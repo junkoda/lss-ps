@@ -19,7 +19,8 @@ static PyMethodDef methods[] = {
    "return number of particles in the catalogue"},
   {"_catalogue_read_text", py_catalogue_read_text, METH_VARARGS,
    "_catalogue_read_text(_cat, filename) read particle data"},
-  
+  {"_catalogue_asarray", py_catalogue_asarray, METH_VARARGS,
+   "_catalogue_asarrary(_cat) return catalogue as a np.array"},
   {NULL, NULL, 0, NULL}
 };
 

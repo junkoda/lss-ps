@@ -5,7 +5,7 @@
 #include <vector>
 
 struct Particle {
-  Float x[3], v[3];
+  Float x[3], w;
 };
 
 class Catalogue : public std::vector<Particle> {

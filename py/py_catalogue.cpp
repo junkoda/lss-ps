@@ -10,6 +10,12 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 
+#ifdef DOUBLEPRECISION
+#define NPY_FLOAT_TYPE NPY_DOUBLE
+#else
+#define NPY_FLOAT_TYPE NPY_FLOAT
+#endif
+
 PyMODINIT_FUNC
 py_catalogue_module_init()
 {
@@ -88,6 +94,26 @@ PyObject* py_catalogue_len(PyObject* self, PyObject* args)
 
 
   return Py_BuildValue("n", cat->size());
+}
+
+PyObject* py_catalogue_asarray(PyObject* self, PyObject* args)
+{
+  PyObject *py_cat;
+
+  if(!PyArg_ParseTuple(args, "O", &py_cat)) {
+    return NULL;
+  }
+
+  Catalogue const * const cat=
+    (Catalogue const *) PyCapsule_GetPointer(py_cat, "_Catalogue");
+  py_assert_ptr(cat);
+
+  const int nd=2;
+  const int ncol= sizeof(Particle)/sizeof(Float);
+  npy_intp dims[]= {(npy_intp) cat->size(), ncol};
+
+  return PyArray_SimpleNewFromData(nd, dims, NPY_FLOAT_TYPE,
+				   (Float*) cat->data());
 }
 
 

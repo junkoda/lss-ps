@@ -16,6 +16,7 @@ using namespace std;
 //   x y z -- white space separated cartisian corrdinate in 1/h Mpc
 //   Lines starting with # is a commnet
 
+
 void catalogue_read_text(Catalogue* const cat, const char filename[])
 {
   msg_printf(msg_verbose, "Reading catalogue %s\n", filename);
@@ -32,6 +33,7 @@ void catalogue_read_text(Catalogue* const cat, const char filename[])
   char buf[nbuf];
 
   Particle p;
+  p.w = 1;
   
   while(fgets(buf, nbuf - 1, fp)) {
     if(buf[0] == '#')

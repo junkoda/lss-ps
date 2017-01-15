@@ -13,6 +13,12 @@ class Catalogue:
 
     def __len__(self):
         return c._catalogue_len(self._cat)
+
+    def __getitem__(self, index):
+        return c._catalogue_asarray(self._cat)[index]
     
     def loadtxt(self, filename):
         c._catalogue_read_text(self._cat, filename)
+
+
+

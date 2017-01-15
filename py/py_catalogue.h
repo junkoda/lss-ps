@@ -9,5 +9,6 @@ py_catalogue_module_init();
 PyObject* py_catalogue_alloc(PyObject* self, PyObject* args);
 PyObject* py_catalogue_len(PyObject* self, PyObject* args);
 PyObject* py_catalogue_read_text(PyObject* self, PyObject* args);
+PyObject* py_catalogue_asarray(PyObject* self, PyObject* args);
 
 #endif
