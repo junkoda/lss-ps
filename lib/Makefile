@@ -1,0 +1,50 @@
+#
+# C++ library of large-scale structure power spectrum
+#
+
+default:
+	cd .. && make lib
+
+LIB = liblss-ps.a liblss-ps.dylib
+#OPT     := -DDOUBLEPRECISION # debug!!!
+
+lib: $(LIB)
+
+FFTW3_DIR ?= #e.g. /Users/jkoda/Research/opt/gcc/fftw3
+GSL_DIR   ?= #e.g. /Users/jkoda/Research/opt/gcc/gsl
+HDF5P_DIR ?= # parallel HDF5 library; e.g., brew install hdf5 --with-mpi
+
+DIR_PATH   = $(FFTW3_DIR) $(GSL_DIR) $(HDF5P_DIR)
+
+CPPFLAGS  += $(foreach dir, $(DIR_PATH), -I$(dir)/include)
+LIBS      += $(foreach dir, $(DIR_PATH), -L$(dir)/lib)
+
+LIBS += -lgsl -lgslcblas
+
+OBJS := msg.o config.o catalogue.o
+
+
+ifeq (,$(findstring -DDOUBLEPRECISION, $(OPT)))
+  # Single precision FFTW
+  FFTWSUF=f
+endif
+LIBS += -lfftw3$(FFTWSUF)
+
+ifdef OPENMP
+  LIBS += -lfftw3$(FFTWSUF)_omp
+  #LIBS += -lfftw3$(FFTWSUF)_threads # for thread parallelization instead of omp
+endif
+
+#
+# Library libfs.a
+#
+liblss-ps.a: $(OBJS)
+	ar r $@ $(OBJS)
+
+liblss-ps.dylib: $(OBJS)
+	echo $(OPT)
+	$(CXX) -dynamiclib $(LIBS) $(OBJS) -o $@
+
+.PHONY: clean run dependence
+clean:
+	rm -f $(LIB) $(OBJS)
