@@ -6,6 +6,7 @@ default:
 	cd .. && make lib
 
 LIB = liblssps.a liblssps.dylib
+CPPFLAGS := -O3 $(OPENMP) $(OPT)
 #OPT     := -DDOUBLEPRECISION # debug!!!
 
 lib: $(LIB)
@@ -36,13 +37,18 @@ ifdef OPENMP
 endif
 
 #
+# Dependeces
+#
+$(OBJS) : ../Makefile Makefile
+
+#
 # Library libfs.a
 #
 liblssps.a: $(OBJS)
 	ar r $@ $(OBJS)
 
 liblssps.dylib: $(OBJS)
-	echo $(OPT)
+	echo "OPT= $(OPT)"
 	$(CXX) -dynamiclib $(LIBS) $(OBJS) -o $@
 
 .PHONY: clean run dependence

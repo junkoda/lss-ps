@@ -18,6 +18,8 @@ using namespace std;
 
 void catalogue_read_text(Catalogue* const cat, const char filename[])
 {
+  msg_printf(msg_verbose, "Reading catalogue %s\n", filename);
+    
   FILE* fp= fopen(filename, "r");
   if(fp == 0) {
     msg_printf(msg_fatal,
@@ -49,5 +51,12 @@ void catalogue_read_text(Catalogue* const cat, const char filename[])
     cat->push_back(p);
   }
 
-  fclose(fp);
+  int ret = fclose(fp);
+  if(ret != 0) {
+    msg_printf(msg_error,
+	       "Error: error upon closing the catalogue file %s\n", filename);
+    throw IOError();
+  }
+
+  msg_printf(msg_verbose, "Read %lu particles\n", cat->size());
 }

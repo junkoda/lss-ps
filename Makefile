@@ -4,6 +4,7 @@ CC      := c++ -std=c++11
 CXX     := c++ -std=c++11
 
 OPT     := -DDOUBLEPRECISION
+# OPT   += -fopenmp   # compiler option to enable OpenMP parallelisation
 
 export CC CXX OPT
 

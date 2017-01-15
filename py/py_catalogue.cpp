@@ -82,8 +82,10 @@ PyObject* py_catalogue_len(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  Catalogue* const cat= (Catalogue*) PyCapsule_GetPointer(py_cat, "_Catalogue");
+  Catalogue const * const cat=
+    (Catalogue const *) PyCapsule_GetPointer(py_cat, "_Catalogue");
   py_assert_ptr(cat);
+
 
   return Py_BuildValue("n", cat->size());
 }

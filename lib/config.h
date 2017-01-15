@@ -45,6 +45,7 @@ typedef float Float;
 // FFTW3 kernel/align.c source code
 #define ALGN 16
 
+size_t config_sizeof_float();
 size_t size_align(size_t size);
 
 #endif
