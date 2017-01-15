@@ -1,9 +1,13 @@
+all: lib py
+
 CC      := c++ -std=c++11
 CXX     := c++ -std=c++11
 
 OPT     := -DDOUBLEPRECISION
 
 export CC CXX OPT
+
+DIRS := lib py
 
 .PHONY: lib py test clean check
 

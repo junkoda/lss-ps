@@ -12,6 +12,6 @@ class Catalogue : public std::vector<Particle> {
   
 };
 
-//typedef std::vector<Particle> Catalogue;
-
+void catalogue_read_text(Catalogue* const cat, const char filename[]);
+  
 #endif

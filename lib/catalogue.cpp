@@ -4,17 +4,25 @@
 
 #include <cstdio>
 #include <vector>
-#include "msg.h"
 #include "config.h"
+#include "msg.h"
+#include "error.h"
 #include "catalogue.h"
 
 using namespace std;
 
-void read_ascii_catalogue(const char filename[], Catalogue& cat)
+// Read ascii file to Catalogue
+// File format:
+//   x y z -- white space separated cartisian corrdinate in 1/h Mpc
+//   Lines starting with # is a commnet
+
+void catalogue_read_text(Catalogue* const cat, const char filename[])
 {
   FILE* fp= fopen(filename, "r");
-  if(fp != 0) {
-    msg_abort("Error: unable to open catalogue file %s\n", filename);
+  if(fp == 0) {
+    msg_printf(msg_fatal,
+	       "Error: unable to open catalogue file %s\n", filename);
+    throw IOError();
   }
 
   
@@ -27,7 +35,6 @@ void read_ascii_catalogue(const char filename[], Catalogue& cat)
     if(buf[0] == '#')
       continue;
 
-    
 #ifdef DOUBLEPRECISION
     int ret= sscanf(buf, "%le %le %le", p.x, p.x + 1, p.x + 2);
 #else
@@ -35,10 +42,11 @@ void read_ascii_catalogue(const char filename[], Catalogue& cat)
 #endif
     
     if(ret != 3) {
-      msg_abort("Error: unable to read 3 numbers, %s\n", buf);
+      msg_printf(msg_error, "Error: unable to read 3 numbers, %s\n", buf);
+      throw IOError();
     }
 
-    cat.push_back(p);
+    cat->push_back(p);
   }
 
   fclose(fp);

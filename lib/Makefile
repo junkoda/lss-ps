@@ -5,7 +5,7 @@
 default:
 	cd .. && make lib
 
-LIB = liblss-ps.a liblss-ps.dylib
+LIB = liblssps.a liblssps.dylib
 #OPT     := -DDOUBLEPRECISION # debug!!!
 
 lib: $(LIB)
@@ -38,10 +38,10 @@ endif
 #
 # Library libfs.a
 #
-liblss-ps.a: $(OBJS)
+liblssps.a: $(OBJS)
 	ar r $@ $(OBJS)
 
-liblss-ps.dylib: $(OBJS)
+liblssps.dylib: $(OBJS)
 	echo $(OPT)
 	$(CXX) -dynamiclib $(LIBS) $(OBJS) -o $@
 
