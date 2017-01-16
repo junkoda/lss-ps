@@ -6,6 +6,7 @@
 
 #include "py_config.h"
 #include "py_catalogue.h"
+#include "py_grid.h"
 
 using namespace std;
 
@@ -21,6 +22,18 @@ static PyMethodDef methods[] = {
    "_catalogue_read_text(_cat, filename) read particle data"},
   {"_catalogue_asarray", py_catalogue_asarray, METH_VARARGS,
    "_catalogue_asarrary(_cat) return catalogue as a np.array"},
+
+  {"_grid_alloc", py_grid_alloc, METH_VARARGS,
+   "_grid_alloc(nc) allocate a new grid object"},
+  {"_grid_fft", py_grid_fft, METH_VARARGS,
+   "_grid_fft(_grid); apply FFT to the grid"},
+  {"_grid_nc", py_grid_nc, METH_VARARGS, "return nc"},
+  {"_grid_mode", py_grid_mode, METH_VARARGS, "return grid mode"},
+  {"_grid_fx_asarray", py_grid_fx_asarray, METH_VARARGS,
+   "return real-space grid as an np.array"},
+  {"_grid_fk_asarray", py_grid_fk_asarray, METH_VARARGS,
+   "return Fourier-space grid as an np.array"},
+  
   {NULL, NULL, 0, NULL}
 };
 
@@ -36,6 +49,8 @@ static struct PyModuleDef module = {
 PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_catalogue_module_init();
+  py_grid_module_init();
+    
   
   return PyModule_Create(&module);
 }

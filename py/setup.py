@@ -13,6 +13,7 @@ setup(name='lssps',
       ext_modules=[
           Extension('lssps._lssps',
                     ['py_package.cpp', 'py_config.cpp', 'py_catalogue.cpp',
+                     'py_grid.cpp',
                     ],
                     include_dirs = ['../lib', np.get_include()],
                     extra_compile_args = [os.environ["OPT"]],

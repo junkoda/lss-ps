@@ -12,7 +12,7 @@
 
 #ifdef DOUBLEPRECISION
 typedef double Float;
-typedef fftw_complex complex_t;
+typedef fftw_complex Complex;
 #define FLOAT_EPS DBL_EPSILON
 #define FLOAT_TYPE MPI_DOUBLE
 #define FLOAT_SAVE_TYPE H5T_IEEE_F64LE
@@ -20,7 +20,7 @@ typedef fftw_complex complex_t;
 #define PRECISION "double"
 
 #else
-typedef fftwf_complex complex_t;
+typedef fftwf_complex Complex;
 typedef float Float;
 #define FLOAT_EPS       FLT_EPSILON
 #define FLOAT_TYPE      MPI_FLOAT
