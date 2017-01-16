@@ -7,6 +7,7 @@
 #include "py_config.h"
 #include "py_catalogue.h"
 #include "py_grid.h"
+#include "py_mass_assignment.h"
 
 using namespace std;
 
@@ -33,7 +34,12 @@ static PyMethodDef methods[] = {
    "return real-space grid as an np.array"},
   {"_grid_fk_asarray", py_grid_fk_asarray, METH_VARARGS,
    "return Fourier-space grid as an np.array"},
-  
+
+  {"_mass_assignment_cic", py_mass_assignment_cic, METH_VARARGS,
+   "assign mass to a grid using CIC"},
+
+  //{py_power_spectrum_alloc(PyObject* self, PyObject* args)
+  PyObject* py_power_spectrum_alloc(PyObject* self, PyObject* args)
   {NULL, NULL, 0, NULL}
 };
 

@@ -25,6 +25,7 @@ class Grid {
   Complex* fk;
   const size_t nc;
   GridMode mode;
+  Float boxsize;
  private:
   const size_t ncz;
   FFTW(plan) plan;

@@ -1,12 +1,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+
 #include "msg.h"
 #include "error.h"
 #include "grid.h"
 
 Grid::Grid(const int nc_) :
-  nc(nc_), ncz(2*(nc_/2+1)), mode(grid_real_space)
+  nc(nc_), ncz(2*(nc_/2+1)), mode(grid_real_space), boxsize(0.0)
 {
   const size_t ngrid= nc*nc*ncz;
   fx= (Float*) FFTW(malloc)(sizeof(Float)*ngrid);
