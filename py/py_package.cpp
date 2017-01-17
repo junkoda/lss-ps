@@ -8,6 +8,7 @@
 #include "py_catalogue.h"
 #include "py_grid.h"
 #include "py_mass_assignment.h"
+#include "py_power_spectrum.h"
 
 using namespace std;
 
@@ -38,8 +39,21 @@ static PyMethodDef methods[] = {
   {"_mass_assignment_cic", py_mass_assignment_cic, METH_VARARGS,
    "assign mass to a grid using CIC"},
 
-  //{py_power_spectrum_alloc(PyObject* self, PyObject* args)
-  PyObject* py_power_spectrum_alloc(PyObject* self, PyObject* args)
+  {"_power_spectrum_alloc", py_power_spectrum_alloc, METH_VARARGS,
+   "allocate a new power spectrum object"},
+  {"_power_spectrum_k_asarray", py_power_spectrum_k_asarray, METH_VARARGS,
+   "k array"},   
+  {"_power_spectrum_P0_asarray", py_power_spectrum_P0_asarray, METH_VARARGS,
+   "P0 array"},   
+  {"_power_spectrum_P2_asarray", py_power_spectrum_P2_asarray, METH_VARARGS,
+   "P2 array"},   
+  {"_power_spectrum_P4_asarray", py_power_spectrum_P4_asarray, METH_VARARGS,
+   "P4 array"},
+  {"_power_spectrum_compute_multipoles", py_power_spectrum_compute_multipoles,
+   METH_VARARGS, "_power_spectrum_compute_multipoles(grid, nbar, neff, _ps)"},
+  {"_power_spectrum_len", py_power_spectrum_len, METH_VARARGS,
+   "number of bins in the power spectrum"},
+
   {NULL, NULL, 0, NULL}
 };
 
@@ -56,7 +70,7 @@ PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_catalogue_module_init();
   py_grid_module_init();
-    
+  py_power_spectrum_module_init();    
   
   return PyModule_Create(&module);
 }

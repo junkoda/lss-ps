@@ -2,11 +2,14 @@
 // wrapping lib/catalogue.cpp
 //
 #include "msg.h"
+#include <iostream>
 //#include "catalogue.h"
 //#include "error.h"
 //#include "py_catalogue.h"
 #include "power_spectrum.h"
 #include "py_assert.h"
+
+using namespace std;
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
@@ -53,13 +56,24 @@ void py_power_spectrum_free(PyObject *obj)
   delete ps;
 }
 
-PyObject* py_double_array1(double* const p, const int n)
-{
-  const int nd=1;
-  npy_intp dims[]= {n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_FLOAT_TYPE, p);
+PyObject* py_power_spectrum_len(PyObject* self, PyObject* args)
+{
+  PyObject *py_ps;
+
+  cerr << "_len\n";
+
+  if(!PyArg_ParseTuple(args, "O", &py_ps)) {
+    return NULL;
+  }
+
+  PowerSpectrum* const ps=
+    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
+  py_assert_ptr(ps);
+
+  return Py_BuildValue("i", ps->n);
 }
+
 
 PyObject* py_power_spectrum_k_asarray(PyObject* self, PyObject* args)
 {
@@ -76,12 +90,15 @@ PyObject* py_power_spectrum_k_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_FLOAT_TYPE, ps->k_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->k_hist);
 }
+
 
 PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
 {
   PyObject *py_ps;
+
+  cerr << "_P0\n";
 
   if(!PyArg_ParseTuple(args, "O", &py_ps)) {
     return NULL;
@@ -94,7 +111,7 @@ PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_FLOAT_TYPE, ps->P0_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->P0_hist);
 }
 
 PyObject* py_power_spectrum_P2_asarray(PyObject* self, PyObject* args)
@@ -112,7 +129,7 @@ PyObject* py_power_spectrum_P2_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_FLOAT_TYPE, ps->P2_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->P2_hist);
 }
 
 PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args)
@@ -130,5 +147,31 @@ PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_FLOAT_TYPE, ps->P4_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->P4_hist);
+}
+
+PyObject* py_power_spectrum_compute_multipoles(PyObject* self, PyObject* args)
+{
+  // _power_spectrum_compute_multipoles(grid, subtract_shotnoise, neff, _ps)
+  PyObject *py_grid, *py_ps;
+  int subtract_shotnoise;
+  double neff;
+
+  if(!PyArg_ParseTuple(args, "OidO",
+		       &py_grid, &subtract_shotnoise, &neff, &py_ps)) {
+    return NULL;
+  }
+
+  cerr << "ps\n";
+  PowerSpectrum* const ps=
+    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
+  py_assert_ptr(ps);
+
+  cerr << "grid\n";
+  Grid* const grid= (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  power_spectrum_compute_multipoles(grid, subtract_shotnoise, neff, ps);
+
+  Py_RETURN_NONE;  
 }

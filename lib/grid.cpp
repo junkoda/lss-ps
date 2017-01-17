@@ -20,11 +20,11 @@ Grid::Grid(const int nc_) :
   
   fk= (Complex*) fx;
   plan= FFTW(plan_dft_r2c_3d)(nc, nc, nc, fx, fk, FFTW_ESTIMATE);
-  clear();
 }
 
 void Grid::fft()
 {
+
   if(mode != grid_real_space) {
     msg_printf(msg_error,
 	       "Error: trying to FFT a grid not in real-space mode\n");

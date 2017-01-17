@@ -26,6 +26,7 @@ class Grid {
   const size_t nc;
   GridMode mode;
   Float boxsize;
+  Float shot_noise;
  private:
   const size_t ncz;
   FFTW(plan) plan;

@@ -34,7 +34,8 @@ class PowerSpectrum {
 };
 
 void power_spectrum_compute_multipoles(Grid const * const grid,
-				       const Float nbar, const Float neff,
+				       const bool subtract_shotnoise,
+				       const Float neff,
 				       PowerSpectrum* const ps);
 
 #endif

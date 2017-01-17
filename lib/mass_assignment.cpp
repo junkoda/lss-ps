@@ -10,6 +10,7 @@ void mass_assignment_cic(Catalogue const * const cat,
 			 Grid* const grid)
 {
   msg_printf(msg_verbose, "Mass assigment with CIC\n");
+  grid->clear();
   
   const size_t nc = grid->nc;
   const Float dx_inv= nc/boxsize;
@@ -57,6 +58,8 @@ void mass_assignment_cic(Catalogue const * const cat,
       }
     }
   }
+
+  grid->shot_noise= boxsize*boxsize*boxsize/np;
 
   float err= fabs(total - np)/np;
   msg_printf(msg_debug,

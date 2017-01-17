@@ -10,7 +10,7 @@ PowerSpectrum::PowerSpectrum(const double kmin_, const double kmax_,
 			     const double dk_) :
   kmin(kmin_), kmax(kmax_), dk(dk_), dk_inv(1.0/dk)
 {
-  n = (int) ceil((kmax - kmin)/dk);
+  n = (int) round((kmax - kmin)/dk);
   nmode_hist= (int*) malloc(sizeof(int)*n); assert(nmode_hist);
   k_hist= (double*) malloc(sizeof(double)*n*4); assert(k_hist);
 
@@ -54,24 +54,31 @@ static inline float w(const float tx)
 }
 
 void power_spectrum_compute_multipoles(Grid const * const grid,
-			    const Float nbar, const Float neff,
+			    const bool subtract_shotnoise, const Float neff,
 			    PowerSpectrum* const ps)
 {
   // Power spectrum subtracting shot noise and aliasing correction
   // P(k) ~ k^neff
   const size_t nc= grid->nc;
   const Float boxsize= grid->boxsize;
+  ps->clear();
 
+  msg_printf(msg_verbose, "computing power spectrum multipoles.\n");
+  
   if(nc == 0) {
-    msg_printf(msg_fatal, "Error: grid->nc is zero.");
+    msg_printf(msg_error, "Error: grid->nc is zero.\n");
     throw AssertionError();
   }
 
   if(boxsize <= 0.0) {
-    msg_printf(msg_fatal, "Error: grid->boxsize is not positive.");
+    msg_printf(msg_error, "Error: grid->boxsize is not positive.\n");
     throw AssertionError();
   }
-  //const Float kmin, const Float kmax, const Float dk)
+
+  if(grid->mode != grid_fourier_space) {
+    msg_printf(msg_error, "Error: grid is not in Fourier space.\n");
+    throw AssertionError();
+  }
 			    
   const Float knq= (M_PI*nc)/grid->boxsize;
   const Float knq_inv= boxsize/(M_PI*nc);
@@ -83,18 +90,12 @@ void power_spectrum_compute_multipoles(Grid const * const grid,
 
   const Float kp= 2.0*M_PI*nc/boxsize;
 
-  const Float nbar_inv= nbar > 0.0f ? 1.0/nbar : 0.0f;
+  const Float nbar_inv= subtract_shotnoise ? grid->shot_noise : 0;
 
   const int na=2;
 
-  //  if(kmax == 0.0f) kmax= nc*M_PI/boxsize; //Nyquist frequency
-
   Complex* const delta_k= grid->fk;
 
-  //Histogram Pgg(kmin, kmax, dk);  // 10.0/boxsize
-  //Histogram P2(kmin, kmax, dk);  // quadrupole
-  //Histogram P4(kmin, kmax, dk);  // hexapole
-  
   for(int ix=0; ix<nc; ++ix) {
     Float kx= ix <= nc/2 ? fac*ix : fac*(ix-nc);
     Float sintx= sin(sin_fac*kx);
@@ -170,4 +171,5 @@ void power_spectrum_compute_multipoles(Grid const * const grid,
       }
     }
   }
+  ps->normalise();
 }
