@@ -10,13 +10,16 @@ export CC CXX OPT
 
 DIRS := lib py
 
-.PHONY: lib py test clean check
+.PHONY: lib py exec test clean check
 
 lib:
 	cd lib && $(MAKE) lib
 
 py:
 	cd py && $(MAKE) py
+
+exec:
+	cd exec && $(MAKE) exec
 
 clean:
 	for dir in $(DIRS); do (cd $$dir && $(MAKE) clean); done

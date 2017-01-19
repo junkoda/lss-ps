@@ -38,4 +38,14 @@ void power_spectrum_compute_multipoles(Grid const * const grid,
 				       const Float neff,
 				       PowerSpectrum* const ps);
 
+void power_spectrum_compute_multipoles_raw(Grid const * const grid,
+			    const bool subtract_shotnoise, const Float neff,
+					   PowerSpectrum* const ps);
+
+void power_spectrum_compute_multipoles_interlacing(
+			    GridComplex const * const grid,
+			    const bool subtract_shotnoise, const Float neff,
+			    PowerSpectrum* const ps);
+
+
 #endif
