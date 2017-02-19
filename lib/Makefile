@@ -3,7 +3,7 @@
 #
 
 default:
-	cd .. && make lib
+	cd .. && make
 
 LIB = liblssps.a liblssps.dylib
 CPPFLAGS := -O3 $(OPENMP) $(OPT)

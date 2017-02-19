@@ -10,8 +10,9 @@
 // Grid
 //
 Grid::Grid(const int nc_) :
-  nc(nc_), ncz(2*(nc_/2+1)), mode(grid_real_space), boxsize(0.0)
+  nc(nc_), mode(grid_real_space), boxsize(0.0)
 {
+  const size_t ncz= 2*(nc/2 + 1);
   const size_t ngrid= nc*nc*ncz;
   fx= (Float*) FFTW(malloc)(sizeof(Float)*ngrid);
   if(fx == 0) {
@@ -52,7 +53,36 @@ Grid::~Grid()
 
 void Grid::clear()
 {
+  const size_t ncz= 2*(nc/2 + 1);
   memset(fx, 0, sizeof(Float)*(nc*nc*ncz));
+}
+
+void Grid::write(const char filename[])
+{
+  FILE* fp= fopen(filename, "w");
+  if(fp == 0) {
+    msg_printf(msg_error,
+	       "Error: unable to write grid data to %s\n", filename);
+    throw IOError();
+  }
+
+  const int inc= (int) nc;
+  const int ncz= 2*(nc/2 + 1);
+  
+  fwrite(&inc, sizeof(int), 1, fp);
+  for(size_t ix= 0; ix<nc; ++ix) {
+   for(size_t iy= 0; iy<nc; ++iy) {
+    for(size_t iz= 0; iz<nc; ++iz) {
+      float f= (float) fx[(ix*nc + iy)*ncz + iz];
+      fwrite(&f, sizeof(float), 1, fp);
+    }
+   }
+  }
+
+  fwrite(&inc, sizeof(int), 1, fp);
+  fclose(fp);
+
+  msg_printf(msg_info, "Grid data written: %s\n", filename);
 }
 
 //

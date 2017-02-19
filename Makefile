@@ -1,4 +1,4 @@
-all: lib py
+all: lib py exec
 
 CC      := c++ -std=c++11
 CXX     := c++ -std=c++11

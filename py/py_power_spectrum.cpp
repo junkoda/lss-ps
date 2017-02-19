@@ -3,9 +3,6 @@
 //
 #include "msg.h"
 #include <iostream>
-//#include "catalogue.h"
-//#include "error.h"
-//#include "py_catalogue.h"
 #include "power_spectrum.h"
 #include "py_assert.h"
 
@@ -171,7 +168,7 @@ PyObject* py_power_spectrum_compute_multipoles(PyObject* self, PyObject* args)
   Grid* const grid= (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
-  power_spectrum_compute_multipoles(grid, subtract_shotnoise, neff, ps);
+  power_spectrum_compute_multipoles(grid, ps, subtract_shotnoise, neff);
 
   Py_RETURN_NONE;  
 }

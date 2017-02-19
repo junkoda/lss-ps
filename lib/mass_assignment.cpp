@@ -21,12 +21,15 @@ void mass_assignment_cic(Catalogue const * const cat,
   int ix[3];
   size_t ix0[3], ix1[3];
   Float w[3];
-
+  Float rx[3];
+  
   for(Catalogue::const_iterator
 	p= cat->begin(); p != cat->end(); ++p) {
+
     for(int j=0; j<3; ++j) {
-      ix[j]= (int) floor((p->x[j] - x0[j])*dx_inv);
-      w[j]= 1 - (p->x[j]*dx_inv - ix[j]);   // CIC weight for left point
+      rx[j]= (p->x[j] - x0[j])*dx_inv;
+      ix[j]= (int) floor(rx[j]);
+      w[j]= 1 - (rx[j] - ix[j]);            // CIC weight for left point
       ix0[j]= (ix[j] + nc) % nc;            // left grid (periodic)
       ix1[j]= (ix[j] + 1 + nc) % nc;        // right grid (periodic)
     }
@@ -63,7 +66,8 @@ void mass_assignment_cic(Catalogue const * const cat,
 
   float err= fabs(total - np)/np;
   msg_printf(msg_debug,
-	     "Density total %le %le; rel difference %e\n", total, np, err);
+	     "Density total %le, expected %le; rel difference %e\n",
+	     total, np, err);
   assert(err < 1.0e-5);
 }
 
@@ -79,7 +83,6 @@ void mass_assignment_interlacing_cic(Catalogue const * const cat,
   
   const size_t nc = grid->nc;
   const Float dx_inv= nc/boxsize;
-  const size_t ncz= 2*(nc/2+1);
   Complex* const d= grid->fx;
   grid->boxsize= boxsize;
 
@@ -137,7 +140,7 @@ void mass_assignment_interlacing_cic(Catalogue const * const cat,
       for(int iz=0; iz<nc; ++iz) {
 	size_t index= nc*(nc*ix + iy) + iz;
 	total_re += d[index][0];
-	total_im += d[index][0];
+	total_im += d[index][1];
 	
   	d[index][0]= d[index][0]*nbar_inv - 1;
 	d[index][1]= d[index][1]*nbar_inv - 1; 

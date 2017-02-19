@@ -20,6 +20,7 @@ class Grid {
 
   void fft();
   void clear();
+  void write(const char filename[]);
   
   Float* fx;
   Complex* fk;
@@ -28,8 +29,9 @@ class Grid {
   Float boxsize;
   Float shot_noise;
  private:
-  const size_t ncz;
   FFTW(plan) plan;
+
+  
 };
 
 class GridComplex {
