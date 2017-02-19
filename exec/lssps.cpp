@@ -105,13 +105,6 @@ int main(int argc, char* argv[])
     
     power_spectrum_compute_multipoles_interlacing2(grid1, ps, subtract_shotnoise);
   }
-  else if(alias_correction == 3) {
-    // Alias correction with 'interlacing' using one complex grid
-    GridComplex* const grid = new GridComplex(nc);
-    mass_assignment_interlacing_cic(cat, x0, boxsize, grid);
-    grid->fft();
-    power_spectrum_compute_multipoles_interlacing(grid, ps, subtract_shotnoise);
-  }
   else {
     msg_printf(msg_fatal, "Error: unknown alias correction scheme: %d\n",
 	       alias_correction);

@@ -34,22 +34,4 @@ class Grid {
   
 };
 
-class GridComplex {
- public:
-  GridComplex(const int nc);
-  ~GridComplex();
-
-  void fft();
-  void clear();
-  
-  Complex* fx;
-  Complex* fk;
-  const size_t nc;
-  GridMode mode;
-  Float boxsize;
-  Float shot_noise;
- private:
-  FFTW(plan) plan;
-};
-
 #endif

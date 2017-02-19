@@ -3,7 +3,6 @@
 
 #include "grid.h"
 
-void interlacing(GridComplex* const grid);
 void interlacing2(Grid* const grid, Grid const * const grid_shifted);
 
 #endif

@@ -113,7 +113,7 @@ void mass_assignment_interlacing_cic(Catalogue const * const cat,
     // Shifted grid
     for(int j=0; j<3; ++j) {
       ix[j]= (int) floor((p->x[j] - x0[j] + 0.5)*dx_inv);
-      w[j]= 1 - (p->x[j]*dx_inv - ix[j]);   // CIC weight for left point
+      w[j]= 1 - ((p->x[j] - x0[j] + 0.5)*dx_inv - ix[j]);   // CIC weight for left point
       ix0[j]= (ix[j] + nc) % nc;            // left grid (periodic)
       ix1[j]= (ix[j] + 1 + nc) % nc;        // right grid (periodic)
     }
