@@ -2,8 +2,10 @@
 // Catalogue is a collection of particles (galaxy or random particles)
 //
 
-#include <cstdio>
 #include <vector>
+#include <chrono>
+#include <cstdio>
+
 #include "config.h"
 #include "msg.h"
 #include "error.h"
@@ -19,6 +21,7 @@ using namespace std;
 
 void catalogue_read_text(Catalogue* const cat, const char filename[])
 {
+  auto ts = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Reading catalogue %s\n", filename);
     
   FILE* fp= fopen(filename, "r");
@@ -61,4 +64,8 @@ void catalogue_read_text(Catalogue* const cat, const char filename[])
   }
 
   msg_printf(msg_verbose, "Read %lu particles\n", cat->size());
+  auto te = std::chrono::high_resolution_clock::now();
+  msg_printf(msg_verbose, "Time read catalogue txt %le\n",
+	     std::chrono::duration<double>(te - ts).count());
+
 }

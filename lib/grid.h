@@ -3,6 +3,7 @@
 
 #include <fftw3.h>
 #include "config.h"
+#include "grid.h"
 
 // FFTW() macro adds fftw_ or fftwf_ prefix depending on DOUBLEPRECISION
 #ifdef DOUBLEPRECISION
@@ -18,20 +19,45 @@ class Grid {
   Grid(const int nc);
   ~Grid();
 
+  double& operator[](const size_t i) {
+    return fx[i];
+  }
+
+  double& operator[](const size_t i) const {
+    return fx[i];
+  }
+
+  double& operator()(const size_t ix, const size_t iy, const size_t iz) {
+    return fx[(ix*nc + iy)*ncz + iz];
+  }
+
+  double& operator()(const size_t ix, const size_t iy, const size_t iz) const {
+    return fx[(ix*nc + iy)*ncz + iz];
+  }
+
   void fft();
   void clear();
   void write(const char filename[]);
   
   Float* fx;
   Complex* fk;
-  const size_t nc;
+  const size_t nc, ncz;
   GridMode mode;
   Float boxsize;
+  Float x0[3];
   Float shot_noise;
- private:
-  FFTW(plan) plan;
 
-  
+  double total_weight, raw_noise, normalisation;
+  int n_mas;
+
+ private:
+  FFTW(plan) plan;  
 };
+
+void grid_print_time();
+
+void grid_compute_fluctuation(Grid& grid1, const Grid& grid_rand);
+void grid_compute_fluctuation_homogeneous(Grid& grid1);
+
 
 #endif

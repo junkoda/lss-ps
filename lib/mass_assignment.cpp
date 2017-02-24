@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cmath>
 #include <cassert>
 
@@ -7,9 +8,12 @@
 
 void mass_assignment_cic(Catalogue const * const cat,
 			 const Float x0[], const Float boxsize,
+			 const bool useFKP, const double Pest,
 			 Grid* const grid)
 {
   msg_printf(msg_verbose, "Mass assigment with CIC\n");
+  auto ts = std::chrono::high_resolution_clock::now();
+  
   grid->clear();
   
   const size_t nc = grid->nc;
@@ -22,9 +26,24 @@ void mass_assignment_cic(Catalogue const * const cat,
   size_t ix0[3], ix1[3];
   Float w[3];
   Float rx[3];
-  
+
+  double w_sum = 0.0;
+  double w2_sum = 0.0;
+  double nw2_sum = 0.0;
+
   for(Catalogue::const_iterator
 	p= cat->begin(); p != cat->end(); ++p) {
+
+    double ww = p->w;
+    const double nbar = 1.0; // TODO nbar
+    
+    if(useFKP)
+      ww /=  (1.0 + nbar*Pest);
+
+    const double w2 = ww*ww;
+    w_sum += ww;
+    w2_sum += w2;    
+    nw2_sum += nbar*w2;
 
     for(int j=0; j<3; ++j) {
       rx[j]= (p->x[j] - x0[j])*dx_inv;
@@ -45,6 +64,11 @@ void mass_assignment_cic(Catalogue const * const cat,
     d[(ix1[0]*nc + ix1[1])*ncz + ix1[2]] += (1-w[0])*(1-w[1])*(1-w[2]);
   }
 
+  auto te = std::chrono::high_resolution_clock::now();
+  msg_printf(msg_verbose, "Time mass_assignment CIC %le\n",
+	     std::chrono::duration<double>(te - ts).count());
+  ts = te;
+
   // check total & normalize
   const double np= cat->size();
 
@@ -64,6 +88,11 @@ void mass_assignment_cic(Catalogue const * const cat,
 
   grid->shot_noise= boxsize*boxsize*boxsize/np;
 
+  te = std::chrono::high_resolution_clock::now();
+  msg_printf(msg_verbose, "Time get fluctuation %le\n",
+	     std::chrono::duration<double>(te - ts).count());
+
+  
   float err= fabs(total - np)/np;
   msg_printf(msg_debug,
 	     "Density total %le, expected %le; rel difference %e\n",
@@ -71,89 +100,61 @@ void mass_assignment_cic(Catalogue const * const cat,
   assert(err < 1.0e-5);
 }
 
-//
-// Interlacing
-//
-void mass_assignment_interlacing_cic(Catalogue const * const cat,
-			 const Float x0[], const Float boxsize,
-			 GridComplex* const grid)
+/*
+
+template<typename MAS>
+void mass_assignment(Catalogue const * const cat,
+		     MAS f, const double x0[], const double boxsize,
+		     const bool useFKP, const double Pest,
+		     Grid* const grid)
 {
-  msg_printf(msg_verbose, "Mass assigment with CIC (interlacing)\n");
-  grid->clear();
+  // Assign a moment of Galaxies in vector v to grid,
+  // using mass assignment function f
   
-  const size_t nc = grid->nc;
-  const Float dx_inv= nc/boxsize;
-  Complex* const d= grid->fx;
-  grid->boxsize= boxsize;
+  // get start time
+  auto ts = std::chrono::high_resolution_clock::now();
 
-  int ix[3];
-  size_t ix0[3], ix1[3];
-  Float w[3];
+  msg_printf(msg_verbose,
+	     "Assigning density field on grid with Teplate n_mas=%d",
+	     f.n_mas);
 
-  for(Catalogue::const_iterator
-	p= cat->begin(); p != cat->end(); ++p) {
+  const double dx_inv = grid->nc/boxsize;
 
-    for(int j=0; j<3; ++j) {
-      ix[j]= (int) floor((p->x[j] - x0[j])*dx_inv);
-      w[j]= 1 - (p->x[j]*dx_inv - ix[j]);   // CIC weight for left point
-      ix0[j]= (ix[j] + nc) % nc;            // left grid (periodic)
-      ix1[j]= (ix[j] + 1 + nc) % nc;        // right grid (periodic)
-    }
+  double* const d = grid->fx;
 
-    d[(ix0[0]*nc + ix0[1])*nc + ix0[2]][0] += w[0]*w[1]*w[2];
-    d[(ix0[0]*nc + ix1[1])*nc + ix0[2]][0] += w[0]*(1-w[1])*w[2];
-    d[(ix0[0]*nc + ix0[1])*nc + ix1[2]][0] += w[0]*w[1]*(1-w[2]);
-    d[(ix0[0]*nc + ix1[1])*nc + ix1[2]][0] += w[0]*(1-w[1])*(1-w[2]);
+  double w_sum = 0.0;
+  double w2_sum = 0.0;
+  double nw2_sum = 0.0;
 
-    d[(ix1[0]*nc + ix0[1])*nc + ix0[2]][0] += (1-w[0])*w[1]*w[2];
-    d[(ix1[0]*nc + ix1[1])*nc + ix0[2]][0] += (1-w[0])*(1-w[1])*w[2];
-    d[(ix1[0]*nc + ix0[1])*nc + ix1[2]][0] += (1-w[0])*w[1]*(1-w[2]);
-    d[(ix1[0]*nc + ix1[1])*nc + ix1[2]][0] += (1-w[0])*(1-w[1])*(1-w[2]);
+  for(std::vector<Particle>::const_iterator p= cat->begin();
+      p != cat->end(); ++p) {
+    double w = p->w;
+    const double nbar = 1.0; // TODO nbar
+    
+    if(useFKP)
+       w /=  (1.0 + nbar*Pest);
 
-    // Shifted grid
-    for(int j=0; j<3; ++j) {
-      ix[j]= (int) floor((p->x[j] - x0[j] + 0.5)*dx_inv);
-      w[j]= 1 - ((p->x[j] - x0[j] + 0.5)*dx_inv - ix[j]);   // CIC weight for left point
-      ix0[j]= (ix[j] + nc) % nc;            // left grid (periodic)
-      ix1[j]= (ix[j] + 1 + nc) % nc;        // right grid (periodic)
-    }
-
-    d[(ix0[0]*nc + ix0[1])*nc + ix0[2]][1] += w[0]*w[1]*w[2];
-    d[(ix0[0]*nc + ix1[1])*nc + ix0[2]][1] += w[0]*(1-w[1])*w[2];
-    d[(ix0[0]*nc + ix0[1])*nc + ix1[2]][1] += w[0]*w[1]*(1-w[2]);
-    d[(ix0[0]*nc + ix1[1])*nc + ix1[2]][1] += w[0]*(1-w[1])*(1-w[2]);
-
-    d[(ix1[0]*nc + ix0[1])*nc + ix0[2]][1] += (1-w[0])*w[1]*w[2];
-    d[(ix1[0]*nc + ix1[1])*nc + ix0[2]][1] += (1-w[0])*(1-w[1])*w[2];
-    d[(ix1[0]*nc + ix0[1])*nc + ix1[2]][1] += (1-w[0])*w[1]*(1-w[2]);
-    d[(ix1[0]*nc + ix1[1])*nc + ix1[2]][1] += (1-w[0])*(1-w[1])*(1-w[2]);
+    const double w2 = w*w;
+    w_sum += w;
+    w2_sum += w*w;    
+    nw2_sum += nbar*w2;
+    
+    double x[] = {(p->x[0] - x0[0])*dx_inv,
+		  (p->x[1] - x0[1])*dx_inv,
+		  (p->x[2] - x0[2])*dx_inv};
+    f(x);
   }
 
-  // check total & normalize
-  const double np= cat->size();
-
-  double total_re= 0.0, total_im= 0.0;
-  float nbar_inv= (double)nc*nc*nc/np;
-
-  for(int ix=0; ix<nc; ++ix) {
-    for(int iy=0; iy<nc; ++iy) {
-      for(int iz=0; iz<nc; ++iz) {
-	size_t index= nc*(nc*ix + iy) + iz;
-	total_re += d[index][0];
-	total_im += d[index][1];
-	
-  	d[index][0]= d[index][0]*nbar_inv - 1;
-	d[index][1]= d[index][1]*nbar_inv - 1; 
-      }
-    }
-  }
-
-  grid->shot_noise= boxsize*boxsize*boxsize/np;
-
-  float err= fabs(total_re - np)/np + fabs(total_im - np)/np;
-  msg_printf(msg_debug,
-	     "# density total %le %le; rel difference %e\n",
-	     0.5*(total_re + total_im), np, err);
-  assert(err < 1.0e-5);
+  grid->total_weight = w_sum;
+  grid->raw_noise = w2_sum;
+  grid->normalisation = nw2_sum;
+  grid->n_mas = f.n_mas;
+  
+  // time duration
+  auto te = std::chrono::high_resolution_clock::now();
+  msg_printf(msg_verbose, "Time mass_assignment template %le\n",
+	     std::chrono::duration<double>(te - ts).count());
 }
+*/
 
+//}

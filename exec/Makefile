@@ -34,6 +34,10 @@ lssps: $(OBJS)
 #
 $(OBJS) : ../Makefile Makefile ../lib/liblssps.a
 
+lssps.o: lssps.cpp ../lib/lssps.h ../lib/msg.h ../lib/config.h \
+  ../lib/grid.h ../lib/catalogue.h ../lib/mass_assignment.h \
+  ../lib/interlacing.h ../lib/power_spectrum.h
+
 .PHONY: clean run dependence
 clean:
 	rm -f $(LIB) $(OBJS)

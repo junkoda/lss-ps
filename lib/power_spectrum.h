@@ -33,6 +33,11 @@ class PowerSpectrum {
   double dk_inv;
 };
 
+void power_spectrum_compute_multipoles(Grid const * const grid,
+				       PowerSpectrum* const ps,
+				       const bool subtract_shotnoise);
+
+/*
 void power_spectrum_compute_multipoles_raw(Grid const * const grid,
 					   PowerSpectrum* const ps);
 
@@ -45,5 +50,9 @@ void power_spectrum_compute_multipoles_interlacing2(
 			    Grid const * const grid,
 			    PowerSpectrum* const ps,
 			    const bool subtract_shotnoise);
+
+void power_spectrum_compute_shotnoise(Grid const * const grid,
+				      PowerSpectrum* const ps);
+*/
 
 #endif

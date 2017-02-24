@@ -17,7 +17,7 @@ using namespace std;
 // Output:
 //    grid is modified with anti-aliased Fourier modes
 
-void interlacing2(Grid* const grid, Grid const * const grid_shifted)
+void interlacing(Grid* const grid, Grid const * const grid_shifted)
 {
   assert(grid->nc == grid_shifted->nc);
   assert(grid->mode == grid_fourier_space);
