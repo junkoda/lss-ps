@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <chrono>
 #include <cmath>
 #include <cassert>
@@ -8,14 +9,30 @@
 #include "grid.h"
 #include "power_spectrum.h"
 
+using namespace std;
+
+//
+//
+//
+static std::vector<Float> window_corr; // array of window function corrections
+static int window_corr_n_mas= 0; // n_mas in window_corr
+//static void init_window_corr();
+void init_window_corr(const size_t nc, const int n_mas);
+
+
 //
 // class Power Spectrum
 //
 PowerSpectrum::PowerSpectrum(const double kmin_, const double kmax_,
-			     const double dk_) :
-  kmin(kmin_), kmax(kmax_), dk(dk_), dk_inv(1.0/dk)
-{
-  n = (int) round((kmax - kmin)/dk);
+			     const double dk_,
+			     const double boxsize) :
+  kmin(kmin_), kmax(kmax_), dk(dk_),
+  k_fundamental(2.0*M_PI/boxsize),
+  ik_min(kmin_/k_fundamental),
+  ik_max(kmax_/k_fundamental),
+  idk_inv(k_fundamental/dk_),
+  n(round((kmax_ - kmin_)/dk_))
+{  
   nmode_hist= (int*) malloc(sizeof(int)*n); assert(nmode_hist);
   k_hist= (double*) malloc(sizeof(double)*n*4); assert(k_hist);
 
@@ -59,17 +76,49 @@ inline float w(const float tx)
 }
 
 //
-// Compute power spectrum from Fourier grid aka shell average
+// 
+//
+void init_window_corr(const size_t nc, const int n_mas)
+{
+  if(window_corr.size() == nc && window_corr_n_mas == n_mas)
+    return;
+
+  msg_printf(msg_verbose, "Initialising window function correction array.\n");
+  window_corr.clear();
+  window_corr.reserve(nc);
+
+  if(n_mas == 0) {
+    for(int i=0; i<nc; ++i)
+      window_corr.push_back(1.0);
+    return;
+  }
+
+  
+  const int knq = nc/2;
+  const Float fac= M_PI/nc;
+  window_corr.push_back(1.0);
+  
+  
+  for(int i=1; i<nc; ++i) {
+    int k= i <= knq ? i : i - nc;
+    Float sinc = sin(fac*k)/(fac*k);
+    window_corr.push_back(1.0/pow(sinc, 2*n_mas));
+  }
+
+  window_corr_n_mas = n_mas;
+}
+
+//
+// Compute power spectrum from Fourier grid, aka shell average.
 //
 
 void power_spectrum_compute_multipoles(Grid const * const grid,
 				       PowerSpectrum* const ps,
-				       const bool subtract_shotnoise)
+				       const bool subtract_shotnoise,
+				       const bool correct_mas)
 {
   auto ts = std::chrono::high_resolution_clock::now();
   
-  // Power spectrum subtracting shot noise and aliasing correction
-  // P(k) ~ k^neff (unused now)
   const size_t nc= grid->nc;
   const Float boxsize= grid->boxsize;
   ps->clear();
@@ -91,39 +140,32 @@ void power_spectrum_compute_multipoles(Grid const * const grid,
     msg_printf(msg_error, "Error: grid is not in Fourier space.\n");
     throw AssertionError();
   }
-			    
-  const Float knq= (M_PI*nc)/grid->boxsize;
-  const Float knq_inv= boxsize/(M_PI*nc);
-  //const Float pk_fac= (boxsize*boxsize*boxsize)/pow((double)nc, 6);
-  std::cerr << "Total weight " << grid->total_weight << std::endl;
-  //const Float pk_fac= (boxsize*boxsize*boxsize)/pow((double)nc, 3)/grid->total_weight;
+
+  if(correct_mas)
+    init_window_corr(nc, grid->n_mas);
+  else
+    init_window_corr(nc, 0);
+  assert(window_corr.size() == nc);
+  
+  //  const Float knq= (M_PI*nc)/grid->boxsize;
   const Float pk_fac= boxsize*boxsize*boxsize/(grid->total_weight*grid->total_weight);
-  const Float sin_fac= 0.5*boxsize/nc;
-
-  const Float fac= 2.0*M_PI/boxsize;
   const size_t nckz= nc/2+1;
+  const int iknq= nc/2;
 
-  const Float kp= 2.0*M_PI*nc/boxsize;
-
-  const Float nbar_inv= subtract_shotnoise ? grid->shot_noise : 0;
-  msg_printf(msg_info, "Shot noise subtraction: %e\n", nbar_inv);
+  const Float shot_noise= subtract_shotnoise ? grid->shot_noise : 0;
+  msg_printf(msg_info, "Shot noise subtraction: %e\n", shot_noise);
 
   Complex* const delta_k= grid->fk;
 
-  for(size_t ix=0; ix<nc; ++ix) {
-    Float kx= ix <= nc/2 ? fac*ix : fac*(ix-nc);
-    //Float sintx= sin(sin_fac*kx);
+  for(int ix=0; ix<nc; ++ix) {
+    int kx = ix <= iknq ? ix : ix - nc;
+    Float corr_x = window_corr[ix];
 
-    // ToDo: this is for no interlacing derive a correct one
-    //float c1x= 1.0 - 2.0/3.0*sintx*sintx;
+    for(int iy=0; iy<nc; ++iy) {
+      int ky = iy <= iknq ? iy : iy - nc;
+      Float corr_xy = corr_x * window_corr[iy];
 
-    for(size_t iy=0; iy<nc; ++iy) {
-      Float ky= iy <= nc/2 ? fac*iy : fac*(iy-nc);
-
-      //Float sinty= sin(sin_fac*ky);
-      //Float c1y= 1.0 - 2.0/3.0*sinty*sinty;
-
-      size_t iz0 = !(kx > 0.0f || (kx == 0.0 && ky > 0.0));
+      int kz0 = !(kx > 0 || (kx == 0 && ky > 0));
 
       // Avoid double counting on kz=plain
       // k=(0,0,0) dropped because this is 0
@@ -131,45 +173,31 @@ void power_spectrum_compute_multipoles(Grid const * const grid,
       //      1 otherwize
       //
       
-      for(size_t iz=iz0; iz<nckz; ++iz) {
-	Float kz= iz <= nc/2 ? fac*iz : fac*(iz-nc);
-	//Float sintz= sin(sin_fac*kz);
-	//Float c1z= 1.0 - 2.0/3.0*sintz*sintz;
-
-	Float k= sqrt(kx*kx + ky*ky + kz*kz);
-	// This shot_noise is without interlacing
-	//Float shot_noise= c1x*c1y*c1z*nbar_inv; // C1 function in Jing 2005
-	Float shot_noise= nbar_inv;
-	Float mu2= kz*kz/(kx*kx + ky*ky + kz*kz);
+      for(int kz=kz0; kz<iknq; ++kz) {
+	Float corr_xyz = corr_xy * window_corr[kz];
+	Float k2 = static_cast<double>(kx*kx + ky*ky + kz*kz);
+	Float k = sqrt(k2);
+	Float mu2= (kz*kz)/k2;
 	
-	if(k <= knq) {
-
-	  Float w1= w(sin_fac*(kx))*
-	            w(sin_fac*(ky))*
-	            w(sin_fac*(kz));
-	  Float w2= w1*w1;
-	  Float c2gg= w2*w2;
-
-	
-	  size_t index= nckz*(nc*ix + iy) + iz;
-	  Float d_re= delta_k[index][0];
-	  Float d_im= delta_k[index][1];
+	size_t index= nckz*(nc*ix + iy) + kz;
+	Float d_re= delta_k[index][0];
+	Float d_im= delta_k[index][1];
 
 	// Legendre polynomial
 	// P_l = (2 l + 1)/2*int_0^1 P(k) P_l(mu) dmu
 	// P_2 = (3 mu^2 + 1)/2
 	// P_4 = (35 mu^4 - 30 mu^2 + 3)/8
-	Float l_2= 7.5f*mu2 - 2.5f;
-	Float l_4= 1.125*(35.0f*mu2*mu2 - 30.0f*mu2 + 3.0f);
+	Float l_2= 7.5*mu2 - 2.5;
+	Float l_4= 1.125*(35.0*mu2*mu2 - 30.0*mu2 + 3.0);
 	Float delta2= pk_fac*(d_re*d_re + d_im*d_im);
 
-	//if(ix < nc/2 && iy < nc/2 && iz < nc/2) // debug!!!
+	if(k < iknq) {
 	ps->add(k,
-		delta2/c2gg, 
-		l_2*(delta2/c2gg - shot_noise),
-		l_4*(delta2/c2gg - shot_noise));	
-	
+		delta2*corr_xyz - shot_noise,
+		l_2*(delta2*corr_xyz - shot_noise),
+		l_4*(delta2*corr_xyz - shot_noise));
 	}
+	
       }
     }
   }
@@ -294,8 +322,8 @@ void power_spectrum_compute_multipoles_jing(Grid const * const grid,
 	// P_l = (2 l + 1)/2*int_0^1 P(k) P_l(mu) dmu
 	// P_2 = (3 mu^2 + 1)/2
 	// P_4 = (35 mu^4 - 30 mu^2 + 3)/8
-	float l_2= 7.5f*mu2 - 2.5f;
-	float l_4= 1.125*(35.0f*mu2*mu2 - 30.0f*mu2 + 3.0f);
+	float l_2= 7.5*mu2 - 2.5;
+	float l_4= 1.125*(35.0f*mu2*mu2 - 30.0f*mu2 + 3.0);
 
 	ps->add(k,
 		(pk_fac*(d_re*d_re + d_im*d_im) - shot_noise)/c2gg,

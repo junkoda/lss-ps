@@ -3,14 +3,12 @@
 #
 
 default:
-	cd .. && make exec
+	cd .. && make
 
 exec: lssps
 
 LIB = liblssps.a liblssps.dylib
 CPPFLAGS := -O3 $(OPENMP) $(OPT)
-#OPT     := -DDOUBLEPRECISION # debug!!!
-
 
 
 FFTW3_DIR ?= #e.g. /Users/jkoda/Research/opt/gcc/fftw3

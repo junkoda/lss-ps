@@ -18,7 +18,7 @@ struct NGP {
 #else
     int ix[3];
     for(int k=0; k<3; ++k) {
-      ix[k] = (int) round(x[k]);
+      ix[k] = (int)(x[k] + 0.5);
     }
 #endif
 
@@ -33,12 +33,13 @@ struct CIC {
     int ix[3], ix0[3], ix1[3];
     double w0[3], w1[3];
     for(int k=0; k<3; ++k) {
-      ix[k] = (int) floor(x[k]);
+      //assert(x[k] > 0.0);
+      ix[k] = (int) x[k]; //(int) floor(x[k]);
       ix0[k]= (ix[k] + d.nc) % d.nc;    // left grid point (periodic)
       ix1[k]= (ix[k] + 1 + d.nc) % d.nc;// right grid point (periodic)
 
       w1[k] = x[k] - ix[k];              // CIC weight to right grid point
-      w0[k] = 1 - w1[k];                 //               left grid point
+      w0[k] = 1.0 - w1[k];                 //               left grid point
     }
     
     d(ix0[0], ix0[1], ix0[2]) += w*w0[0]*w0[1]*w0[2];
@@ -83,11 +84,9 @@ void mass_assignment(Catalogue const * const cat,
 
   grid.clear();
   grid.boxsize= boxsize;
-
+  
   const double dx_inv = grid.nc/boxsize;
-
-  double* const d = grid.fx;
-
+  Float rx[3];
   double w_sum = 0.0;
   double w2_sum = 0.0;
   double nw2_sum = 0.0;
@@ -98,17 +97,18 @@ void mass_assignment(Catalogue const * const cat,
     const double nbar = 1.0; // TODO nbar
     
     if(useFKP)
-       w /=  (1.0 + nbar*Pest);
+      w /=  (1.0 + nbar*Pest);
 
     const double w2 = w*w;
     w_sum += w;
     w2_sum += w2;    
     nw2_sum += nbar*w2;
     
-    double x[] = {(p->x[0] - x0[0])*dx_inv,
-		  (p->x[1] - x0[1])*dx_inv,
-		  (p->x[2] - x0[2])*dx_inv};
-    f(x, w, grid);
+    rx[0] = (p->x[0] - x0[0])*dx_inv;
+    rx[1] = (p->x[1] - x0[1])*dx_inv;
+    rx[2] = (p->x[2] - x0[2])*dx_inv;
+
+    f(rx, w, grid);
   }
 
   grid.total_weight = w_sum;

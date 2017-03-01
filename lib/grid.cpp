@@ -1,3 +1,4 @@
+#include <iostream>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -24,6 +25,7 @@ Grid::Grid(const int nc_) :
   total_weight(0.0), n_mas(0)
 {
   auto ts = std::chrono::high_resolution_clock::now();
+
   
   //const size_t ncz= 2*(nc/2 + 1);
   x0[0] = x0[1]= x0[2]= 0.0;
@@ -51,7 +53,7 @@ Grid::Grid(const int nc_) :
 void Grid::fft()
 {
   auto ts = std::chrono::high_resolution_clock::now();
-  
+
   if(mode != grid_real_space) {
     msg_printf(msg_error,
 	       "Error: trying to FFT a grid not in real-space mode\n");
@@ -158,7 +160,7 @@ void grid_compute_fluctuation_homogeneous(Grid& grid1)
   //
   
   auto ts = std::chrono::high_resolution_clock::now();
-  msg_printf(msg_verbose, "Compute fluctuation without randoms");
+  msg_printf(msg_verbose, "Compute fluctuation without randoms.\n");
 
   const size_t nc= grid1.nc;
   const size_t ncz= grid1.ncz;

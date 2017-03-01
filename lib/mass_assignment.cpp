@@ -53,15 +53,15 @@ void mass_assignment_cic(Catalogue const * const cat,
       ix1[j]= (ix[j] + 1 + nc) % nc;        // right grid (periodic)
     }
 
-    d[(ix0[0]*nc + ix0[1])*ncz + ix0[2]] += w[0]*w[1]*w[2];
-    d[(ix0[0]*nc + ix1[1])*ncz + ix0[2]] += w[0]*(1-w[1])*w[2];
-    d[(ix0[0]*nc + ix0[1])*ncz + ix1[2]] += w[0]*w[1]*(1-w[2]);
-    d[(ix0[0]*nc + ix1[1])*ncz + ix1[2]] += w[0]*(1-w[1])*(1-w[2]);
+    d[(ix0[0]*nc + ix0[1])*ncz + ix0[2]] += ww*w[0]*w[1]*w[2];
+    d[(ix0[0]*nc + ix1[1])*ncz + ix0[2]] += ww*w[0]*(1-w[1])*w[2];
+    d[(ix0[0]*nc + ix0[1])*ncz + ix1[2]] += ww*w[0]*w[1]*(1-w[2]);
+    d[(ix0[0]*nc + ix1[1])*ncz + ix1[2]] += ww*w[0]*(1-w[1])*(1-w[2]);
 
-    d[(ix1[0]*nc + ix0[1])*ncz + ix0[2]] += (1-w[0])*w[1]*w[2];
-    d[(ix1[0]*nc + ix1[1])*ncz + ix0[2]] += (1-w[0])*(1-w[1])*w[2];
-    d[(ix1[0]*nc + ix0[1])*ncz + ix1[2]] += (1-w[0])*w[1]*(1-w[2]);
-    d[(ix1[0]*nc + ix1[1])*ncz + ix1[2]] += (1-w[0])*(1-w[1])*(1-w[2]);
+    d[(ix1[0]*nc + ix0[1])*ncz + ix0[2]] += ww*(1-w[0])*w[1]*w[2];
+    d[(ix1[0]*nc + ix1[1])*ncz + ix0[2]] += ww*(1-w[0])*(1-w[1])*w[2];
+    d[(ix1[0]*nc + ix0[1])*ncz + ix1[2]] += ww*(1-w[0])*w[1]*(1-w[2]);
+    d[(ix1[0]*nc + ix1[1])*ncz + ix1[2]] += ww*(1-w[0])*(1-w[1])*(1-w[2]);
   }
 
   auto te = std::chrono::high_resolution_clock::now();
