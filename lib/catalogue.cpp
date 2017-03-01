@@ -8,7 +8,6 @@
 
 #include "config.h"
 #include "msg.h"
-#include "error.h"
 #include "catalogue.h"
 
 using namespace std;
@@ -69,3 +68,4 @@ void catalogue_read_text(Catalogue* const cat, const char filename[])
 	     std::chrono::duration<double>(te - ts).count());
 
 }
+

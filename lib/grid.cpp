@@ -110,32 +110,32 @@ void Grid::write(const char filename[])
 //
 // Grid algorithms
 //
-void grid_compute_fluctuation(Grid& grid1, const Grid& grid_rand)
+void grid_compute_fluctuation(Grid& grid_data, const Grid& grid_rand)
 {
-  // Compute the fluctuation field: grid1 -= grid_rand
+  // Compute the fluctuation field: grid_data -= grid_rand
   //
   // Input:
-  //     grid1 is the grid of data
-  //     grid_rand is the grid of randoms
+  //     grid_data is the number density grid of data
+  //     grid_rand is the number density grid of randoms
   //
   // Output:
-  //     grid1 become a fluctuation field
+  //     grid_data become a fluctuation field
   //
   
   auto ts = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Compute fluctuation");
 
-  const size_t nc= grid1.nc;
-  const size_t ncz= grid1.ncz;
+  const size_t nc= grid_data.nc;
+  const size_t ncz= grid_data.ncz;
   assert(grid_rand.nc == nc);
 
-  const double alpha = grid1.total_weight / grid_rand.total_weight;
+  const double alpha = grid_data.total_weight / grid_rand.total_weight;
 
   for(size_t ix=0; ix<nc; ++ix) {
     for(size_t iy=0; iy<nc; ++iy) {
       size_t index= (ix*nc + iy)*ncz;
       for(size_t iz=0; iz<nc; ++iz) {
-	grid1[index] -= alpha*grid_rand[index];
+	grid_data[index] -= alpha*grid_rand[index];
 	index++;
       }
     }

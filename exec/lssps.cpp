@@ -33,6 +33,11 @@ int main(int argc, char* argv[])
     ("alias-correction", value<int>()->default_value(1), "0: no correction, 1: Jing et al, 2: interlacing\n")
     ("mas-correction", value<bool>()->default_value(1), "mass assignment window correction\n")
     ("write-data-grid", value<string>(), "filename of data grid")
+    ("xyz", value<vector<int>>()->multitoken(), "xyz columns in input file e.g. --xyz=1,2,3")
+    ("radec", value<string>(), "Ra-Dec columns in input file e.g. --radec=1,2")
+    ("r", value<string>(), "radius r column in input file e.g. --r=3")
+    ("nbar", value<int>()->default_value(0), "mean density column in input file, 0 if no column for nbar")
+    ("weights", value<vector<int>>()->multitoken(), "weight columns in input file")
     ;
   
   positional_options_description p;
@@ -56,12 +61,25 @@ int main(int argc, char* argv[])
 
   msg_set_prefix("# ");
 
+     //
+
   // Read data and create data grid
   const string data_filename= vm["data"].as<string>();
   Catalogue* const data = new Catalogue();
   const double x0[]= {0.0, 0.0, 0.0};
 
-  catalogue_read_text(data, data_filename.c_str());
+  //catalogue_read_text(data, data_filename.c_str());
+  if(vm.count("xyz")) {
+    vector<int> ixyz= vm["xyz"].as<vector<int>>();
+    const int inbar= vm["nbar"].as<int>();
+    vector<int> iw;
+    if(vm.count("weights"))
+      iw= vm["weights"].as<vector<int>>();
+    catalogue_read(data, data_filename.c_str(),
+		   XYZ(ixyz, iw, inbar));
+  }
+  
+  //catalogue_read(data, data_filename.c_str());
 
   Grid* const grid_data = new Grid(nc); assert(grid_data);
   //mass_assignment_cic(data, x0, boxsize, false, 0.0, grid1);
