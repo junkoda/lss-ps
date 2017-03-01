@@ -69,3 +69,31 @@ void catalogue_read_text(Catalogue* const cat, const char filename[])
 
 }
 
+void catalogue_compute_range(const Catalogue& cat,
+			     double x0_out[], double& boxsize_out)
+{
+  // Input:
+  //   catalogue cat
+  // Output:
+  //   x0: minimum corrdinate
+  //   boxsize:
+
+  double left[3], right[3];
+
+  for(int k=0; k<3; ++k)
+    left[k]= right[k]= cat.front().x[k];
+    
+  for(auto&& p : cat) {
+    for(int k=0; k<3; ++k) {
+      if(p.x[k] < left[k]) left[k]= p.x[k];
+      if(p.x[k] > right[k]) right[k]= p.x[k];
+    }
+  }
+
+  boxsize_out= 0.0;
+  for(int k=0; k<3; ++k) {
+    x0_out[k]= left[k];
+    double diff= right[k] - left[k];
+    if(diff > boxsize_out) boxsize_out= diff;
+  }
+}

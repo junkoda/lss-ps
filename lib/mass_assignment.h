@@ -58,7 +58,6 @@ struct CIC {
 
 void mass_assignment_cic(Catalogue const * const cat,
 			 const Float x0[], const Float boxsize,
-			 const bool useFKP, const double Pest,
 			 Grid* const grid);
 
 
@@ -69,7 +68,6 @@ void mass_assignment_cic(Catalogue const * const cat,
 template<typename MAS>
 void mass_assignment(Catalogue const * const cat,
 		     MAS f, const double x0[], const double boxsize,
-		     const bool useFKP, const double Pest,
 		     Grid& grid)
 {
   // Assign a moment of Galaxies in vector v to grid,
@@ -94,10 +92,10 @@ void mass_assignment(Catalogue const * const cat,
   for(std::vector<Particle>::const_iterator p= cat->begin();
       p != cat->end(); ++p) {
     double w = p->w;
-    const double nbar = 1.0; // TODO nbar
-    
-    if(useFKP)
-      w /=  (1.0 + nbar*Pest);
+    const double nbar = p->nbar;
+
+    // DEBUG!!!
+    // move this to catalog reader
 
     const double w2 = w*w;
     w_sum += w;
@@ -112,9 +110,10 @@ void mass_assignment(Catalogue const * const cat,
   }
 
   grid.total_weight = w_sum;
-  grid.raw_noise = w2_sum;
-  grid.normalisation = nw2_sum;
+  grid.w2_sum = w2_sum;
+  grid.nw2_sum = nw2_sum;
   grid.n_mas = f.n_mas;
+  grid.np = cat->size();
   
   // time duration
   auto te = std::chrono::high_resolution_clock::now();

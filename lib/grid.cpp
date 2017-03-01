@@ -11,6 +11,8 @@
 static double time_init= 0.0;
 static double time_fft= 0.0;
 
+using namespace std;
+
 void grid_print_time()
 {
   msg_printf(msg_verbose, "Time grid_init %le\n", time_init);
@@ -110,7 +112,7 @@ void Grid::write(const char filename[])
 //
 // Grid algorithms
 //
-void grid_compute_fluctuation(Grid& grid_data, const Grid& grid_rand)
+void grid_compute_fluctuation(Grid& grid_data, Grid& grid_rand)
 {
   // Compute the fluctuation field: grid_data -= grid_rand
   //
@@ -123,13 +125,17 @@ void grid_compute_fluctuation(Grid& grid_data, const Grid& grid_rand)
   //
   
   auto ts = std::chrono::high_resolution_clock::now();
-  msg_printf(msg_verbose, "Compute fluctuation");
+
 
   const size_t nc= grid_data.nc;
   const size_t ncz= grid_data.ncz;
   assert(grid_rand.nc == nc);
 
   const double alpha = grid_data.total_weight / grid_rand.total_weight;
+  //cerr << "data total_weight " << grid_data.total_weight << endl;
+  //cerr << "rand total_weight " << grid_rand.total_weight << endl;
+  
+  msg_printf(msg_verbose, "Compute fluctuation, alpha= %e\n", alpha);
 
   for(size_t ix=0; ix<nc; ++ix) {
     for(size_t iy=0; iy<nc; ++iy) {
@@ -141,41 +147,56 @@ void grid_compute_fluctuation(Grid& grid_data, const Grid& grid_rand)
     }
   }
 
+  grid_data.shot_noise = (1.0 + alpha)*grid_rand.w2_sum / grid_rand.nw2_sum;
+  grid_rand.shot_noise = 0.0;
+
+  grid_data.pk_normalisation= 1.0/(grid_rand.nw2_sum*alpha);
+  cerr << "normalization= " << grid_rand.nw2_sum*alpha << endl;
+  
+  grid_rand.pk_normalisation= 1.0/(grid_rand.nw2_sum/alpha);
+
+
   // time duration
   auto te = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Time fluctuation %le\n",
 	     std::chrono::duration<double>(te - ts).count());
 }
 
-void grid_compute_fluctuation_homogeneous(Grid& grid1)
+void grid_compute_fluctuation_homogeneous(Grid& grid_data)
 {
   // Compute the fluctuation field: data_grid - nbar,
   // when the nbar is homogeneous, i.e., no randoms catalogue necessary
   //
   // Input:
-  //     grid1 is the grid of data
+  //     grid_data is the number density grid of data
   //
   // Output:
-  //     grid1 become a fluctuation field
+  //     grid_data become a fluctuation field
   //
   
   auto ts = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Compute fluctuation without randoms.\n");
 
-  const size_t nc= grid1.nc;
-  const size_t ncz= grid1.ncz;
-  const double nbar = grid1.total_weight / (nc*nc*nc);
+  const size_t nc= grid_data.nc;
+  const size_t ncz= grid_data.ncz;
+  const double nbar = grid_data.total_weight / (nc*nc*nc);
 
   for(size_t ix=0; ix<nc; ++ix) {
     for(size_t iy=0; iy<nc; ++iy) {
       size_t index= (ix*nc + iy)*ncz;
       for(size_t iz=0; iz<nc; ++iz) {
-	grid1[index] -= nbar;
+	grid_data[index] -= nbar;
 	index++;
       }
     }
   }
 
+  const double boxsize= grid_data.boxsize;
+  const double vol= boxsize*boxsize*boxsize;
+  grid_data.pk_normalisation= vol
+                              / (grid_data.total_weight*grid_data.total_weight);
+  grid_data.shot_noise = vol / (double) grid_data.np;
+  
   // time duration
   auto te = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Time fluctuation homogeneous %le\n",

@@ -47,8 +47,9 @@ static inline int end_of_number(const char line[], int i)
   return i;
 }
 
-static inline void read_line(char line[], std::vector<double>& v)
+static inline void split(char line[], std::vector<double>& v)
 {
+  // split a space spearated char line into a vector of double
   int i=0;
   int ibegin= 0;
 
@@ -67,70 +68,95 @@ static inline void read_line(char line[], std::vector<double>& v)
   }
 }
 
-class XYZ {
- public:
-  XYZ(const std::vector<int>& xyz, const std::vector<int>& weights, const int inbar_) {
-    assert(xyz.size() == 3);
-    ix= xyz[0] - 1;
-    iy= xyz[1] - 1;
-    iz= xyz[2] - 1;
-    for(auto i : weights)
-      weight_cols.push_back(i - 1);
-    inbar= inbar_ - 1;
+//
+// Convertor
+//
+enum class AngleUnit {rad, deg};
 
-    msg_printf(msg_info, "Columns for xyz: %d %d %d\n",
-	       ix + 1, iy + 1, iz + 1);
-    msg_printf(msg_info, "Columns for weights:");
-    for(auto i : weight_cols)
-      msg_printf(msg_info, " %d", i + 1);
-    if(weight_cols.empty())
-      msg_printf(msg_info, "none");
-    msg_printf(msg_info, "\n");
-
-    msg_printf(msg_info, "Column for mean number density: ");
-    if(inbar > 0)
-      msg_printf(msg_info, "%d\n", inbar + 1);
-    else
-      msg_printf(msg_info, "none\n");
-  }
-  
-  
-  void operator()(const std::vector<double>& v, Particle& p) const {
-#ifdef DEBUG
-    assert(ix < v.size());
-    assert(iy < v.size());
-    assert(iz < v.size());
-    assert(inbar < (int) v.size());
-#endif
-    
-    p.x[0]= v[ix];
-    p.x[1]= v[iy];
-    p.x[2]= v[iz];
-    p.w= 1.0;
-    p.nbar= 0.0;
-    for(const int i : weight_cols) {
-#ifdef DEBUG
-      assert(i < v.size());
-#endif
-      p.w *= v[i];
-    }
-    if(inbar >= 0)
-      p.nbar = v[inbar];
-  }
-
-  void push_back(const int icol_weight);
- private:
-  int ix, iy, iz, inbar;
-  std::vector<int> weight_cols;	
+struct XYZ {
+  // When the input file is xyz, nothing is needed to do
+  void operator()(Particle& p) const {}
 };
+
+class Spherical {
+ public:
+  Spherical(const AngleUnit angle_unit) {
+    if(angle_unit == AngleUnit::rad)
+      unit_angle= 1.0;
+    else if(angle_unit == AngleUnit::deg)
+      unit_angle= M_PI/180.0;
+    else
+      assert(false);
+
+    msg_printf(msg_info, "Using sperical coordinate position = (RA, Dec, r)\n");
+  }
+  
+  void operator()(Particle& p) const {
+    // (RA, Dec, r) -> (x, y, z)
+    double r= p.x[2];
+    double theta= unit_angle*p.x[1]; // measured from xy plane
+    double phi= -unit_angle*p.x[0];  // minus for definition of RA
+    double rcosO= r*cos(theta);
+    p.x[0]= rcosO*cos(phi);
+    p.x[1]= rcosO*sin(phi);
+    p.x[2]= r*sin(theta);
+
+    //printf("%e %e %e\n", p.x[0], p.x[1], p.x[2]);
+  }
+ private:
+  double unit_angle;
+};
+
 
 template<typename Converter>
 void catalogue_read(Catalogue* const cat, const char filename[],
-		    Converter f)
+		    const std::vector<int>& ipos,
+		    const std::vector<int>& iweights, const int inbar1,
+		    const bool Pest,
+		    Converter convert)
 {
+  // Read catalogue from an ascii file
+  //
+  // ipos:     column numbers for positions; the column index starts from 1
+  // iweights: column numbers for weights
+  // inbar1:   column number for nbar
+  //
+  // Pest:  1/(1 + nbar*Pest) in FKP weight.
+  //        set Pest to 0 when FKP weight is not used
+  //
+  // The position is converted to xyz by the Convertor
+  //
+  
   auto ts = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Reading catalogue %s\n", filename);
-    
+
+  const int ipos1= ipos[0] - 1; assert(ipos1 >= 0);
+  const int ipos2= ipos[1] - 1; assert(ipos2 >= 0);
+  const int ipos3= ipos[2] - 1; assert(ipos3 >= 0);
+  std::vector<int> weight_cols;
+  
+  for(auto i : iweights)
+    weight_cols.push_back(i - 1);
+  const int inbar= inbar1 - 1;
+
+  const bool use_fkp_weight= Pest > 0.0;
+
+  msg_printf(msg_info, "Columns for positions: %d %d %d\n",
+	     ipos1 + 1, ipos2 + 1, ipos3 + 1);
+  msg_printf(msg_info, "Columns for weights:");
+  for(auto i : weight_cols)
+    msg_printf(msg_info, " %d", i + 1);
+  if(weight_cols.empty())
+    msg_printf(msg_info, "none");
+  msg_printf(msg_info, "\n");
+
+
+  if(inbar > 0)
+    msg_printf(msg_info, "Column for mean number density: %d", inbar + 1);
+  else
+    msg_printf(msg_info, "Column for mean number density: none");
+
+  
   FILE* fp= fopen(filename, "r");
   if(fp == 0) {
     msg_printf(msg_fatal,
@@ -144,13 +170,39 @@ void catalogue_read(Catalogue* const cat, const char filename[],
   Particle p;
   std::vector<double> v;
   p.w = 1;
+  p.nbar= 1.0;
   
   while(fgets(buf, nbuf - 1, fp)) {
     if(buf[0] == '#')
       continue;
 
-    read_line(buf, v);
-    f(v, p);
+    split(buf, v);
+
+#ifdef DEBUG
+    assert(ix < v.size());
+    assert(iy < v.size());
+    assert(iz < v.size());
+    assert(inbar < (int) v.size());
+#endif
+
+    p.x[0]= v[ipos1];
+    p.x[1]= v[ipos2];
+    p.x[2]= v[ipos3];
+    p.w= 1.0;
+
+    for(const int i : weight_cols) {
+      p.w *= v[i];
+    }
+    if(inbar >= 0) {
+      p.nbar = v[inbar];
+      //std::cerr << p.nbar << std::endl;
+    }
+
+    if(use_fkp_weight)
+      p.w /=  (1.0 + p.nbar*Pest);
+
+
+    convert(p);
     cat->push_back(p);
   }
 
@@ -167,5 +219,8 @@ void catalogue_read(Catalogue* const cat, const char filename[],
 	     std::chrono::duration<double>(te - ts).count());
 }
 
+
+void catalogue_compute_range(const Catalogue& cat,
+			     double x0_out[], double& boxsize_out);
 
 #endif

@@ -8,7 +8,6 @@
 
 void mass_assignment_cic(Catalogue const * const cat,
 			 const Float x0[], const Float boxsize,
-			 const bool useFKP, const double Pest,
 			 Grid* const grid)
 {
   msg_printf(msg_verbose, "Mass assigment with CIC\n");
@@ -35,11 +34,8 @@ void mass_assignment_cic(Catalogue const * const cat,
 	p= cat->begin(); p != cat->end(); ++p) {
 
     double ww = p->w;
-    const double nbar = 1.0; // TODO nbar
+    const double nbar = p->nbar;
     
-    if(useFKP)
-      ww /=  (1.0 + nbar*Pest);
-
     const double w2 = ww*ww;
     w_sum += ww;
     w2_sum += w2;    

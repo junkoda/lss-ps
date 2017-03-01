@@ -46,8 +46,10 @@ class Grid {
   Float boxsize;
   Float x0[3];
   Float shot_noise;
+  Float pk_normalisation;
 
-  double total_weight, raw_noise, normalisation;
+  double total_weight, w2_sum, nw2_sum;
+  size_t np;
   int n_mas;
 
  private:
@@ -56,7 +58,7 @@ class Grid {
 
 void grid_print_time();
 
-void grid_compute_fluctuation(Grid& grid1, const Grid& grid_rand);
+void grid_compute_fluctuation(Grid& grid1, Grid& grid_rand);
 void grid_compute_fluctuation_homogeneous(Grid& grid1);
 
 
