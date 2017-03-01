@@ -158,8 +158,6 @@ int main(int argc, char* argv[])
   //delete grid;
   //delete cat;
 
-  grid_print_time();
-  
   auto te = std::chrono::high_resolution_clock::now();
   msg_printf(msg_verbose, "Time total %le\n",
 	     std::chrono::duration<double>(te - ts).count());

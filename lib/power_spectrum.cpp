@@ -147,7 +147,6 @@ void power_spectrum_compute_multipoles(Grid const * const grid,
     init_window_corr(nc, 0);
   assert(window_corr.size() == nc);
   
-  //  const Float knq= (M_PI*nc)/grid->boxsize;
   const Float pk_fac= boxsize*boxsize*boxsize/(grid->total_weight*grid->total_weight);
   const size_t nckz= nc/2+1;
   const int iknq= nc/2;
