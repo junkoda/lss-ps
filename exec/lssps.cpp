@@ -77,10 +77,6 @@ int main(int argc, char* argv[])
 
   // FKP weight
   const double Pest= vm["Pest"].as<double>();
-
-
-
-  
   const int nc= vm["nc"].as<int>(); assert(nc > 0);
 
   msg_set_prefix("# ");

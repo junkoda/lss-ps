@@ -43,7 +43,7 @@ PyObject* py_grid_alloc(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  msg_printf(msg_verbose, "Allocating a grid nc = %d\n", nc);
+  //msg_printf(msg_verbose, "Allocating a grid nc = %d\n", nc);
 
   Grid* grid= 0;
   try {
@@ -148,10 +148,8 @@ PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args)
   npy_intp strides[]= {(npy_intp) (sizeof(Float)*nc*ncz),
 		       (npy_intp) (sizeof(Float)*ncz),
 		       (npy_intp) (sizeof(Float))};
-
   return PyArray_New(&PyArray_Type, nd, dims, NPY_FLOAT_TYPE, strides,
-		     grid->fx, 0, 0, 0);
-  
+  grid->fx, 0, 0, 0);
 }
 
 
@@ -173,5 +171,22 @@ PyObject* py_grid_fk_asarray(PyObject* self, PyObject* args)
   npy_intp dims[]= {nc, nc, nckz};
 
   return PyArray_SimpleNewFromData(nd, dims, NPY_COMPLEX_TYPE, grid->fk);
+}
+
+PyObject* py_grid_clear(PyObject* self, PyObject* args)
+{
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->clear();
+
+  Py_RETURN_NONE;
 }
 

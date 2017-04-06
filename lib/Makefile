@@ -45,11 +45,11 @@ $(OBJS) : ../Makefile Makefile
 catalogue.o: catalogue.cpp config.h msg.h error.h catalogue.h
 config.o: config.cpp config.h msg.h
 grid.o: grid.cpp msg.h error.h grid.h config.h
-interlacing.o: interlacing.cpp config.h grid.h
-mass_assignment.o: mass_assignment.cpp msg.h catalogue.h config.h grid.h
-msg.o: msg.cpp msg.h
-power_spectrum.o: power_spectrum.cpp config.h error.h msg.h grid.h \
-  power_spectrum.h
+#interlacing.o: interlacing.cpp config.h grid.h
+#mass_assignment.o: mass_assignment.cpp msg.h catalogue.h config.h grid.h
+#msg.o: msg.cpp msg.h
+#power_spectrum.o: power_spectrum.cpp config.h error.h msg.h grid.h \
+#power_spectrum.h
 
 #
 # Library libfs.a

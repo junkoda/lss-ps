@@ -25,6 +25,9 @@ static PyMethodDef methods[] = {
   {"_catalogue_asarray", py_catalogue_asarray, METH_VARARGS,
    "_catalogue_asarrary(_cat) return catalogue as a np.array"},
 
+  {"_catalogue_file_ascii_alloc", py_catalogue_file_ascii_alloc, METH_VARARGS,
+   "_catalogue_file_ascii_alloc(filename, ipos, iweights, inbar, Pest"},   
+
   {"_grid_alloc", py_grid_alloc, METH_VARARGS,
    "_grid_alloc(nc) allocate a new grid object"},
   {"_grid_fft", py_grid_fft, METH_VARARGS,
@@ -35,10 +38,13 @@ static PyMethodDef methods[] = {
    "return real-space grid as an np.array"},
   {"_grid_fk_asarray", py_grid_fk_asarray, METH_VARARGS,
    "return Fourier-space grid as an np.array"},
+  {"_grid_clear", py_grid_clear, METH_VARARGS,
+   "_grid_clear(_grid); clear the array with 0"},
 
-  {"_mass_assignment_cic", py_mass_assignment_cic, METH_VARARGS,
-   "assign mass to a grid using CIC"},
+  {"_mass_assignment", py_mass_assignment, METH_VARARGS,
+   "assign mass to a grid"},
 
+  /*
   {"_power_spectrum_alloc", py_power_spectrum_alloc, METH_VARARGS,
    "allocate a new power spectrum object"},
   {"_power_spectrum_k_asarray", py_power_spectrum_k_asarray, METH_VARARGS,
@@ -53,6 +59,7 @@ static PyMethodDef methods[] = {
    METH_VARARGS, "_power_spectrum_compute_multipoles(grid, nbar, neff, _ps)"},
   {"_power_spectrum_len", py_power_spectrum_len, METH_VARARGS,
    "number of bins in the power spectrum"},
+  */
 
   {NULL, NULL, 0, NULL}
 };
@@ -70,7 +77,7 @@ PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_catalogue_module_init();
   py_grid_module_init();
-  py_power_spectrum_module_init();    
+  //py_power_spectrum_module_init();    
   
   return PyModule_Create(&module);
 }

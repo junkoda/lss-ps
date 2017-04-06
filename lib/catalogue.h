@@ -4,13 +4,12 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
 
 #include "config.h"
 #include "error.h"
 #include "msg.h"
-
-//#define DEBUG
 
 struct Particle {
   Float x[3], w, nbar;
@@ -21,52 +20,41 @@ class Catalogue : public std::vector<Particle> {
   Float boxsize;
 };
 
+class CatalogueFile {
+ public:
+  CatalogueFile() = default;
+  virtual ~CatalogueFile() = default;
+  virtual void open() = 0;
+  virtual void read(const size_t nbuf, std::vector<Particle>& v) = 0;
+  virtual void close() = 0;
+};
+
+class CatalogueFileAscii : public CatalogueFile {
+ public:
+  CatalogueFileAscii(const char filename_[],
+		     const std::vector<int> ipos_,
+		     const std::vector<int> iweights_,
+		     const int inbar_,
+		     const double Pest_);
+  virtual ~CatalogueFileAscii() = default;
+
+  virtual void open();
+  virtual void read(const size_t nbuf, std::vector<Particle>& v);
+  virtual void close();
+
+ private:
+  std::string filename;
+  std::vector<int> ipos, iweights;
+  int inbar;
+  int imax;
+  double Pest;
+  FILE* fp;
+};
+
+
+
 void catalogue_read_text(Catalogue* const cat, const char filename[]);
 
-static inline int skip_space(const char line[], int i)
-{
-  // return the first position after i that is not white space
-  while(line[i] != '\0') {
-    if(line[i] == ' ' || line[i] == '\t')
-      i++;
-    else
-      break;
-  }
-  return i;
-}
-
-static inline int end_of_number(const char line[], int i)
-{
-  // return the first position after i that is not number (not space)
-  while(line[i] != '\0') {
-    if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
-      break;
-    else
-      i++;
-  }
-  return i;
-}
-
-static inline void split(char line[], std::vector<double>& v)
-{
-  // split a space spearated char line into a vector of double
-  int i=0;
-  int ibegin= 0;
-
-  v.clear();
-  
-  while(line[i] != '\0') {
-    ibegin= skip_space(line, i);
-    if(line[i] == '\n' || line[i] == '\0')
-      break;
-    
-    i= end_of_number(line, ibegin+1);
-    line[i]= '\0';
-    double x= atof(line + ibegin);
-    v.push_back(x);
-    i++;
-  }
-}
 
 //
 // Convertor
@@ -100,14 +88,12 @@ class Spherical {
     p.x[0]= rcosO*cos(phi);
     p.x[1]= rcosO*sin(phi);
     p.x[2]= r*sin(theta);
-
-    //printf("%e %e %e\n", p.x[0], p.x[1], p.x[2]);
   }
  private:
   double unit_angle;
 };
 
-
+/*
 template<typename Converter>
 void catalogue_read(Catalogue* const cat, const char filename[],
 		    const std::vector<int>& ipos,
@@ -218,7 +204,7 @@ void catalogue_read(Catalogue* const cat, const char filename[],
   msg_printf(msg_verbose, "Time read catalogue template %le\n",
 	     std::chrono::duration<double>(te - ts).count());
 }
-
+*/
 
 void catalogue_compute_range(const Catalogue& cat,
 			     double x0_out[], double& boxsize_out);

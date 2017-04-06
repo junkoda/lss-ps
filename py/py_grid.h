@@ -12,5 +12,6 @@ PyObject* py_grid_nc(PyObject* self, PyObject* args);
 PyObject* py_grid_mode(PyObject* self, PyObject* args);
 PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args);
 PyObject* py_grid_fk_asarray(PyObject* self, PyObject* args);
+PyObject* py_grid_clear(PyObject* self, PyObject* args);
 
 #endif

@@ -517,3 +517,81 @@ void power_spectrum_compute_shotnoise(const size_t nc, const Float boxsize,
   ps->normalise();
 }
 */
+
+/*
+template<typename Moment>
+void power_spectrum_compute_yamamoto_scoccimarro(const Grid& grid_delta,
+					     const Grid& grid_moment,
+					     const Moment moment,
+					     const double fac2,
+					     const double fac4,
+					     PowerSpectrum* const ps)
+{
+  auto ts = std::chrono::high_resolution_clock::now();
+  
+  const size_t nc= grid->nc;
+  const Float boxsize= grid->boxsize;
+
+  assert(grid_delta.nc == grid_moment.nc);
+
+  if(grid_delta.mode != grid_fourier_space) {
+    msg_printf(msg_error, "Error: delta grid is not in Fourier space.\n");
+    throw AssertionError();
+  }
+
+  if(grid_moment.mode != grid_fourier_space) {
+    msg_printf(msg_error, "Error: moment grid is not in Fourier space.\n");
+    throw AssertionError();
+  }
+
+  const size_t nckz= nc/2+1;
+  const int iknq= nc/2;
+
+  const Float shot_noise= subtract_shotnoise ? grid->shot_noise : 0;
+  msg_printf(msg_info, "Shot noise subtraction: %e\n", shot_noise);
+
+  Complex* const delta_k= grid_delta.fk;
+  Complex* const moment_k= grid_moment.fk;
+
+  Float k[3];
+
+  for(int ix=0; ix<nc; ++ix) {
+    k[0] = ix <= iknq ? ix : ix - nc;
+    for(int iy=0; iy<nc; ++iy) {
+      k[1] = iy <= iknq ? iy : iy - nc;
+      int kz0 = !(kx > 0 || (kx == 0 && ky > 0));
+
+      for(int iz=kz0; iz<iknq; ++iz) {
+	k[2]= iz;
+	size_t index= nckz*(nc*ix + iy) + kz;
+	const Float m= moment(k);
+	Float d_re= delta_k[index][0];
+	Float d_im= delta_k[index][1];
+	Float m_re= moment_k[index][0];
+	Float m_im= moment_k[index][1];
+
+	Float f2= d_re*m_re + d_im*m_im;
+	Float f4= 
+
+	Float l_2= 7.5*mu2 - 2.5;
+	Float l_4= 1.125*(35.0*mu2*mu2 - 30.0*mu2 + 3.0);
+	Float delta2= pk_fac*(d_re*d_re + d_im*d_im);
+
+	if(k < iknq) {
+	ps->add(k,
+		0.0,
+		fac*m*f,???
+		l_4*(delta2*corr_xyz - shot_noise));
+	}
+	
+      }
+    }
+  }
+  ps->normalise();
+
+  auto te = std::chrono::high_resolution_clock::now();
+  msg_printf(msg_verbose, "Time multipoles %le\n",
+	     std::chrono::duration<double>(te - ts).count());
+
+}
+*/

@@ -11,4 +11,5 @@ PyObject* py_catalogue_len(PyObject* self, PyObject* args);
 PyObject* py_catalogue_read_text(PyObject* self, PyObject* args);
 PyObject* py_catalogue_asarray(PyObject* self, PyObject* args);
 
+PyObject* py_catalogue_file_ascii_alloc(PyObject* self, PyObject* args);
 #endif

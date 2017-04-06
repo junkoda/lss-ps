@@ -6,151 +6,158 @@
 #include "catalogue.h"
 #include "grid.h"
 
-void mass_assignment_cic(Catalogue const * const cat,
-			 const Float x0[], const Float boxsize,
-			 Grid* const grid)
-{
-  msg_printf(msg_verbose, "Mass assigment with CIC\n");
-  auto ts = std::chrono::high_resolution_clock::now();
-  
-  grid->clear();
-  
-  const size_t nc = grid->nc;
-  const Float dx_inv= nc/boxsize;
-  const size_t ncz= 2*(nc/2+1);
-  Float* const d= grid->fx;
-  grid->boxsize= boxsize;
+using namespace std;
 
-  int ix[3];
-  size_t ix0[3], ix1[3];
-  Float w[3];
-  Float rx[3];
+//
+// Mass assignment functions
+//  x: position relative to the cubic box corner in units of grid spacing;
+//     i.e., (0, 0, 0) and (nc, nc, nc) is the edge of the FFT grid,
+//     where nc is the number of grids per dimension
 
-  double w_sum = 0.0;
-  double w2_sum = 0.0;
-  double nw2_sum = 0.0;
-
-  for(Catalogue::const_iterator
-	p= cat->begin(); p != cat->end(); ++p) {
-
-    double ww = p->w;
-    const double nbar = p->nbar;
-    
-    const double w2 = ww*ww;
-    w_sum += ww;
-    w2_sum += w2;    
-    nw2_sum += nbar*w2;
-
-    for(int j=0; j<3; ++j) {
-      rx[j]= (p->x[j] - x0[j])*dx_inv;
-      ix[j]= (int) floor(rx[j]);
-      w[j]= 1 - (rx[j] - ix[j]);            // CIC weight for left point
-      ix0[j]= (ix[j] + nc) % nc;            // left grid (periodic)
-      ix1[j]= (ix[j] + 1 + nc) % nc;        // right grid (periodic)
+struct NGP {
+  void operator()(const double x[], const double w, Grid* const d) const {
+    int ix[3];
+    for(int k=0; k<3; ++k) {
+      ix[k] = (int)(x[k] + 0.5);
     }
 
-    d[(ix0[0]*nc + ix0[1])*ncz + ix0[2]] += ww*w[0]*w[1]*w[2];
-    d[(ix0[0]*nc + ix1[1])*ncz + ix0[2]] += ww*w[0]*(1-w[1])*w[2];
-    d[(ix0[0]*nc + ix0[1])*ncz + ix1[2]] += ww*w[0]*w[1]*(1-w[2]);
-    d[(ix0[0]*nc + ix1[1])*ncz + ix1[2]] += ww*w[0]*(1-w[1])*(1-w[2]);
+    d->add(ix[0], ix[1], ix[2], w);
+  }
+  static const int n_mas = 1;
+};
+    
 
-    d[(ix1[0]*nc + ix0[1])*ncz + ix0[2]] += ww*(1-w[0])*w[1]*w[2];
-    d[(ix1[0]*nc + ix1[1])*ncz + ix0[2]] += ww*(1-w[0])*(1-w[1])*w[2];
-    d[(ix1[0]*nc + ix0[1])*ncz + ix1[2]] += ww*(1-w[0])*w[1]*(1-w[2]);
-    d[(ix1[0]*nc + ix1[1])*ncz + ix1[2]] += ww*(1-w[0])*(1-w[1])*(1-w[2]);
+struct CIC {
+  void operator()(const double x[], const double w, Grid* const d) const {
+    int ix[3], ix0[3], ix1[3];
+    double w0[3], w1[3];
+    for(int k=0; k<3; ++k) {
+      ix[k] = (int) x[k]; // assume x[k] >= 0.0
+      ix0[k]= (ix[k] + d->nc) % d->nc;    // left grid point (periodic)
+      ix1[k]= (ix[k] + 1 + d->nc) % d->nc;// right grid point (periodic)
+
+      w1[k] = x[k] - ix[k];              // CIC weight to right grid point
+      w0[k] = 1.0 - w1[k];                 //               left grid point
+    }
+    
+    d->add(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
+    d->add(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
+    d->add(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
+    d->add(ix0[0], ix1[1], ix1[2], w*w0[0]*w1[1]*w1[2]);
+
+    d->add(ix1[0], ix0[1], ix0[2], w*w1[0]*w0[1]*w0[2]);
+    d->add(ix1[0], ix1[1], ix0[2], w*w1[0]*w1[1]*w0[2]);
+    d->add(ix1[0], ix0[1], ix1[2], w*w1[0]*w0[1]*w1[2]);
+    d->add(ix1[0], ix1[1], ix1[2], w*w1[0]*w1[1]*w1[2]);
   }
 
-  auto te = std::chrono::high_resolution_clock::now();
-  msg_printf(msg_verbose, "Time mass_assignment CIC %le\n",
-	     std::chrono::duration<double>(te - ts).count());
-  ts = te;
+  static const int n_mas = 2;
+};
 
-  // check total & normalize
-  const double np= cat->size();
+struct TSC {
+  void operator()(const double x[], const double w, Grid* const d) const {
+    int ix0[3];
 
-  double total= 0.0;
-  float nbar_inv= (double)nc*nc*nc/np;
+    double ww[3][3];
+    for(int k=0; k<3; ++k) {
+      ix0[k] = (int) (x[k] + 0.5);
+      double dx1 = x[k] - ix0[k];
+      double dx2 = 0.5 - dx1;
+      
+      ww[k][0] = 0.5*dx2*dx2;
+      ww[k][1] = 0.75 - dx1*dx1;
+      ww[k][2] = 1.0 - ww[k][0] - ww[k][1];
+    }
 
-  for(int ix=0; ix<nc; ++ix) {
-    for(int iy=0; iy<nc; ++iy) {
-      for(int iz=0; iz<nc; ++iz) {
-	size_t index= ncz*(nc*ix + iy) + iz;
-	total += d[index];
-
-  	d[index]= d[index]*nbar_inv - 1.0f; 
+    for(int dix=0; dix<3; ++dix) {
+      int ix= (ix0[0] + dix - 1 + d->nc) % d->nc;
+      for(int diy=0; diy<3; ++diy) {
+	int iy= (ix0[1] + diy - 1 + d->nc) % d->nc;
+	for(int diz=0; diz<3; ++diz) {
+	  int iz= (ix0[2] + diz - 1 + d->nc) % d->nc;
+	  d->add(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
+	}
       }
     }
   }
 
-  grid->shot_noise= boxsize*boxsize*boxsize/np;
+  static const int n_mas = 3;
+};
 
-  te = std::chrono::high_resolution_clock::now();
-  msg_printf(msg_verbose, "Time get fluctuation %le\n",
-	     std::chrono::duration<double>(te - ts).count());
-
-  
-  float err= fabs(total - np)/np;
-  msg_printf(msg_debug,
-	     "Density total %le, expected %le; rel difference %e\n",
-	     total, np, err);
-  assert(err < 1.0e-5);
-}
-
-/*
+//
+// Mass assignment algorithm
+//
 
 template<typename MAS>
-void mass_assignment(Catalogue const * const cat,
-		     MAS f, const double x0[], const double boxsize,
-		     const bool useFKP, const double Pest,
-		     Grid* const grid)
+void mass_assignment_template(const vector<Particle>& cat,
+			      const double x0[],
+			      const double boxsize,
+			      MAS f,
+			      bool parallel,
+			      Grid* grid)
 {
-  // Assign a moment of Galaxies in vector v to grid,
-  // using mass assignment function f
-  
-  // get start time
-  auto ts = std::chrono::high_resolution_clock::now();
-
-  msg_printf(msg_verbose,
-	     "Assigning density field on grid with Teplate n_mas=%d",
-	     f.n_mas);
-
+  // Add density to grid
   const double dx_inv = grid->nc/boxsize;
-
-  double* const d = grid->fx;
-
   double w_sum = 0.0;
   double w2_sum = 0.0;
   double nw2_sum = 0.0;
 
-  for(std::vector<Particle>::const_iterator p= cat->begin();
-      p != cat->end(); ++p) {
-    double w = p->w;
-    const double nbar = 1.0; // TODO nbar
-    
-    if(useFKP)
-       w /=  (1.0 + nbar*Pest);
-
+#pragma omp parallel for if(parallel) reduction( + : w_sum, w2_sum, nw2_sum )
+  for(size_t i=0; i<cat.size(); ++i) {
+    Float rx[3];
+    double w = cat[i].w;
+    const double nbar = cat[i].nbar;
     const double w2 = w*w;
     w_sum += w;
-    w2_sum += w*w;    
+    w2_sum += w2;
     nw2_sum += nbar*w2;
     
-    double x[] = {(p->x[0] - x0[0])*dx_inv,
-		  (p->x[1] - x0[1])*dx_inv,
-		  (p->x[2] - x0[2])*dx_inv};
-    f(x);
+    rx[0] = (cat[i].x[0] - x0[0])*dx_inv;
+    rx[1] = (cat[i].x[1] - x0[1])*dx_inv;
+    rx[2] = (cat[i].x[2] - x0[2])*dx_inv;
+
+    f(rx, w, grid);
   }
-
-  grid->total_weight = w_sum;
-  grid->raw_noise = w2_sum;
-  grid->normalisation = nw2_sum;
-  grid->n_mas = f.n_mas;
-  
-  // time duration
-  auto te = std::chrono::high_resolution_clock::now();
-  msg_printf(msg_verbose, "Time mass_assignment template %le\n",
-	     std::chrono::duration<double>(te - ts).count());
+ 
+  #pragma omp critical (__MASS_ASSIGNMENT__)
+  {
+    grid->total_weight += w_sum;
+    grid->w2_sum += w2_sum;
+    grid->nw2_sum += nw2_sum;
+    grid->np += cat.size();
+    
+    grid->n_mas = f.n_mas;
+    grid->boxsize= boxsize;
+  }
 }
-*/
 
-//}
+
+//
+// Wrapper for various mass assignment scheme
+//
+void mass_assignment(const vector<Particle>& cat,
+		     const Float x0[], const Float boxsize,
+		     const int mas, const bool parallelise,
+		     Grid* const grid)
+{
+  // parallelise = true if you want to parallelise the mass assignment
+  // within this function call
+  switch(mas) {
+  case 1:
+    mass_assignment_template(cat, x0, boxsize, NGP(), parallelise, grid);
+    break;
+
+  case 2:
+    mass_assignment_template(cat, x0, boxsize, CIC(), parallelise, grid);
+    break;
+
+  case 3:
+    mass_assignment_template(cat, x0, boxsize, TSC(), parallelise, grid);
+    break;
+
+  default:
+    msg_printf(msg_error, "Error: unknown mass assignment scheme %d\n",
+	       mas);
+  }
+}
+

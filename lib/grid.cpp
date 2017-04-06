@@ -28,8 +28,6 @@ Grid::Grid(const int nc_) :
 {
   auto ts = std::chrono::high_resolution_clock::now();
 
-  
-  //const size_t ncz= 2*(nc/2 + 1);
   x0[0] = x0[1]= x0[2]= 0.0;
   
   const size_t ngrid= nc*nc*ncz;
@@ -71,12 +69,17 @@ void Grid::fft()
 
 Grid::~Grid()
 {
+  assert(fx);
   FFTW(free)(fx);
   FFTW(destroy_plan)(plan);
 }
 
 void Grid::clear()
 {
+  total_weight= w2_sum= nw2_sum= 0.0;
+  np= 0;
+
+  
   const size_t ncz= 2*(nc/2 + 1);
   memset(fx, 0, sizeof(Float)*(nc*nc*ncz));
 }
@@ -202,4 +205,3 @@ void grid_compute_fluctuation_homogeneous(Grid& grid_data)
   msg_printf(msg_verbose, "Time fluctuation homogeneous %le\n",
 	     std::chrono::duration<double>(te - ts).count());
 }
-

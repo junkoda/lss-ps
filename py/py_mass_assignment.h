@@ -3,6 +3,6 @@
 
 #include "Python.h"
 
-PyObject* py_mass_assignment_cic(PyObject* self, PyObject* args);
+PyObject* py_mass_assignment(PyObject* self, PyObject* args);
 
 #endif
