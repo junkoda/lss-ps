@@ -120,9 +120,9 @@ PyObject* py_grid_mode(PyObject* self, PyObject* args)
     (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
-  if(grid->mode == grid_real_space)
+  if(grid->mode == GridMode::real_space)
     return Py_BuildValue("s", "real-space");
-  else if(grid->mode == grid_fourier_space)
+  else if(grid->mode == GridMode::fourier_space)
     return Py_BuildValue("s", "fourier-space");
 
   Py_RETURN_NONE;
@@ -189,4 +189,44 @@ PyObject* py_grid_clear(PyObject* self, PyObject* args)
 
   Py_RETURN_NONE;
 }
+
+PyObject* py_grid_compute_fluctuation(PyObject* self, PyObject* args)
+{
+  PyObject *py_grid_data, *py_grid_rand;
+  if(!PyArg_ParseTuple(args, "OO", &py_grid_data, &py_grid_rand)) {
+    return NULL;
+  }
+
+  Grid* const grid_data=
+    (Grid*) PyCapsule_GetPointer(py_grid_data, "_Grid");
+  py_assert_ptr(grid_data);
+
+  Grid const * const grid_rand=
+    (Grid const *) PyCapsule_GetPointer(py_grid_rand, "_Grid");
+  py_assert_ptr(grid_rand);
+
+  grid_compute_fluctuation(*grid_data, *grid_rand);
+
+  Py_RETURN_NONE;
+}
+
+
+PyObject* py_grid_compute_fluctuation_homogeneous(PyObject* self,
+						  PyObject* args)
+{
+  PyObject *py_grid_data, *py_grid_rand;
+  if(!PyArg_ParseTuple(args, "OO", &py_grid_data, &py_grid_rand)) {
+    return NULL;
+  }
+
+  Grid* const grid_data=
+    (Grid*) PyCapsule_GetPointer(py_grid_data, "_Grid");
+  py_assert_ptr(grid_data);
+
+
+  grid_compute_fluctuation_homogeneous(*grid_data);
+
+  Py_RETURN_NONE;
+}
+
 

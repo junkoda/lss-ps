@@ -8,6 +8,7 @@
 #include "error.h"
 #include "py_mass_assignment.h"
 #include "py_assert.h"
+#include "py_util.h"
 
 using namespace std;
 /*
@@ -37,29 +38,51 @@ PyObject* py_mass_assignment(PyObject* self, PyObject* args)
 }
 */
 
+// Assign density to a grid or a pair of grid
 PyObject* py_mass_assignment(PyObject* self, PyObject* args)
 {
-  PyObject *py_f, *py_grid, *py_x0;
+  // _mass_assignment(_f, _x0, boxsize, mas, _grid)
+  // Args:
+  //     _f: CatalogueFile
+  //     _x0: sequence of x0
+  //     boxsize:
+  //     mas (int): 1 for NGP, 2 for CIC, ...
+  //     _grid: a _Grid pointer
+  //            or a sequence of two _Grid pointers (interlacing)
+  PyObject *py_f, *py_grid, *py_grid_shifted, *py_x0;
   int mas;
   double boxsize;
 
-  if(!PyArg_ParseTuple(args, "OOdiO",
-		       &py_f, &py_x0, &boxsize, &mas, &py_grid))
+  if(!PyArg_ParseTuple(args, "OOdiOO",
+		       &py_f, &py_x0, &boxsize, &mas,
+		       &py_grid, &py_grid_shifted))
     return NULL;
 
   CatalogueFile* const f=
     (CatalogueFile*) PyCapsule_GetPointer(py_f, "_CatalogueFile");
   py_assert_ptr(f);
 
-  // TODO; with interlacing, py_grid will be a pair of grids
-  Grid* const grid= (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
-  Grid* const grid_shifted= 0;
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
-  // TODO set x0
-  Float x0[]= {0, 0, 0};
-  Float x0_shifted[]= {0, 0, 0};
+  Grid* grid_shifted= nullptr;
+  if(py_grid_shifted != Py_None) {
+    grid_shifted = (Grid*) PyCapsule_GetPointer(py_grid_shifted, "_Grid");
+    py_assert_ptr(grid_shifted);
+  }
 
+  
+  vector<double> x0, x0_shifted;
+  sequence_to_vector(py_x0, x0);
+  if(x0.size() != 3) {
+    PyErr_SetString(PyExc_TypeError, "py_x0 does not include 3 numbers.");
+  }
+
+  for(auto x : x0)
+    x0_shifted.push_back(x - 0.5*boxsize/grid->nc);
+
+  
   static size_t buffer_size = 100000;
   
   f->open();
@@ -74,10 +97,11 @@ PyObject* py_mass_assignment(PyObject* self, PyObject* args)
       if(cat.empty())
 	break;
       
-      mass_assignment(cat, x0, boxsize, mas, false, grid);
+      mass_assignment(cat, x0.data(), boxsize, mas, false, grid);
 
       if(grid_shifted)
-	mass_assignment(cat, x0_shifted, boxsize, mas, false, grid_shifted);
+	mass_assignment(cat, x0_shifted.data(), boxsize, mas, false,
+			grid_shifted);
     }
   }
 

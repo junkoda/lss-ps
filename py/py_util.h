@@ -23,6 +23,7 @@ void sequence_to_vector(PyObject* seq, std::vector<T>& v)
 
   for(size_t i=0; i<n; ++i) {
     PyObject* elem = PySequence_GetItem(seq, i); py_assert_void(elem);
+    // new reference
     if(std::is_same<T, int>::value)
       v.push_back(PyLong_AsLong(elem));
     else if(std::is_same<T, double>::value)
@@ -31,6 +32,7 @@ void sequence_to_vector(PyObject* seq, std::vector<T>& v)
       PyErr_SetString(PyExc_TypeError,
 		      "The value in the sequence is not the type expected");
     }
+    Py_DECREF(elem);
   }
 }
 

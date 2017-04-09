@@ -5,6 +5,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H 1
 
+#include <complex>
 #include <cmath>
 #include <cfloat>
 #include <fftw3.h>
@@ -12,7 +13,7 @@
 
 #ifdef DOUBLEPRECISION
 typedef double Float;
-typedef fftw_complex Complex;
+
 #define FLOAT_EPS DBL_EPSILON
 #define FLOAT_TYPE MPI_DOUBLE
 #define FLOAT_SAVE_TYPE H5T_IEEE_F64LE
@@ -20,7 +21,7 @@ typedef fftw_complex Complex;
 #define PRECISION "double"
 
 #else
-typedef fftwf_complex Complex;
+//typedef fftwf_complex FFTComplex;
 typedef float Float;
 #define FLOAT_EPS       FLT_EPSILON
 #define FLOAT_TYPE      MPI_FLOAT
@@ -29,6 +30,8 @@ typedef float Float;
 #define PRECISION "single"
 
 #endif
+
+typedef std::complex<Float> Complex;
 
 // number of particles in one MPI node must not overflow Index
 // (however, number of bytes allocated for particles may be larger

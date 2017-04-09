@@ -18,9 +18,11 @@ class Catalogue:
     def __getitem__(self, index):
         return c._catalogue_asarray(self._cat)[index]
 
+
 class CatalogueFile:
     def __init__(self, fname):
         self._filename = fname
+        self.boxsize = None
 
     def __repr__(self):
         return 'CatalogueFile(\'%s\')' % self._filename
@@ -28,12 +30,11 @@ class CatalogueFile:
     @property
     def filename():
         return self._filename
-    
-    pass
+        
         
 
 def ascii(filename, *,
-          xyz=(0, 1, 2), radec=None, r=None,
+          xyz=(0, 1, 2),
           weights=(), nbar=-1, Pest=0.0):
     f = CatalogueFile(filename)
     f._f = c._catalogue_file_ascii_alloc(filename, xyz, weights, nbar, Pest)
@@ -44,8 +45,8 @@ def gadget(filename, *,
            particle_types=(1), rsd=False):
     pass
 
-def loadtxt(filename, *, xyz=[0, 1, 2], radec=None, r=None,
-             weights=None, nbar=None):
+def loadtxt(filename, *, xyz=(0, 1, 2), 
+             weights=(), nbar=-1):
     cat = Catalogue()
     c._catalogue_read_text(cat._cat, filename)
     

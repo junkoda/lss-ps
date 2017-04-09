@@ -50,8 +50,8 @@ void interlacing(Grid* const grid, Grid const * const grid_shifted)
   auto ts = std::chrono::high_resolution_clock::now();
   
   assert(grid->nc == grid_shifted->nc);
-  assert(grid->mode == grid_fourier_space);
-  assert(grid_shifted->mode == grid_fourier_space);
+  assert(grid->mode == GridMode::fourier_space);
+  assert(grid_shifted->mode == GridMode::fourier_space);
 
   const int nc= grid->nc;
   // exp_kh = exp[(kx + ky + kz)*h] where

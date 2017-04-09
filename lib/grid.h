@@ -1,10 +1,9 @@
 #ifndef GRID_H
 #define GRID_H 1
 
-#include <cmath>
+#include <complex>
 #include <fftw3.h>
 #include "config.h"
-#include "grid.h"
 
 // FFTW() macro adds fftw_ or fftwf_ prefix depending on DOUBLEPRECISION
 #ifdef DOUBLEPRECISION
@@ -13,7 +12,7 @@
 #define FFTW(f) fftwf_ ## f
 #endif
 
-enum GridMode {grid_real_space, grid_fourier_space, grid_unknown_mode};
+enum class GridMode {unknown_mode, real_space, fourier_space};
 
 //
 // Class Grid
@@ -51,11 +50,10 @@ class Grid {
   void write(const char filename[]);
   
   Float* fx;
-  Complex* fk;
+  std::complex<Float>* fk;
   const size_t nc, ncz;
   GridMode mode;
   Float boxsize;
-  Float x0[3];
   Float shot_noise;
   Float pk_normalisation;
 

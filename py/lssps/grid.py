@@ -5,7 +5,7 @@ class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension"""
 
     def __init__(self, nc):
-        # _grid is the C++ Grid object
+        # _grid is the pointer to a C++ Grid object
         self._grid = c._grid_alloc(nc)
 
     def __getitem__(self, index):
@@ -45,3 +45,32 @@ def zeros(nc):
     grid.clear()
 
     return grid
+
+def compute_fluctuation(grid_data, grid_rand):
+    """Compute density fluctuation data = data - rand
+
+    Args:
+        data: a tuple of data grids
+        rand: a tuple of random grids (may be None)
+
+    Returns:
+        a tuple of fluctutation grid
+
+    Note:
+        data grids are modified and become fluctuation grids
+    """
+
+    n = len(grid_data)
+    assert(n == 1 or n == 2)
+    
+    if grid_rand is None:
+        for i in range(n)
+            c._grid_compute_fluctuation_homogeneous(grid_data[i]._grid)
+    else:
+        assert(len(grid_rand) == n)
+        for i in range(n):
+            c._grid_compute_fluctuation(grid_data[i]._grid, grid_rand[i]._grid)
+    
+    return grid_data
+
+

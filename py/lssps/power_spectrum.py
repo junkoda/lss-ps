@@ -1,23 +1,31 @@
 import lssps._lssps as c
 
 class PowerSpectrum:
-    def __init__(self, kmin, kmax, dk):
-        self._ps = c._power_spectrum_alloc(kmin, kmax, dk)
-        
+    """
+    Power spectrum computed in bins
+    Attributes:
+        k (numpy.array): mean wave number in bins [h/Mpc]
+        P0 (numpy.array): P0 monopole [(1/h Mpc)^3]
+        P2 (numpy.array): P2 quadrupole
+        P4 (numpy.array): P4 hexadecapole
+        nmodes (numpy.array): number of independent k modes in bins
 
-    def __len__(self):
-        return c._power_spectrum_len(self._ps)
-
-    def update(self):
+        P2D (numpy.array): 2D power spectrum P(k, mu)
+        nomodes2D (numpy.array): number of k modes in 2D bins
+    """
+    def __init__(self, _ps):
+        self._ps = _ps
         self.k = c._power_spectrum_k_asarray(self._ps)
         self.P0 = c._power_spectrum_P0_asarray(self._ps)
+        self.P2 = c._power_spectrum_P2_asarray(self._ps)
+        self.P4 = c._power_spectrum_P4_asarray(self._ps)
+        
+        self.n = c._power_spectrum_len(self._ps)
 
-def compute_multipoles(grid, *, kmin=0.0, kmax=1.0, dk=0.01,
-                       subtract_shotnoise = True, neff= -1.6):
-    ps = PowerSpectrum(kmin, kmax, dk)
+    def __len__(self):
+        """Number of bins"""
+        return self.n
 
-    c._power_spectrum_compute_multipoles(grid._grid,
-                                         int(subtract_shotnoise), neff, ps._ps)
-    ps.update()
-    
-    return ps
+
+
+

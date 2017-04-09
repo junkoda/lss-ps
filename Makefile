@@ -10,7 +10,7 @@ export CC CXX OPT
 
 DIRS := lib py
 
-.PHONY: lib py exec test clean check
+.PHONY: lib py exec test clean check doc
 
 lib:
 	cd lib && $(MAKE) lib
@@ -24,3 +24,6 @@ exec:
 clean:
 	for dir in $(DIRS); do (cd $$dir && $(MAKE) clean); done
 
+doc:
+	cd doc && $(MAKE) html
+	@echo "Documents generated in doc/_build/html"

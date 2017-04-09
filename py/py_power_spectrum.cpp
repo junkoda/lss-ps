@@ -4,6 +4,8 @@
 #include "msg.h"
 #include <iostream>
 #include "power_spectrum.h"
+#include "grid.h"
+#include "multipole.h"
 #include "py_assert.h"
 
 using namespace std;
@@ -28,6 +30,8 @@ py_power_spectrum_module_init()
 
 static void py_power_spectrum_free(PyObject *obj);
 
+
+/*
 PyObject* py_power_spectrum_alloc(PyObject* self, PyObject* args)
 {
   // _power_spectrum_alloc(kmin, kmax, dk)
@@ -41,6 +45,7 @@ PyObject* py_power_spectrum_alloc(PyObject* self, PyObject* args)
 
   return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
 }
+*/
 
 void py_power_spectrum_free(PyObject *obj)
 {
@@ -57,8 +62,6 @@ void py_power_spectrum_free(PyObject *obj)
 PyObject* py_power_spectrum_len(PyObject* self, PyObject* args)
 {
   PyObject *py_ps;
-
-  cerr << "_len\n";
 
   if(!PyArg_ParseTuple(args, "O", &py_ps)) {
     return NULL;
@@ -87,7 +90,7 @@ PyObject* py_power_spectrum_k_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->k_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->k[0]);
 }
 
 
@@ -108,7 +111,7 @@ PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->P0_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p0);
 }
 
 PyObject* py_power_spectrum_P2_asarray(PyObject* self, PyObject* args)
@@ -126,7 +129,7 @@ PyObject* py_power_spectrum_P2_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->P2_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p2[0]);
 }
 
 PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args)
@@ -144,31 +147,35 @@ PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, ps->P4_hist);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p4[0]);
 }
 
-PyObject* py_power_spectrum_compute_multipoles(PyObject* self, PyObject* args)
+PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
+						   PyObject* args)
 {
-  // _power_spectrum_compute_multipoles(grid, subtract_shotnoise, neff, _ps)
-  PyObject *py_grid, *py_ps;
-  int subtract_shotnoise;
-  double neff;
-
-  if(!PyArg_ParseTuple(args, "OidO",
-		       &py_grid, &subtract_shotnoise, &neff, &py_ps)) {
+  // _power_spectrum_compute_multipoles(k_min, k_max, dk, nmu,
+  //  grid, subtract_shotnoise, correct_mas)
+  
+  double k_min, k_max, dk;
+  int nmu;
+  PyObject *py_grid;
+  int subtract_shotnoise, correct_mas;
+  
+  if(!PyArg_ParseTuple(args, "dddiOii",
+		       &k_min, &k_max, &dk, &nmu,
+		       &py_grid, &subtract_shotnoise, &correct_mas)) {
     return NULL;
   }
 
-  cerr << "ps\n";
-  PowerSpectrum* const ps=
-    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
-  py_assert_ptr(ps);
-
-  cerr << "grid\n";
-  Grid* const grid= (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
-  power_spectrum_compute_multipoles(grid, ps, subtract_shotnoise, neff);
-
-  Py_RETURN_NONE;  
+  PowerSpectrum* const ps=
+    multipole_compute_plane_parallel(k_min, k_max, dk, nmu,
+				     grid,
+				     subtract_shotnoise, correct_mas);
+  
+  return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
 }
+

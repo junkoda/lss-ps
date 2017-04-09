@@ -23,12 +23,12 @@ void grid_print_time()
 // class Grid
 //
 Grid::Grid(const int nc_) :
-  nc(nc_), ncz(2*(nc_/2 + 1)), mode(grid_real_space), boxsize(0.0),
-  total_weight(0.0), n_mas(0)
+  nc(nc_), ncz(2*(nc_/2 + 1)), mode(GridMode::real_space), boxsize(0),
+  total_weight(0), n_mas(0)
 {
   auto ts = std::chrono::high_resolution_clock::now();
 
-  x0[0] = x0[1]= x0[2]= 0.0;
+  //x0_box[0] = x0_box[1]= x0_box[2]= 0;
   
   const size_t ngrid= nc*nc*ncz;
   fx= (Float*) FFTW(malloc)(sizeof(Float)*ngrid);
@@ -39,8 +39,9 @@ Grid::Grid(const int nc_) :
     throw MemoryError();
   }
   
-  fk= (Complex*) fx;
-  plan= FFTW(plan_dft_r2c_3d)(nc, nc, nc, fx, fk, FFTW_ESTIMATE);
+  fk= (complex<Float>*) fx;
+  plan= FFTW(plan_dft_r2c_3d)(nc, nc, nc, fx, (FFTW(complex)*) fx,
+			      FFTW_ESTIMATE);
   
   msg_printf(msg_info,
 	    "Allocated a grid nc= %d; using %.1lf Mbytes\n",
@@ -54,7 +55,7 @@ void Grid::fft()
 {
   auto ts = std::chrono::high_resolution_clock::now();
 
-  if(mode != grid_real_space) {
+  if(mode != GridMode::real_space) {
     msg_printf(msg_error,
 	       "Error: trying to FFT a grid not in real-space mode\n");
     throw AssertionError();
@@ -62,7 +63,7 @@ void Grid::fft()
   
   FFTW(execute)(plan);
 
-  mode = grid_fourier_space;
+  mode = GridMode::fourier_space;
   auto te = std::chrono::high_resolution_clock::now();
   time_fft += std::chrono::duration<double>(te - ts).count();
 }
