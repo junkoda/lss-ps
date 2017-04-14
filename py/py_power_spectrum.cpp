@@ -22,6 +22,7 @@ using namespace std;
 PyMODINIT_FUNC
 py_power_spectrum_module_init()
 {
+  cerr << "init py_power_spectrum\n";
   import_array();
 
   return NULL;
@@ -98,8 +99,6 @@ PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
 {
   PyObject *py_ps;
 
-  cerr << "_P0\n";
-
   if(!PyArg_ParseTuple(args, "O", &py_ps)) {
     return NULL;
   }
@@ -111,7 +110,11 @@ PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p0);
+  //for(int i=0; i<ps->n; ++i) {
+    //fprintf(stderr, "%e %e 0\n", ps->k[i], (*ps->p0[i]);
+    //}
+
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p0[0]);
 }
 
 PyObject* py_power_spectrum_P2_asarray(PyObject* self, PyObject* args)

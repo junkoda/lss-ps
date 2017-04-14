@@ -1,6 +1,6 @@
 import lssps._lssps as c
-import power_spectrum
-import grid
+import lssps.power_spectrum
+import lssps.grid
 
     
 def compute_power_spectrum(data, rand, nc, *, mas='CIC',
@@ -30,17 +30,17 @@ def compute_power_spectrum(data, rand, nc, *, mas='CIC',
             raise TypeError('boxsize is not given')
 
     # Read catalogue and compute density on grids
-    grid_data = lssps.compute_density(data, mas, nc,
+    grid_data = lssps.compute_density(data, nc, mas=mas,
                              x0=x0, boxsize=boxsize, interlacing=interlacing)
 
     if rand is None:
         grid_rand = None
     else:
-        grid_rand = lssps.compte_density(rand, mas, nc,
+        grid_rand = lssps.compte_density(rand, nc, mas=mas,
                              x0=x0, boxsize=boxsize, interlacing=interlacing)
  
     # compute fluctuation
-    grid_delta = compute_fluctuation(grid_data, grid_rand):
+    grid_delta = lssps.compute_fluctuation(grid_data, grid_rand)
         
     # FFT
     for d in grid_delta:
@@ -55,7 +55,6 @@ def compute_power_spectrum(data, rand, nc, *, mas='CIC',
     _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu,
                 grid_delta[0]._grid,
                 int(subtract_shotnoise), int(correct_mas))
-
     
-    return PowerSpectrum(_ps)
 
+    return lssps.PowerSpectrum(_ps)

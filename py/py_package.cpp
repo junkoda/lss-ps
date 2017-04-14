@@ -41,10 +41,10 @@ static PyMethodDef methods[] = {
    "return Fourier-space grid as an np.array"},
   {"_grid_clear", py_grid_clear, METH_VARARGS,
    "_grid_clear(_grid); clear the array with 0"},
-  {"_grid_compute_fluctuation", _grid_compute_fluctuation, METH_VARARGS,
+  {"_grid_compute_fluctuation", py_grid_compute_fluctuation, METH_VARARGS,
    "_grid_compute_fluctuation(_grid_data, _grid_rand)"},
   {"_grid_compute_fluctuation_homogeneous",
-   _grid_compute_fluctuation_homogeneous, METH_VARARGS,
+   py_grid_compute_fluctuation_homogeneous, METH_VARARGS,
    "_grid_compute_fluctuation_homogeneous(_grid_data)"},
 
   {"_mass_assignment", py_mass_assignment, METH_VARARGS,
@@ -52,7 +52,9 @@ static PyMethodDef methods[] = {
 
   {"_interlacing", py_interlacing, METH_VARARGS,
    "_interlacing(_grid1, _grid2)"},
-  
+
+  {"_power_spectrum_len",py_power_spectrum_len, METH_VARARGS,
+   "_power_spectrum_len(_ps)"},
   {"_power_spectrum_k_asarray", py_power_spectrum_k_asarray, METH_VARARGS,
    "k array"},   
   {"_power_spectrum_P0_asarray", py_power_spectrum_P0_asarray, METH_VARARGS,
@@ -81,7 +83,7 @@ PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_catalogue_module_init();
   py_grid_module_init();
-  //py_power_spectrum_module_init();    
+  py_power_spectrum_module_init();    
   
   return PyModule_Create(&module);
 }

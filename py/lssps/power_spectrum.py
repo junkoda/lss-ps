@@ -15,11 +15,12 @@ class PowerSpectrum:
     """
     def __init__(self, _ps):
         self._ps = _ps
+        #DEBUG!!! segmentation fault here
         self.k = c._power_spectrum_k_asarray(self._ps)
         self.P0 = c._power_spectrum_P0_asarray(self._ps)
         self.P2 = c._power_spectrum_P2_asarray(self._ps)
         self.P4 = c._power_spectrum_P4_asarray(self._ps)
-        
+
         self.n = c._power_spectrum_len(self._ps)
 
     def __len__(self):

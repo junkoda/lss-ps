@@ -5,7 +5,7 @@
 default:
 	cd .. && make
 
-LIB = liblssps.a liblssps.dylib
+LIB = liblssps.dylib
 CPPFLAGS := -O3 $(OPENMP) $(OPT)
 #OPT     := -DDOUBLEPRECISION # debug!!!
 
@@ -56,6 +56,9 @@ grid.o: grid.cpp msg.h error.h grid.h config.h
 #
 liblssps.a: $(OBJS)
 	ar r $@ $(OBJS)
+
+liblssps.so: $(OBJS)
+	$(CXX) -shared $(LIBS) $(OBJS) -o $@
 
 liblssps.dylib: $(OBJS)
 	echo "OPT= $(OPT)"

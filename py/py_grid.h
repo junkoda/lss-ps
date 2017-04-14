@@ -16,7 +16,7 @@ PyObject* py_grid_clear(PyObject* self, PyObject* args);
 
 PyObject* py_grid_compute_fluctuation(PyObject* self, PyObject* args);
 PyObject* py_grid_compute_fluctuation_homogeneous(PyObject* self,
-						  PyObject* args)
+						  PyObject* args);
 
 
 #endif

@@ -51,6 +51,8 @@ void mas_correction_init(const int nc, const int n_mas)
     mas_correction_array[i] = 1.0/pow(sinc, 2*n_mas);
   }
 
+  msg_printf(msg_info, "MAS correction array initialised\n");
+  
   return;
 }
 
@@ -65,10 +67,13 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 {
   auto ts = std::chrono::high_resolution_clock::now();
 
-  Grid const * const grid = f.grid;
+  Grid const * const grid = f.grid; assert(grid);
   const int nc= grid->nc;
   const double boxsize= grid->boxsize;
   const int n_mas= correct_mas ? grid->n_mas : 0;
+
+
+  mas_correction_init(nc, n_mas);
 
   assert(nc > 0);
   assert(grid->mode == GridMode::fourier_space);
@@ -85,7 +90,6 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   
   PowerSpectrum* const ps= new PowerSpectrum(n, nmu);
   PowerSpectrum& P= *ps;
-  
 
   const size_t nckz= nc/2+1;
   const int ik_nq= nc/2;
@@ -94,10 +98,9 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   const double shot_noise= subtract_shotnoise ? grid->shot_noise : 0;
   msg_printf(msg_info, "Shot noise subtraction: %e\n", shot_noise);
 
-
   #pragma omp parallel num_threads(omp_get_max_threads())
   {
-    PowerSpectrum ps_local(P);
+    PowerSpectrum ps_local(n, nmu);
 			   
     #pragma omp for
     for(int ix=0; ix<nc; ++ix) {
@@ -134,6 +137,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 	    double mu2= (kz*kz)/k2;	
 	    double corr_xyz = corr_xy * mas_correction_array[kz];
 
+	    //DEBUG!!!
 	    ps_local.nmodes[i]++;
 	    ps_local.k[i] += k; 
 
@@ -161,6 +165,8 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
       P.p0[i] = fac*P.p0[i] - shot_noise;
       P.p2[i] = fac*P.p2[i];
       P.p4[i] = fac*P.p4[i];
+
+      //fprintf(stderr, "%e %e\n", P.k[i], P.p0[i]);
     }
   }
 
@@ -173,7 +179,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   }
   
   auto te = std::chrono::high_resolution_clock::now();
-  msg_printf(msg_info, "Time multipoles %e",
+  msg_printf(msg_info, "Time multipoles %e\n",
              std::chrono::duration<double>(te - ts).count());
 
   return ps;
@@ -208,20 +214,25 @@ public:
     // (2l + 1) P_4 = 9*(35 mu^4 - 30 mu^2 + 3)/8
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-    double delta2= norm(grid->fk[index])*corr;
+    double delta2= norm(grid->fk[index])*corr; //DEBUG!!
     P.p0[ik] += delta2;
     P.p2[ik] += l2*delta2;
     P.p4[ik] += l4*delta2;
 
     // 2D Power spectrum p2d(k, mu)
-    double mu = sqrt(mu2);
-    int imu = static_cast<int>(mu*P.nmu); assert(0 <= imu && imu <= P.nmu);
+    if(P.nmu > 0) {
+      double mu = sqrt(mu2);
+      int imu = static_cast<int>(mu*P.nmu); assert(0 <= imu && imu <= P.nmu);
 
-    if(imu == P.nmu) imu = P.nmu - 1;
-    int ibin2d = ik*P.nmu + imu;
+      if(imu == P.nmu) imu = P.nmu - 1;
+      int ibin2d = ik*P.nmu + imu;
+      fprintf(stderr, "%d %d %d %d %d\n", ik, imu, ibin2d, P.nmu, P.n);
 
-    P.p2d[ibin2d] += delta2;
-    P.nmodes2d[ibin2d]++;
+      if(0 <= ibin2d && ibin2d < P.nmu*P.n) {
+	P.p2d[ibin2d] += delta2;
+	P.nmodes2d[ibin2d]++;
+      }
+    }
   }
   Grid const * const grid;
 };
@@ -310,7 +321,7 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
 			   const bool correct_mas)
 {
   return compute_multipoles_template(k_min, k_max, dk, nmu,
-				     Multipole(grid),
+  				     Multipole(grid),
 				     subtract_shotnoise, correct_mas);
 }
 

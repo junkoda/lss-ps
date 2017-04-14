@@ -1,3 +1,6 @@
+#include "grid.h"
+#include "interlacing.h"
+#include "py_assert.h"
 #include "py_interlacing.h"
 
 

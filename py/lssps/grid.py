@@ -64,7 +64,7 @@ def compute_fluctuation(grid_data, grid_rand):
     assert(n == 1 or n == 2)
     
     if grid_rand is None:
-        for i in range(n)
+        for i in range(n):
             c._grid_compute_fluctuation_homogeneous(grid_data[i]._grid)
     else:
         assert(len(grid_rand) == n)

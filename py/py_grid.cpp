@@ -201,8 +201,8 @@ PyObject* py_grid_compute_fluctuation(PyObject* self, PyObject* args)
     (Grid*) PyCapsule_GetPointer(py_grid_data, "_Grid");
   py_assert_ptr(grid_data);
 
-  Grid const * const grid_rand=
-    (Grid const *) PyCapsule_GetPointer(py_grid_rand, "_Grid");
+  Grid* const grid_rand=
+    (Grid*) PyCapsule_GetPointer(py_grid_rand, "_Grid");
   py_assert_ptr(grid_rand);
 
   grid_compute_fluctuation(*grid_data, *grid_rand);
@@ -214,8 +214,8 @@ PyObject* py_grid_compute_fluctuation(PyObject* self, PyObject* args)
 PyObject* py_grid_compute_fluctuation_homogeneous(PyObject* self,
 						  PyObject* args)
 {
-  PyObject *py_grid_data, *py_grid_rand;
-  if(!PyArg_ParseTuple(args, "OO", &py_grid_data, &py_grid_rand)) {
+  PyObject *py_grid_data;
+  if(!PyArg_ParseTuple(args, "O", &py_grid_data)) {
     return NULL;
   }
 

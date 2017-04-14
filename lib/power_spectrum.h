@@ -18,7 +18,8 @@ class PowerSpectrum {
   std::valarray<int> nmodes, nmodes2d;
   std::valarray<double> k, p0, p2, p4;
   std::valarray<double> p2d;
-
+ private:
+  PowerSpectrum(const PowerSpectrum&);
 };
 
 void power_spectrum_compute_multipoles(Grid const * const grid,
