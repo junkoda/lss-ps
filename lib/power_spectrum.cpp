@@ -21,8 +21,8 @@ PowerSpectrum::PowerSpectrum()
 
 PowerSpectrum::PowerSpectrum(const int n_, const int nmu_) :
   n(n_), nmu(nmu_),
-  nmodes(0, n), k(0.0, n), p0(0.0, n), p2(0.0, n), p4(0.0, n),
-  nmodes2d(0, n*nmu), p2d(0.0, n*nmu)
+  nmodes(0, n), nmodes2d(0, n*nmu),
+  k(0.0, n), p0(0.0, n), p2(0.0, n), p4(0.0, n), p2d(0.0, n*nmu)
 {
 
 }

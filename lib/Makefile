@@ -7,7 +7,6 @@ default:
 
 LIB = liblssps.dylib
 CPPFLAGS := -O3 $(OPENMP) $(OPT)
-#OPT     := -DDOUBLEPRECISION # debug!!!
 
 lib: $(LIB)
 

@@ -24,7 +24,7 @@ static vector<complex<Float>> exp_kh;
 
 void interlacing_init(const int nc)
 {
-  if(exp_kh.size() == nc)
+  if(exp_kh.size() == (size_t) nc)
     return;
   
   const Float fac= M_PI/nc;
@@ -53,7 +53,7 @@ void interlacing(Grid* const grid, Grid const * const grid_shifted)
   assert(grid->mode == GridMode::fourier_space);
   assert(grid_shifted->mode == GridMode::fourier_space);
 
-  const int nc= grid->nc;
+  const size_t nc= grid->nc;
   // exp_kh = exp[(kx + ky + kz)*h] where
   // k_i = 2pi/L * ik_i
   // h = 0.5*boxsize/nc
@@ -66,14 +66,14 @@ void interlacing(Grid* const grid, Grid const * const grid_shifted)
   complex<Float>* const d= (complex<Float>*) grid->fk;
   complex<Float> const * const ds= (complex<Float> const*) grid_shifted->fk;
 
-  for(int ix=0; ix<nc; ++ix) {
+  for(size_t ix=0; ix<nc; ++ix) {
    complex<Float> exp_x= exp_kh[ix];
    
-   for(int iy=0; iy<nc; ++iy) {
+   for(size_t iy=0; iy<nc; ++iy) {
     complex<Float> exp_y= exp_kh[iy];
     complex<Float> exp_xy = exp_x*exp_y;
 
-    for(int iz=0; iz<nckz; ++iz) {
+    for(size_t iz=0; iz<nckz; ++iz) {
       complex<Float> expkh = exp_xy*exp_kh[iz];
 
       size_t index= nckz*(nc*ix + iy) + iz;
