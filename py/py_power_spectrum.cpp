@@ -22,7 +22,6 @@ using namespace std;
 PyMODINIT_FUNC
 py_power_spectrum_module_init()
 {
-  cerr << "init py_power_spectrum\n";
   import_array();
 
   return NULL;

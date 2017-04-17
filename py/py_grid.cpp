@@ -23,7 +23,6 @@ using namespace std;
 PyMODINIT_FUNC
 py_grid_module_init()
 {
-  msg_printf(msg_debug, "Module py_grid initialised for numpy array.\n");
   import_array();
 
   return NULL;

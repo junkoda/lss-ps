@@ -3,5 +3,6 @@
 *.a
 *.dylib
 *.so
+__pycache__
 data
 exec/lssps

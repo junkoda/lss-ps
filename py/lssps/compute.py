@@ -3,7 +3,8 @@ import lssps.power_spectrum
 import lssps.grid
 
     
-def compute_power_spectrum(data, rand, nc, *, mas='CIC',
+def compute_power_spectrum(data, rand, nc, estimator='plane-parallel', *,
+                           mas='CIC',
                            x0=(0,0,0), boxsize=None,
                            k_min=0.0, k_max=1.0, dk=0.01, nmu=0,
                            subtract_shotnoise=True,

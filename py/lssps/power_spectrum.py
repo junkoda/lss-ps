@@ -23,7 +23,7 @@ class PowerSpectrum:
         
         self._ps = _ps
         self.k = c._power_spectrum_k_asarray(self._ps)
-        self.nmodes = c._power_spectrum_nmodes_asarray(self._ps)
+        self.nmodes = c._power_spectrum_nmodes_asarray(self._ps).astype(float)
         
         self.P0 = c._power_spectrum_P0_asarray(self._ps)
         self.P2 = c._power_spectrum_P2_asarray(self._ps)

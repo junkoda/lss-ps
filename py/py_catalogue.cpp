@@ -20,7 +20,6 @@
 PyMODINIT_FUNC
 py_catalogue_module_init()
 {
-  msg_printf(msg_debug, "Module py_catalogue initialised for numpy array.\n");
   import_array();
 
   return NULL;
