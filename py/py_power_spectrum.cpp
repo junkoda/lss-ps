@@ -94,6 +94,24 @@ PyObject* py_power_spectrum_k_asarray(PyObject* self, PyObject* args)
   return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->k[0]);
 }
 
+PyObject* py_power_spectrum_nmodes_asarray(PyObject* self, PyObject* args)
+{
+  PyObject *py_ps;
+
+  if(!PyArg_ParseTuple(args, "O", &py_ps)) {
+    return NULL;
+  }
+
+  PowerSpectrum* const ps=
+    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
+  py_assert_ptr(ps);
+
+  const int nd=1;
+  npy_intp dims[]= {ps->n};
+
+  return PyArray_SimpleNewFromData(nd, dims, NPY_INT, &ps->nmodes[0]);
+}
+
 
 PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
 {

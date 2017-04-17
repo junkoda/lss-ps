@@ -4,7 +4,9 @@
 enum LogLevel {msg_debug=0, msg_verbose, msg_info, msg_warn, msg_error, msg_fatal, msg_silent};
 
 
+LogLevel msg_get_loglevel();
 void msg_set_loglevel(const LogLevel level);
+
 void msg_set_prefix(const char prefix[]);
 
 void msg_printf(const LogLevel level, char const * const fmt, ...);

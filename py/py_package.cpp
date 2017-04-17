@@ -5,6 +5,7 @@
 #include "Python.h"
 
 #include "py_config.h"
+#include "py_msg.h"
 #include "py_catalogue.h"
 #include "py_grid.h"
 #include "py_mass_assignment.h"
@@ -16,6 +17,11 @@ using namespace std;
 static PyMethodDef methods[] = {
   {"_config_sizeof_float", py_config_sizeof_float, METH_VARARGS,
    "return sizeof(Float)"},
+
+  {"_msg_get_loglevel", py_msg_get_loglevel, METH_VARARGS,
+   "return current loglevel"},
+  {"_msg_set_loglevel", py_msg_set_loglevel, METH_VARARGS,
+   "_msg_set_loglevel(lv); set loglevel"},
 
   {"_catalogue_alloc", py_catalogue_alloc, METH_VARARGS,
    "allocate a new _cat opbject"},
@@ -56,7 +62,9 @@ static PyMethodDef methods[] = {
   {"_power_spectrum_len",py_power_spectrum_len, METH_VARARGS,
    "_power_spectrum_len(_ps)"},
   {"_power_spectrum_k_asarray", py_power_spectrum_k_asarray, METH_VARARGS,
-   "k array"},   
+   "k array"},
+  {"_power_spectrum_nmodes_asarray", py_power_spectrum_nmodes_asarray,
+   METH_VARARGS, "number of modes array"},
   {"_power_spectrum_P0_asarray", py_power_spectrum_P0_asarray, METH_VARARGS,
    "P0 array"},   
   {"_power_spectrum_P2_asarray", py_power_spectrum_P2_asarray, METH_VARARGS,

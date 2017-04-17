@@ -1,4 +1,4 @@
-all: lib py #exec
+default: py
 
 # Set C++11 compiler
 CXX     := c++ -std=c++11

@@ -12,11 +12,14 @@ lssps
 	     
    compute_powerspectrum.rst
 
+.. .. automodule:: power_spectrum
+..   :members:
 
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial:
-	     
+
+   power_spectrum.rst
    catalogue.rst
    grid.rst
    

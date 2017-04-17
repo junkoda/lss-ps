@@ -15,6 +15,11 @@ void msg_set_loglevel(const enum LogLevel lv)
   log_level= lv;
 }
 
+LogLevel msg_get_loglevel()
+{
+  return log_level;
+}
+
 
 void msg_set_prefix(const char prefix_[])
 {
