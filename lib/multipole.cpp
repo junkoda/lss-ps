@@ -87,7 +87,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   const double ik_min= k_min/k_fundamental;
   const double ik_max= min(k_nq, k_max)/k_fundamental;
   const double idk= dk/k_fundamental;
-  
+
   PowerSpectrum* const ps= new PowerSpectrum(n, nmu);
   PowerSpectrum& P= *ps;
 
@@ -159,7 +159,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   const double pk_fac= grid->pk_normalisation; 
   for(int i=0; i<n; ++i) {
     if(P.nmodes[i] > 0) {
-      P.k[i] *= k_fundamental;
+      P.k[i] *= k_fundamental/P.nmodes[i];
       
       double fac = pk_fac/P.nmodes[i];
       P.p0[i] = fac*P.p0[i] - shot_noise;

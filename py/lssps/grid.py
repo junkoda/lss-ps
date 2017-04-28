@@ -5,10 +5,13 @@ import lssps._lssps as c
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension"""
 
-    def __init__(self, nc, boxsize):
+    def __init__(self, nc, boxsize, x0=None, *, offset=0.0):
         # _grid is the pointer to a C++ Grid object
         self._grid = c._grid_alloc(nc)
-        self.boxsize = boxsiz
+        self.boxsize = boxsize
+
+        if x0 is not None:
+            self.x0 = x0
 
     def __getitem__(self, index):
         """grid[ix, iy, iz]: value at grid point (ix, iy, iz)
@@ -55,9 +58,18 @@ class Grid:
         return c._grid_get_x0(self._grid)
 
     @x0.setter
-    def x0(self, x0, y0, z0):
+    def x0(self, x0):
         """corner coordinate of the box"""
-        return c._grid_set_x0(self._grid, x0, y0, z0)
+        return c._grid_set_x0(self._grid, x0[0], x0[1], x0[2])
+
+    @property
+    def offset(self):
+        """offset of the grid with respect to the box in units of grid spacing"""
+        return c._grid_get_offset(self._grid)
+
+    @offset.setter
+    def offset(self, value):
+        return c._grid_set_offset(self._grid, value)
 
 
 def zeros(nc):
@@ -98,5 +110,8 @@ def compute_fluctuation(grid_data, grid_rand = None):
         assert(len(grid_rand) == n)
         for i in range(n):
             c._grid_compute_fluctuation(grid_data[i]._grid, grid_rand[i]._grid)
+
+    if len(grid_data) == 1:
+        return grid_data[0]
     
     return grid_data

@@ -149,7 +149,7 @@ PyObject* py_grid_get_boxsize(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_boxsize(PyObject* self, PyObject* args)
 {
-  // _grid_nc(_cat, boxsize)
+  // _grid_set_boxsize(_cat, boxsize)
   // Set boxsize
   PyObject *py_grid;
   double boxsize;
@@ -169,7 +169,7 @@ PyObject* py_grid_set_boxsize(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_x0(PyObject* self, PyObject* args)
 {
-  // _grid_nc(_cat, x0)
+  // _grid_get_x0(_cat, x0)
   // Return x0_box
   PyObject *py_grid;
   double x0[3];
@@ -188,7 +188,7 @@ PyObject* py_grid_get_x0(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_x0(PyObject* self, PyObject* args)
 {
-  // _grid_nc(_cat, x0, y0, z0)
+  // _grid_set_x0(_cat, x0, y0, z0)
   // Set x0_box
   PyObject *py_grid;
   double x0[3];
@@ -206,6 +206,44 @@ PyObject* py_grid_set_x0(PyObject* self, PyObject* args)
 
   Py_RETURN_NONE;
 }
+
+PyObject* py_grid_get_offset(PyObject* self, PyObject* args)
+{
+  // _grid_get_offset(_cat)
+  // Return offset
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  return Py_BuildValue("d", grid->offset);
+}
+
+PyObject* py_grid_set_offset(PyObject* self, PyObject* args)
+{
+  // _grid_set_offset(_cat, offset)
+  // set offset
+  PyObject *py_grid;
+  double offset;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid, &offset)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->offset= offset;
+
+  Py_RETURN_NONE;
+}
+
 
 
 PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args)

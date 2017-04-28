@@ -155,7 +155,7 @@ void grid_compute_fluctuation(Grid& grid_data, Grid& grid_rand)
   grid_rand.shot_noise = 0.0;
 
   grid_data.pk_normalisation= 1.0/(grid_rand.nw2_sum*alpha);
-  cerr << "normalization= " << grid_rand.nw2_sum*alpha << endl;
+  //cerr << "normalization= " << grid_rand.nw2_sum*alpha << endl;
   
   grid_rand.pk_normalisation= 1.0/(grid_rand.nw2_sum/alpha);
 
