@@ -13,5 +13,6 @@ class MemoryError: RuntimeError {};
 
 class ValError: RuntimeError {}; // check Python error name
 
+class TypeError: RuntimeError {};
 
 #endif

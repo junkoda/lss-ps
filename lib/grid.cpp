@@ -23,12 +23,12 @@ void grid_print_time()
 // class Grid
 //
 Grid::Grid(const int nc_) :
-  nc(nc_), ncz(2*(nc_/2 + 1)), mode(GridMode::real_space), boxsize(0),
+  nc(nc_), ncz(2*(nc_/2 + 1)), mode(GridMode::real_space), offset(0), boxsize(0),
   total_weight(0), n_mas(0)
 {
   auto ts = std::chrono::high_resolution_clock::now();
 
-  //x0_box[0] = x0_box[1]= x0_box[2]= 0;
+  x0_box[0] = x0_box[1]= x0_box[2]= 0;
   
   const size_t ngrid= nc*nc*ncz;
   fx= (Float*) FFTW(malloc)(sizeof(Float)*ngrid);

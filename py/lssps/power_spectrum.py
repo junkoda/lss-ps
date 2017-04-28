@@ -58,3 +58,30 @@ class PowerSpectrum:
             raise TypeError('Index must be an integer')
 
 
+def compute_plane_parallel(grid_delta, *,
+                           k_min=0.0, k_max=1.0, dk=0.01, nmu=0,
+                           subtract_shotnoise=True,
+                           correct_mas= True):
+    """
+    Args:
+        delta_grid (Grid): Grid object for delta(k)
+        k_min (float): lower bound of k binning [h/Mpc]
+        k_max (float): upper bound of k binning [h/Mpc]
+        dk (float):    bin width [h/Mpc]
+        nmu (int):   number of mu = kz/k bins for 2D power spectrum
+        subtract_shotnoise (bool)
+        correct_mas (bool)
+    Returns:
+        PowerSpectrum object
+    """
+
+    if grid_delta.mode != 'fourier-space':
+        raise TypeError('grid is not in Fourier space')
+    
+    _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu,
+                              grid_delta._grid,
+                              subtract_shotnoise, correct_mas)
+
+    return PowerSpectrum(_ps)
+
+    

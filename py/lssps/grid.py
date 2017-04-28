@@ -1,12 +1,14 @@
+import lssps
 import lssps._lssps as c
 
 
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension"""
 
-    def __init__(self, nc):
+    def __init__(self, nc, boxsize):
         # _grid is the pointer to a C++ Grid object
         self._grid = c._grid_alloc(nc)
+        self.boxsize = boxsiz
 
     def __getitem__(self, index):
         """grid[ix, iy, iz]: value at grid point (ix, iy, iz)
@@ -38,6 +40,25 @@ class Grid:
         """Number of grid points per dimension"""
         return c._grid_nc(self._grid)
 
+    @property
+    def boxsize(self):
+        """length of the cubic box on a side"""
+        return c._grid_get_boxsize(self._grid)
+
+    @boxsize.setter
+    def boxsize(self, value):
+        c._grid_set_boxsize(self._grid, value)
+
+    @property
+    def x0(self):
+        """corner coordinate of the box"""
+        return c._grid_get_x0(self._grid)
+
+    @x0.setter
+    def x0(self, x0, y0, z0):
+        """corner coordinate of the box"""
+        return c._grid_set_x0(self._grid, x0, y0, z0)
+
 
 def zeros(nc):
     """Return a new empty grid filled with zeros"""
@@ -46,7 +67,7 @@ def zeros(nc):
 
     return grid
 
-def compute_fluctuation(grid_data, grid_rand):
+def compute_fluctuation(grid_data, grid_rand = None):
     """Compute density fluctuation data = data - rand
 
     Args:
@@ -60,6 +81,13 @@ def compute_fluctuation(grid_data, grid_rand):
         data grids are modified and become fluctuation grids
     """
 
+    
+    if isinstance(grid_data, lssps.Grid):
+        grid_data = (grid_data,)
+
+    if isinstance(grid_rand, lssps.Grid):
+        grid_rand = (grid_rand,)
+    
     n = len(grid_data)
     assert(n == 1 or n == 2)
     
@@ -72,5 +100,3 @@ def compute_fluctuation(grid_data, grid_rand):
             c._grid_compute_fluctuation(grid_data[i]._grid, grid_rand[i]._grid)
     
     return grid_data
-
-

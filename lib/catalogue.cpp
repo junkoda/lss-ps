@@ -142,7 +142,7 @@ void CatalogueFileAscii::read(const size_t nbatch, vector<Particle>& cat)
       if(buf[0] == '#')
 	continue;
 
-      split(buf, v); assert(imax < v.size());
+      split(buf, v); assert(imax < (int) v.size());
 
       p.x[0]= v[ipos[0]];
       p.x[1]= v[ipos[1]];

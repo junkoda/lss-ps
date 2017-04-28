@@ -53,11 +53,12 @@ class Grid {
   std::complex<Float>* fk;
   const size_t nc, ncz;
   GridMode mode;
+  Float x0_box[3], offset;
   Float boxsize;
   Float shot_noise;
   Float pk_normalisation;
 
-  double total_weight, w2_sum, nw2_sum;
+  long double total_weight, w2_sum, nw2_sum;
   size_t np;
   int n_mas;
 

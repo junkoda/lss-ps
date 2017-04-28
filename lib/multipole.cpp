@@ -17,12 +17,11 @@
 using namespace std;
 
 // correction factor for mass assignment window function
-namespace {
+static int mas_correction_nc;
+static int mas_correction_n;
+static vector<Float> mas_correction_array;
 
-int mas_correction_nc;
-int mas_correction_n;
-vector<Float> mas_correction_array;
-
+static void mas_correction_init(const int nc, const int n_mas);
 
 void mas_correction_init(const int nc, const int n_mas)
 {
@@ -76,6 +75,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   mas_correction_init(nc, n_mas);
 
   assert(nc > 0);
+  assert(boxsize > 0.0);
   assert(grid->mode == GridMode::fourier_space);
   assert(mas_correction_array.size() == (size_t) nc);
 
@@ -296,7 +296,6 @@ class MultipoleScoccimarro {
 };
 
 
-} // Unnamed namespace
 
 
 // Wrappter functions

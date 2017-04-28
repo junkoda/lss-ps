@@ -54,13 +54,25 @@ def compute_density(catalogue_file, nc, *,
     return (grid,)
 
 
-def assign_density(cat, grid, mas, nc, *,
-                   x0=(0.0, 0.0, 0.0), boxsize=None):
+def assign_density(grid, *,
+                   cat=None,
+                   xyz=None, weight=None, nbar=None,
+                   mas='CIC'):
     """Assign density to an existing grid.
     Args:
-        cat:  catalogue, catalogue file, or array
-        grid: Grid object or a pair of Grids for interlacing
-        mas:  Mass assignment scheme 'NGP', 'CIC', or 'TSC'
-        
+        grid: A Grid object
+        mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
     """
-    pass
+
+    if grid.boxsize <= 0.0:
+        raise AssertionError('grid.boxsize is not set.')
+        
+    
+    
+    if xyz is not None:
+        c._mass_assignment_from_array(xyz, weight, nbar,
+                                      _mass_assignment_scheme[mas],
+                                      grid._grid)
+    else:
+        RuntimeError('xyz not provided')
+        # TODO cat

@@ -41,9 +41,3 @@ PowerSpectrum& PowerSpectrum::operator+=(const PowerSpectrum& ps)
 
   return *this;
 }
-
-
-
-
-
-

@@ -41,6 +41,11 @@ static PyMethodDef methods[] = {
    "_grid_fft(_grid); apply FFT to the grid"},
   {"_grid_nc", py_grid_nc, METH_VARARGS, "return nc"},
   {"_grid_mode", py_grid_mode, METH_VARARGS, "return grid mode"},
+  {"_grid_get_boxsize", py_grid_get_boxsize, METH_VARARGS, "return boxsize"},
+  {"_grid_set_boxsize", py_grid_set_boxsize, METH_VARARGS, "set boxsize"},
+  {"_grid_get_x0", py_grid_get_x0, METH_VARARGS, "return x0"},
+  {"_grid_set_x0", py_grid_set_x0, METH_VARARGS, "set x0"},
+
   {"_grid_fx_asarray", py_grid_fx_asarray, METH_VARARGS,
    "return real-space grid as an np.array"},
   {"_grid_fk_asarray", py_grid_fk_asarray, METH_VARARGS,
@@ -55,6 +60,8 @@ static PyMethodDef methods[] = {
 
   {"_mass_assignment", py_mass_assignment, METH_VARARGS,
    "assign mass to a grid"},
+  {"_mass_assignment_from_array", py_mass_assignment_from_array, METH_VARARGS,
+   "assign mass to a grid from an array"},
 
   {"_interlacing", py_interlacing, METH_VARARGS,
    "_interlacing(_grid1, _grid2)"},

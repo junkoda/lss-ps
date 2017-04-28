@@ -2,13 +2,23 @@ from distutils.core import setup, Extension
 import numpy as np
 import os
 
-#dir = os.getcwd()
-#print(dir)
-#print("np.get_include()")
-#print(np.get_include())
 
-idirs = ['../lib', np.get_include()] + os.environ["IDIRS"].split(' ')
-ldirs = os.environ["LDIRS"].split(' ')
+# directories for include -I(idir)
+idirs = os.environ["IDIRS"]
+if idirs:
+    idirs = idirs.split(' ')
+else:
+    idirs = []
+
+idirs = ['../lib', np.get_include()] + idirs
+
+# directories for libraries -L(dir)
+ldirs = os.environ["LDIRS"]
+if ldirs:
+    ldirs = ldirs.split(' ')
+else:
+    ldirs = []
+
 libs = os.environ['LIBS'].split(' ')
 
 setup(name='lssps',
@@ -28,9 +38,10 @@ setup(name='lssps',
                      'py_power_spectrum.cpp', 'py_interlacing.cpp',
                     ],
                     include_dirs = idirs,
-                    extra_compile_args = [os.environ["OPT"]],
+                    extra_compile_args = [os.environ['OPT']],
                     library_dirs = ldirs,
                     libraries = libs,
+                    undef_macros = ['NDEBUG'],
           )
       ],
       packages=['lssps'],
