@@ -231,7 +231,7 @@ PyObject* py_grid_set_offset(PyObject* self, PyObject* args)
   PyObject *py_grid;
   double offset;
 
-  if(!PyArg_ParseTuple(args, "O", &py_grid, &offset)) {
+  if(!PyArg_ParseTuple(args, "Od", &py_grid, &offset)) {
     return NULL;
   }
 

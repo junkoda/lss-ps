@@ -17,8 +17,8 @@
 using namespace std;
 
 // correction factor for mass assignment window function
-static int mas_correction_nc;
-static int mas_correction_n;
+static int mas_correction_nc= 0;
+static int mas_correction_n= -1;
 static vector<Float> mas_correction_array;
 
 static void mas_correction_init(const int nc, const int n_mas);
@@ -137,7 +137,6 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 	    double mu2= (kz*kz)/k2;	
 	    double corr_xyz = corr_xy * mas_correction_array[kz];
 
-	    //DEBUG!!!
 	    ps_local.nmodes[i]++;
 	    ps_local.k[i] += k; 
 
@@ -165,8 +164,6 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
       P.p0[i] = fac*P.p0[i] - shot_noise;
       P.p2[i] = fac*P.p2[i];
       P.p4[i] = fac*P.p4[i];
-
-      //fprintf(stderr, "%e %e\n", P.k[i], P.p0[i]);
     }
   }
 
@@ -214,7 +211,7 @@ public:
     // (2l + 1) P_4 = 9*(35 mu^4 - 30 mu^2 + 3)/8
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-    double delta2= norm(grid->fk[index])*corr; //DEBUG!!
+    double delta2= norm(grid->fk[index])*corr;
     P.p0[ik] += delta2;
     P.p2[ik] += l2*delta2;
     P.p4[ik] += l4*delta2;

@@ -119,6 +119,7 @@ void mass_assignment_template(float_type const * xyz,
   long double nw2_sum = 0.0;
 
   const double dx= grid->boxsize/grid->nc;
+
   const double x0[]= {grid->x0_box[0] + grid->offset*dx,
 		      grid->x0_box[1] + grid->offset*dx,
 		      grid->x0_box[2] + grid->offset*dx};

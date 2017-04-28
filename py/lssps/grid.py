@@ -5,13 +5,16 @@ import lssps._lssps as c
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension"""
 
-    def __init__(self, nc, boxsize, x0=None, *, offset=0.0):
+    def __init__(self, nc, boxsize, x0=None, *, offset=None):
         # _grid is the pointer to a C++ Grid object
         self._grid = c._grid_alloc(nc)
         self.boxsize = boxsize
 
         if x0 is not None:
             self.x0 = x0
+
+        if offset is not None:
+            self.offset = offset
 
     def __getitem__(self, index):
         """grid[ix, iy, iz]: value at grid point (ix, iy, iz)
