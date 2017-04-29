@@ -1,13 +1,28 @@
 import lssps
 import lssps._lssps as c
+from numbers import Number
+import warnings
 
 
 class Grid:
-    """Grid is a 3-dimensional cubic grid with nc points per dimension"""
+    """Grid is a 3-dimensional cubic grid with nc points per dimension
 
-    def __init__(self, nc, boxsize, x0=None, *, offset=None):
+    Methods:
+        grid[:]: return grid data as an array
+        clear(): reset all data to 0
+        fft():   Fast Fourier Transform to Fourier space
+
+    Properties:
+        grid.boxsize:
+        grid.x0:
+        grid.offset:
+        grid.shifted: A grid shifted by half grid spacing (for interlacing)
+    """
+
+    def __init__(self, nc, boxsize, x0=None, offset=None):
         # _grid is the pointer to a C++ Grid object
         self._grid = c._grid_alloc(nc)
+        self.shifted = None
         self.boxsize = boxsize
 
         if x0 is not None:
@@ -27,11 +42,17 @@ class Grid:
     def clear(self):
         """Reset the grid with zeros"""
         c._grid_clear(self._grid)
+        if self.shifted is not None:
+            self.shifted.clear()
+
         return self
 
     def fft(self):
         """Fast Fourier Transform from real space to Fourier space"""
         c._grid_fft(self._grid)
+        if self.shifted is not None:
+            self.shifted.fft()
+
         return self
 
     @property
@@ -48,41 +69,64 @@ class Grid:
 
     @property
     def boxsize(self):
-        """length of the cubic box on a side"""
+        """Length of the cubic box on a side"""
         return c._grid_get_boxsize(self._grid)
 
     @boxsize.setter
     def boxsize(self, value):
         c._grid_set_boxsize(self._grid, value)
+        if self.shifted is not None:
+            self.shifted.boxsize = value
 
     @property
     def x0(self):
-        """corner coordinate of the box"""
+        """Coordinate of the box corner"""
         return c._grid_get_x0(self._grid)
 
     @x0.setter
     def x0(self, x0):
-        """corner coordinate of the box"""
-        return c._grid_set_x0(self._grid, x0[0], x0[1], x0[2])
+        """Coordinate of the box corner
+           grid.x0 = (0.0, 0.0, 0.0)"""
+        c._grid_set_x0(self._grid, x0[0], x0[1], x0[2])
+        if self.shifted is not None:
+            self.shifted.x0 = x0
 
     @property
     def offset(self):
-        """offset of the grid with respect to the box in units of grid spacing"""
+        """offset of the grid with respect to the box
+           in units of grid spacing"""
+
         return c._grid_get_offset(self._grid)
 
     @offset.setter
     def offset(self, value):
-        return c._grid_set_offset(self._grid, value)
+        c._grid_set_offset(self._grid, value)
+        if self.shifted is not None:
+            self.shifted.offset = value - 0.5
 
 
-def zeros(nc):
-    """Return a new empty grid filled with zeros"""
-    grid = Grid(nc)
+def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
+    """Return a new empty grid filled with zeros
+    Args:
+        nc (int): number of grids per dimension
+        boxsize: length of the box on a side
+        x0: corner of the box
+        offset: offset of the grid points from the box corner
+                give a tuple of 2 floats to set both offsets for
+                the main and shifted grid
+        interlacing: attach shifted grid which is shifted by half gridspacing
+    """
+
+    grid = Grid(nc, boxsize, x0, offset)
+    if interlacing:
+        grid.shifted = Grid(nc, x0, boxsize, offset - 0.5)
+
     grid.clear()
 
     return grid
 
-def compute_fluctuation(grid_data, grid_rand = None):
+
+def compute_fluctuation(grid_data, grid_rand=None):
     """Compute density fluctuation data = data - rand
 
     Args:
@@ -90,31 +134,19 @@ def compute_fluctuation(grid_data, grid_rand = None):
         rand: a tuple of random grids (may be None)
 
     Returns:
-        a tuple of fluctutation grid
-
-    Note:
-        data grids are modified and become fluctuation grids
+        fluctutation grid (= grid_data)
+        data grids are modified and become fluctuation grid
     """
 
-    
-    if isinstance(grid_data, lssps.Grid):
-        grid_data = (grid_data,)
-
-    if isinstance(grid_rand, lssps.Grid):
-        grid_rand = (grid_rand,)
-    
-    n = len(grid_data)
-    assert(n == 1 or n == 2)
-    
     if grid_rand is None:
-        for i in range(n):
-            c._grid_compute_fluctuation_homogeneous(grid_data[i]._grid)
+        c._grid_compute_fluctuation_homogeneous(grid_data._grid)
     else:
-        assert(len(grid_rand) == n)
-        for i in range(n):
-            c._grid_compute_fluctuation(grid_data[i]._grid, grid_rand[i]._grid)
+        c._grid_compute_fluctuation(grid_data._grid, grid_rand._grid)
 
-    if len(grid_data) == 1:
-        return grid_data[0]
-    
+    if grid_data.shifted is not None:
+        if grid_rand is None:
+            compute_fluctuation(grid_data.shifted)
+        else:
+            compute_fluctuation(grid_data.shifted, grid_rand.shifted)
+
     return grid_data
