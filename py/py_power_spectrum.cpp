@@ -180,10 +180,12 @@ PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
   int nmu;
   PyObject *py_grid;
   int subtract_shotnoise, correct_mas;
+  int line_of_sight;
   
-  if(!PyArg_ParseTuple(args, "dddiOii",
+  if(!PyArg_ParseTuple(args, "dddiOiii",
 		       &k_min, &k_max, &dk, &nmu,
-		       &py_grid, &subtract_shotnoise, &correct_mas)) {
+		       &py_grid, &subtract_shotnoise, &correct_mas,
+		       &line_of_sight)) {
     return NULL;
   }
 
@@ -194,7 +196,8 @@ PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
   PowerSpectrum* const ps=
     multipole_compute_plane_parallel(k_min, k_max, dk, nmu,
 				     grid,
-				     subtract_shotnoise, correct_mas);
+				     subtract_shotnoise, correct_mas,
+				     line_of_sight);
   
   return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
 }

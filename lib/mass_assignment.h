@@ -109,7 +109,17 @@ void mass_assignment_template(float_type const * xyz,
   //     np:          number of particles
   //     parallelise: OpenMP paralesllise the mass assignment loop
   //     grid:        the density grid
+  //
+  // Output:
+  //     update
+  //     grid->total_weight;
+  //     grid->w2_sum;
+  //     grid->nw2_sum;
+  //     grid->np;
+  //     grid->n_mas = f.n_mas;
+
   assert(xyz);
+  std::cerr << "grid->boxsize " << grid->boxsize << std::endl; // DEBUG
   assert(grid->boxsize > 0);
   assert(grid->nc > 0);
   
@@ -153,6 +163,7 @@ void mass_assignment_template(float_type const * xyz,
  
   #pragma omp critical (__MASS_ASSIGNMENT__)
   {
+    std::cerr << "w_sum " << w_sum << std::endl;
     grid->total_weight += w_sum;
     grid->w2_sum += w2_sum;
     grid->nw2_sum += nw2_sum;

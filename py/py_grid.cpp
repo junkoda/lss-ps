@@ -244,6 +244,87 @@ PyObject* py_grid_set_offset(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+PyObject* py_grid_get_sums(PyObject* self, PyObject* args)
+{
+  // _grid_get_sums(_cat)
+  // Return sum of weights, total_weight, w2_sum, nw2_sum
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  return Py_BuildValue("(dddk)",
+		       (double) grid->total_weight,
+		       (double) grid->w2_sum,
+		       (double) grid->nw2_sum,
+		       (unsigned long) grid->np);
+}
+
+PyObject* py_grid_set_sums(PyObject* self, PyObject* args)
+{
+  // _grid_set_sum(_cat, total_weight, w2_sum, nw2_sum, np)
+  PyObject *py_grid;
+  double w_sum, w2_sum, nw2_sum;
+  unsigned long np;
+
+  if(!PyArg_ParseTuple(args, "Odddk", &py_grid,
+		       &w_sum, &w2_sum, &nw2_sum, &np)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->total_weight = w_sum;
+  grid->w2_sum = w2_sum;
+  grid->nw2_sum = nw2_sum;
+  grid->np = np;
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_grid_get_nmas(PyObject* self, PyObject* args)
+{
+  // _grid_get_nmas(_cat)
+  // Return the degree of mass assighment
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  return Py_BuildValue("i", grid->n_mas);
+}
+
+PyObject* py_grid_set_nmas(PyObject* self, PyObject* args)
+{
+  // _grid_set_nmas(_cat, boxsize)
+  PyObject *py_grid;
+  int n_mas;
+
+  if(!PyArg_ParseTuple(args, "Oi", &py_grid, &n_mas)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->n_mas= n_mas;
+
+  Py_RETURN_NONE;
+}
+
 
 
 PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args)
@@ -290,6 +371,8 @@ PyObject* py_grid_fk_asarray(PyObject* self, PyObject* args)
 
   return PyArray_SimpleNewFromData(nd, dims, NPY_COMPLEX_TYPE, grid->fk);
 }
+
+
 
 PyObject* py_grid_clear(PyObject* self, PyObject* args)
 {
@@ -347,4 +430,56 @@ PyObject* py_grid_compute_fluctuation_homogeneous(PyObject* self,
   Py_RETURN_NONE;
 }
 
+PyObject* py_grid_load_fx_from_array(PyObject* self, PyObject* args)
+{
+  PyObject *py_grid, *py_array;
 
+  if(!PyArg_ParseTuple(args, "OO", &py_grid, &py_array)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  Py_buffer a;
+  if(PyObject_GetBuffer(py_array, &a, PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS | PyBUF_FULL_RO) == -1)
+    return NULL;
+
+  if(a.ndim != 3) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 3-dimensional array for grid");
+    return NULL;
+  }
+
+  std::cerr << "a.ndim " << a.ndim << std::endl;
+  std::cerr << "a.shape " << a.shape[0] << std::endl;
+  
+  size_t nc= grid->nc;
+  Py_ssize_t nc_check= static_cast<Py_ssize_t>(nc);
+  if(a.shape[0] != nc_check || a.shape[1] != nc_check ||
+     a.shape[2] != nc_check) {
+    PyErr_SetString(PyExc_TypeError, "Expected a cubic grid.");
+    return NULL;
+  }
+
+  if(strcmp(a.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError, "Expected an array of double.");
+    return NULL;
+  }
+  
+  npy_intp ncz= 2*(nc/2 + 1);
+
+  double* p= (double*) a.buf;
+
+  for(size_t ix=0; ix<nc; ++ix) {
+    for(size_t iy=0; iy<nc; ++iy) {
+      size_t index= (ix*nc + iy)*ncz;
+      for(size_t iz=0; iz<nc; ++iz) {
+	grid->fx[index++]= *p++;
+      }
+    }
+  }
+  Py_RETURN_NONE;
+}
+
+	

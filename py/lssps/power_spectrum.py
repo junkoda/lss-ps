@@ -61,7 +61,7 @@ class PowerSpectrum:
 def compute_plane_parallel(grid_delta, *,
                            k_min=0.0, k_max=1.0, dk=0.01, nmu=0,
                            subtract_shotnoise=True,
-                           correct_mas= True):
+                           correct_mas= True, line_of_sight=2):
     """
     Args:
         delta_grid (Grid): Grid object for delta(k)
@@ -71,6 +71,8 @@ def compute_plane_parallel(grid_delta, *,
         nmu (int):   number of mu = kz/k bins for 2D power spectrum
         subtract_shotnoise (bool)
         correct_mas (bool)
+        line_of_sight (int): line of sight direction for multipoles
+                             0,1,2 for x,y,z, respectively
     Returns:
         PowerSpectrum object
     """
@@ -80,7 +82,8 @@ def compute_plane_parallel(grid_delta, *,
     
     _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu,
                               grid_delta._grid,
-                              subtract_shotnoise, correct_mas)
+                              subtract_shotnoise, correct_mas,
+                              line_of_sight)
 
     return PowerSpectrum(_ps)
 

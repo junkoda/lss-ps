@@ -2,7 +2,7 @@ import lssps
 import lssps._lssps as c
 from numbers import Number
 import warnings
-
+import h5py
 
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension
@@ -55,6 +55,68 @@ class Grid:
 
         return self
 
+    def save_h5(self, filename):
+        """Save grid to an HDF5 file
+        
+        """
+        f = h5py.File(filename, 'w')
+        
+        f['nc'] = self.nc
+        f['boxsize'] = self.boxsize
+        f['x0_box'] = self.x0
+        f['offset'] = self.offset
+        sums = self.sums
+
+        print('grid.py sums', sums)
+        f['sums'] = (sums[0], sums[1], sums[2])
+        f['np'] = sums[3]
+        f['n_mas'] = self.n_mas
+        
+        if self.mode == 'real-space':
+            f['fx'] = self[:]
+        elif self.mode == 'fourier-space':
+            f['fk'] = self[:]
+
+        if self.shifted is not None:
+            g = f.create_group('shifted')
+            g['offset'] = self.shifted.offset
+            sums = self.shifted.sums
+            g['sums'] = (sums[0], sums[1], sums[2])
+            g['np'] = sums_shifted[3]
+            
+            if self.mode == 'real-space':
+                g['fx'] = self.shifted[:]
+            elif self.mode == 'fourier-space':
+                g['fk'] = self.shifted[:]
+
+        f.close()
+    # def assign_density(cat, mas):
+    #     """Assign density from particles in file or array"""
+
+    #     n_mas = lssps._mass_assignment_scheme[mas.upper()]
+        
+    #     # From CatalogueFile
+    #     if isinstance(catalogue_file, CatalogueFile):
+    #         c._mass_assignment(cat._f, x0, boxsize,
+    #                            n_mas, grid._grid, None)
+
+
+    #     if interlacing:
+    #         grid_shifted = lssps.grid.zeros(nc)
+    #         c._mass_assignment(catalogue_file._f, x0, boxsize,
+    #                            n_mas, grid._grid, grid_shifted._grid)
+
+    #     return (grid, grid_shifted)
+
+    #if isinstance(cat, str):\
+        
+    # catalogue is the filename
+    #    cat = loadtxt(cat)
+
+
+
+
+
     @property
     def mode(self):
         """Current mode of the grid:
@@ -104,6 +166,28 @@ class Grid:
         if self.shifted is not None:
             self.shifted.offset = value - 0.5
 
+    @property
+    def sums(self):
+        """Length of the cubic box on a side"""
+        ss = c._grid_get_sums(self._grid)
+        print('ss', ss)
+        return c._grid_get_sums(self._grid)
+
+    @sums.setter
+    def sums(self, values):
+        c._grid_set_sums(self._grid, values[0], values[1], values[2], values[3])
+
+    @property
+    def n_mas(self):
+        """Length of the cubic box on a side"""
+        return c._grid_get_nmas(self._grid)
+
+    @n_mas.setter
+    def n_mas(self, value):
+        c._grid_set_nmas(self._grid, value)
+
+
+
 
 def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
     """Return a new empty grid filled with zeros
@@ -118,6 +202,7 @@ def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
     """
 
     grid = Grid(nc, boxsize, x0, offset)
+
     if interlacing:
         grid.shifted = Grid(nc, x0, boxsize, offset - 0.5)
 
@@ -150,3 +235,54 @@ def compute_fluctuation(grid_data, grid_rand=None):
             compute_fluctuation(grid_data.shifted, grid_rand.shifted)
 
     return grid_data
+
+def load_h5(filename):
+    """
+    Args:
+        filename (str): file name of an HDF file
+    """
+    
+    if isinstance(filename, str):
+        f = h5py.File(filename, 'r')
+    else:
+        f = filename
+        
+    nc = f['nc'][()]
+    boxsize = f['boxsize'][()]
+    x0 = f['x0_box'][:]
+    offset = f['offset'][()]
+
+    grid = Grid(nc, boxsize, x0, offset)
+
+    sums = f['sums'][:]
+    n = f['np'][()]
+    n_mas = f['n_mas'][()]
+
+    grid.sums = (sums[0], sums[1], sums[2], int(n))
+    grid.n_mas = n_mas
+
+    a = f['fx'][:]
+    if 'fx' in f:
+        c._grid_load_fx_from_array(grid._grid, a)
+    else:
+        raise RuntimeError('fx does not exists in HDF5 file')
+
+    if 'shifted' in f:
+        g = f['shifted']
+        offset_shifted = g['offset'][()]
+        grid.shifted = Grid(nc, boxsize, x0, offset_shifted)
+
+        sums = g['sums'][:]
+        n = g['np'][()]
+
+        grid.shifted.sums = (sums[0], sums[1], sums[2], n)
+        grid.shifted.n_mas = n_mas
+
+        a_shifted = g['fx'][:]
+        c._grid_load_fx_from_array(grid.shifted._grid, a_shifted)
+    
+    f.close()
+
+    return grid
+
+

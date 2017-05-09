@@ -16,14 +16,23 @@ PyObject* py_grid_get_x0(PyObject* self, PyObject* args);
 PyObject* py_grid_set_x0(PyObject* self, PyObject* args);
 PyObject* py_grid_get_offset(PyObject* self, PyObject* args);
 PyObject* py_grid_set_offset(PyObject* self, PyObject* args);
+PyObject* py_grid_get_sums(PyObject* self, PyObject* args);
+PyObject* py_grid_set_sums(PyObject* self, PyObject* args);
+PyObject* py_grid_get_nmas(PyObject* self, PyObject* args);
+PyObject* py_grid_set_nmas(PyObject* self, PyObject* args);
 
 PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args);
 PyObject* py_grid_fk_asarray(PyObject* self, PyObject* args);
+
+PyObject* py_grid_load_fx_from_array(PyObject* self, PyObject* args);
+
 PyObject* py_grid_clear(PyObject* self, PyObject* args);
 
 PyObject* py_grid_compute_fluctuation(PyObject* self, PyObject* args);
 PyObject* py_grid_compute_fluctuation_homogeneous(PyObject* self,
 						  PyObject* args);
+
+
 
 
 #endif

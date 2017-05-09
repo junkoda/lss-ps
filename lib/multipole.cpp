@@ -62,9 +62,12 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 					   const double dk, const int nmu,
 					   const F f,
 					   const bool subtract_shotnoise,
-					   const bool correct_mas)
+					   const bool correct_mas,
+					   const int los=2)
 {
   auto ts = std::chrono::high_resolution_clock::now();
+
+  assert(0 <= los && los < 3);
 
   Grid const * const grid = f.grid; assert(grid);
   const int nc= grid->nc;
@@ -104,20 +107,21 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 			   
     #pragma omp for
     for(int ix=0; ix<nc; ++ix) {
-      int kx = ix <= ik_nq ? ix : ix - nc;
-      if(kx >= ik_max || kx <= -ik_max)
+      int k[3];
+      k[0] = ix <= ik_nq ? ix : ix - nc;
+      if(k[0] >= ik_max || k[0] <= -ik_max)
 	continue; 
       
       double corr_x = mas_correction_array[ix];
       
       for(int iy=0; iy<nc; ++iy) {
-	int ky = iy <= ik_nq ? iy : iy - nc;
-	int kk = kx*kx + ky*ky;
+	k[1] = iy <= ik_nq ? iy : iy - nc;
+	int kk = k[0]*k[0] + k[1]*k[1];
 	if(kk > ik_max2) continue;
 	
 	double corr_xy = corr_x * mas_correction_array[iy];
 	
-	int kz0 = !(kx > 0 || (kx == 0 && ky > 0));
+	int kz0 = !(k[0] > 0 || (k[0] == 0 && k[1] > 0));
 	
 	// Avoid double counting on kz=0 plain
 	// k=(0,0,0) dropped because this is 0
@@ -125,20 +129,21 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 	//      1 otherwize
 	//
 	
-	for(int kz=kz0; kz<ik_nq; ++kz) {
-	  double k2 = kx*kx + ky*ky + kz*kz;
+	for(int iz=kz0; iz<ik_nq; ++iz) {
+	  k[2]= iz;
+	  double k2 = k[0]*k[0] + k[1]*k[1] + k[2]*k[2];
 	  if(k2 > ik_max2) break;
 	  
-	  double k= sqrt(k2);
-	  int i= static_cast<int>(floor((k - ik_min)/idk));
+	  double kmag= sqrt(k2);
+	  int i= static_cast<int>(floor((kmag - ik_min)/idk));
 	
 	  if(0 <= i && i < n) {
-	    size_t index= nckz*(nc*ix + iy) + kz;
-	    double mu2= (kz*kz)/k2;	
-	    double corr_xyz = corr_xy * mas_correction_array[kz];
+	    size_t index= nckz*(nc*ix + iy) + iz;
+	    double mu2= (k[los]*k[los])/k2;	
+	    double corr_xyz = corr_xy * mas_correction_array[iz];
 
 	    ps_local.nmodes[i]++;
-	    ps_local.k[i] += k; 
+	    ps_local.k[i] += kmag; 
 
 	    f(index, mu2, corr_xyz, i, ps_local);
 	  }	
@@ -311,14 +316,16 @@ multipole_compute_monopole(const double k_min, const double k_max,
 
 PowerSpectrum*
 multipole_compute_plane_parallel(const double k_min, const double k_max,
-			   const double dk, const int nmu,
-			   Grid const * const grid,
-			   const bool subtract_shotnoise,
-			   const bool correct_mas)
+				 const double dk, const int nmu,
+				 Grid const * const grid,
+				 const bool subtract_shotnoise,
+				 const bool correct_mas,
+				 const int line_of_sight)
 {
   return compute_multipoles_template(k_min, k_max, dk, nmu,
   				     Multipole(grid),
-				     subtract_shotnoise, correct_mas);
+				     subtract_shotnoise, correct_mas,
+				     line_of_sight);
 }
 
 PowerSpectrum*

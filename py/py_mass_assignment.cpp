@@ -46,16 +46,14 @@ PyObject* py_mass_assignment(PyObject* self, PyObject* args)
   // Args:
   //     _f: CatalogueFile
   //     _x0: sequence of x0
-  //     boxsize:
   //     mas (int): 1 for NGP, 2 for CIC, ...
   //     _grid: a _Grid pointer
   //            or a sequence of two _Grid pointers (interlacing)
-  PyObject *py_f, *py_grid, *py_grid_shifted, *py_x0;
+  PyObject *py_f, *py_grid, *py_grid_shifted;
   int mas;
-  double boxsize;
 
   if(!PyArg_ParseTuple(args, "OOdiOO",
-		       &py_f, &py_x0, &boxsize, &mas,
+		       &py_f, &mas,
 		       &py_grid, &py_grid_shifted))
     return NULL;
 
@@ -63,30 +61,15 @@ PyObject* py_mass_assignment(PyObject* self, PyObject* args)
     (CatalogueFile*) PyCapsule_GetPointer(py_f, "_CatalogueFile");
   py_assert_ptr(f);
 
-  vector<double> x0;
-  sequence_to_vector(py_x0, x0);
-  if(x0.size() != 3) {
-    PyErr_SetString(PyExc_TypeError, "py_x0 does not include 3 numbers.");
-  }
-
   Grid* const grid=
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
-
-  for(int k=0; k<3; ++k) grid->x0_box[k]= x0[k];
-  grid->offset= 0.0;
-  grid->boxsize= boxsize;
 
   Grid* grid_shifted= nullptr;
   if(py_grid_shifted != Py_None) {
     grid_shifted = (Grid*) PyCapsule_GetPointer(py_grid_shifted, "_Grid");
     py_assert_ptr(grid_shifted);
-
-    for(int k=0; k<3; ++k) grid_shifted->x0_box[k]= x0[k];
-    grid_shifted->offset= 0.5;
-    grid_shifted->boxsize= boxsize;
   }
-
   
   static size_t buffer_size = 100000;
   
@@ -139,6 +122,9 @@ PyObject* py_mass_assignment_from_array(PyObject* self, PyObject* args)
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
+  // DEBUG
+  std::cerr << "py_mass_assignment grid boxsize " << grid->boxsize << std::endl;
+  
   //
   // Decode array information
   //

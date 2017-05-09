@@ -3,7 +3,7 @@ from lssps.catalogue import CatalogueFile, loadtxt
 import lssps._lssps as c
 
 
-_mass_assignment_scheme = {'NGP':1, 'CIC':2, 'TSC': 3}
+#_mass_assignment_scheme = {'NGP':1, 'CIC':2, 'TSC': 3}
 
 def compute_density(catalogue_file, nc, *,
                     mas='CIC',
@@ -35,7 +35,7 @@ def compute_density(catalogue_file, nc, *,
         raise TypeError('CatalogueFile is not given to compute_density')
     
     grid = lssps.grid.zeros(nc)
-    n_mas = _mass_assignment_scheme[mas.upper()]
+    n_mas = lssps._mass_assignment_scheme[mas.upper()]
 
     if interlacing:
         grid_shifted = lssps.grid.zeros(nc)
@@ -71,7 +71,7 @@ def assign_density(grid, *,
     
     if xyz is not None:
         c._mass_assignment_from_array(xyz, weight, nbar,
-                                      _mass_assignment_scheme[mas],
+                                      lssps._mass_assignment_scheme[mas],
                                       grid._grid)
     else:
         RuntimeError('xyz not provided')

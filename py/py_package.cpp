@@ -47,11 +47,18 @@ static PyMethodDef methods[] = {
   {"_grid_set_x0", py_grid_set_x0, METH_VARARGS, "set x0"},
   {"_grid_get_offset", py_grid_get_offset, METH_VARARGS, "return offset"},
   {"_grid_set_offset", py_grid_set_offset, METH_VARARGS, "set offset"},
+  {"_grid_get_sums", py_grid_get_sums, METH_VARARGS, "get sums"},
+  {"_grid_set_sums", py_grid_set_sums, METH_VARARGS, "set sums"},
+  {"_grid_get_nmas", py_grid_get_nmas, METH_VARARGS, "get n_mas"},
+  {"_grid_set_nmas", py_grid_set_nmas, METH_VARARGS, "set n_mas"},
 
   {"_grid_fx_asarray", py_grid_fx_asarray, METH_VARARGS,
    "return real-space grid as an np.array"},
   {"_grid_fk_asarray", py_grid_fk_asarray, METH_VARARGS,
    "return Fourier-space grid as an np.array"},
+  {"_grid_load_fx_from_array", py_grid_load_fx_from_array, METH_VARARGS,
+   "fill grid data from array"},
+  
   {"_grid_clear", py_grid_clear, METH_VARARGS,
    "_grid_clear(_grid); clear the array with 0"},
   {"_grid_compute_fluctuation", py_grid_compute_fluctuation, METH_VARARGS,

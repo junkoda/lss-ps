@@ -9,6 +9,6 @@ import lssps.msg
 loglevel = lssps.msg.LogLevel()
 
 #import lssps.power_spectrum
-    
+_mass_assignment_scheme = {'NGP':1, 'CIC':2, 'TSC': 3}    
 
 

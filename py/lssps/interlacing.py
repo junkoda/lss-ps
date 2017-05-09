@@ -1,13 +1,15 @@
 import lssps._lssps as c
 
-def interlacing(grid):
-    """interlacing((grid, grid_shifted))
-    Arg:
-       grid, a pair 
-    
-    """
-    assert(len(grid) == 2)
-    
-    c._interlacing(grid[0]._grid, grid[1]._grid)
 
-    return grid[0]
+def interlacing(grid):
+    """interlacing(grid)
+    Arg:
+       grid (lssps.grid.Grid) A grid with shifted grid, grid.shifted.
+    """
+
+    if grid.shifted is None:
+        raise TypeError('grid.shifted is required for interlacing')
+
+    c._interlacing(grid._grid, grid.shifted._grid)
+
+    return grid
