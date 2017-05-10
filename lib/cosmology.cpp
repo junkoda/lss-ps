@@ -1,5 +1,6 @@
 #include "cosmology.h"
 
+#include <iostream>
 #include <cstdlib>
 #include <cassert>
 #include <gsl/gsl_spline.h>
@@ -15,7 +16,7 @@ static gsl_interp_accel *acc_zd= 0;
 static gsl_spline* spline_dz= 0;
 static gsl_spline* spline_zd= 0;
 
-static double cosmology_compute_comoving_distance(const double a);
+
 
 void cosmology_init(const double omega_m_, const double z_max_, const size_t n)
 {

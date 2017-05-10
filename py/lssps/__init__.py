@@ -5,6 +5,7 @@ from lssps.compute import compute_power_spectrum
 
 from lssps.power_spectrum import PowerSpectrum
 import lssps.msg
+import lssps.cosmology
 
 loglevel = lssps.msg.LogLevel()
 

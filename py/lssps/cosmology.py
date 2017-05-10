@@ -17,3 +17,13 @@ def redshift(d):
     c._cosmology_distance_redshift(d, z)
 
     return z
+
+def compute_comoving_distance(z):
+    """
+    Args:
+       z (float): redshift
+    Returns:
+       d (float): comoving distance
+    """
+
+    return c._cosmology_compute_comoving_distance(z)

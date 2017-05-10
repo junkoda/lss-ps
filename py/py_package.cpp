@@ -28,6 +28,10 @@ static PyMethodDef methods[] = {
    "_cosmology_init(omega_m, z_max, n)"},
   {"_cosmology_distance_redshift", py_cosmology_distance_redshift,
    METH_VARARGS, "_cosmology_distance_redshift(d_array)"},
+  {"_cosmology_compute_comoving_distance",
+   py_cosmology_compute_comoving_distance, METH_VARARGS,
+   "_cosmology_compute_comoving_distance"},
+   
    
   {"_catalogue_alloc", py_catalogue_alloc, METH_VARARGS,
    "allocate a new _cat opbject"},
