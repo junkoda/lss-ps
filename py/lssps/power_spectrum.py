@@ -80,7 +80,6 @@ def compute_plane_parallel(grid_delta, *,
     if grid_delta.mode != 'fourier-space':
         print('fft')
         grid_delta.fft()
-        #raise TypeError('grid is not in Fourier space')
 
     if grid_delta.shifted is not None:
         if grid_delta.interlacing != 'done':

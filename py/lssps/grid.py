@@ -17,6 +17,8 @@ class Grid:
         grid.x0:
         grid.offset:
         grid.shifted: A grid shifted by half grid spacing (for interlacing)
+        grid.interlacing: 'done' if interlace() has been called. 
+                           Reset to None by clear()
     """
 
     def __init__(self, nc, boxsize, x0=None, offset=None):
@@ -44,6 +46,7 @@ class Grid:
         """Reset the grid with zeros"""
         c._grid_clear(self._grid)
         self.mode = 'real-space'
+        self.interlacing = None
         
         if self.shifted is not None:
             self.shifted.clear()
