@@ -43,6 +43,8 @@ class Grid:
     def clear(self):
         """Reset the grid with zeros"""
         c._grid_clear(self._grid)
+        self.mode = 'real-space'
+        
         if self.shifted is not None:
             self.shifted.clear()
 

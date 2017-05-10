@@ -64,6 +64,9 @@ def assign_density(grid, *,
         mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
     """
 
+    if grid.mode != 'real-space':
+        raise TypeError('grid is not in real-space mode')
+    
     if grid.boxsize <= 0.0:
         raise AssertionError('grid.boxsize is not set.')
         
