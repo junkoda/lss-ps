@@ -115,7 +115,7 @@ class Grid:
             g['offset'] = self.shifted.offset
             sums = self.shifted.sums
             g['sums'] = (sums[0], sums[1], sums[2])
-            g['np'] = sums_shifted[3]
+            g['np'] = sums[3]
             
             if self.mode == 'real-space':
                 g['fx'] = self.shifted[:]
@@ -263,10 +263,10 @@ def load_h5(filename):
     grid = Grid(nc, boxsize, x0, offset)
 
     sums = f['sums'][:]
-    n = f['np'][()]
+    n = int(f['np'][()])
     n_mas = f['n_mas'][()]
 
-    grid.sums = (sums[0], sums[1], sums[2], int(n))
+    grid.sums = (sums[0], sums[1], sums[2], n)
     grid.n_mas = n_mas
 
     a = f['fx'][:]
@@ -281,7 +281,7 @@ def load_h5(filename):
         grid.shifted = Grid(nc, boxsize, x0, offset_shifted)
 
         sums = g['sums'][:]
-        n = g['np'][()]
+        n = int(g['np'][()])
 
         grid.shifted.sums = (sums[0], sums[1], sums[2], n)
         grid.shifted.n_mas = n_mas

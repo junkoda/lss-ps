@@ -62,6 +62,13 @@ static inline void split(char line[], std::vector<double>& v)
 }
 
 //
+// CatalogueFile
+//
+CatalogueFile::~CatalogueFile()
+{
+}
+
+//
 // CatalogueFileAscii
 //
 
@@ -100,6 +107,11 @@ CatalogueFileAscii::CatalogueFileAscii(const char filename_[],
   }
 }
 
+CatalogueFileAscii::~CatalogueFileAscii()
+{
+
+}
+				       
 void CatalogueFileAscii::open()
 {
   fp= fopen(filename.c_str(), "r");

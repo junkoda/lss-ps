@@ -23,7 +23,7 @@ class Catalogue : public std::vector<Particle> {
 class CatalogueFile {
  public:
   CatalogueFile() = default;
-  virtual ~CatalogueFile() = default;
+  virtual ~CatalogueFile();
   virtual void open() = 0;
   virtual void read(const size_t nbuf, std::vector<Particle>& v) = 0;
   virtual void close() = 0;
@@ -36,7 +36,7 @@ class CatalogueFileAscii : public CatalogueFile {
 		     const std::vector<int> iweights_,
 		     const int inbar_,
 		     const double Pest_);
-  virtual ~CatalogueFileAscii() = default;
+  virtual ~CatalogueFileAscii();
 
   virtual void open();
   virtual void read(const size_t nbuf, std::vector<Particle>& v);

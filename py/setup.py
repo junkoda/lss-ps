@@ -6,7 +6,7 @@ import os
 # directories for include -I(idir)
 idirs = os.environ["IDIRS"]
 if idirs:
-    idirs = idirs.split(' ')
+    idirs = idirs.split()
 else:
     idirs = []
 
