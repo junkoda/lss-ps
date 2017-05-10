@@ -136,8 +136,6 @@ void grid_compute_fluctuation(Grid& grid_data, Grid& grid_rand)
   assert(grid_rand.nc == nc);
 
   const double alpha = grid_data.total_weight / grid_rand.total_weight;
-  //cerr << "data total_weight " << grid_data.total_weight << endl;
-  //cerr << "rand total_weight " << grid_rand.total_weight << endl;
   
   msg_printf(msg_verbose, "Compute fluctuation, alpha= %e\n", alpha);
 
@@ -155,7 +153,6 @@ void grid_compute_fluctuation(Grid& grid_data, Grid& grid_rand)
   grid_rand.shot_noise = 0.0;
 
   grid_data.pk_normalisation= 1.0/(grid_rand.nw2_sum*alpha);
-  //cerr << "normalization= " << grid_rand.nw2_sum*alpha << endl;
   
   grid_rand.pk_normalisation= 1.0/(grid_rand.nw2_sum/alpha);
 

@@ -67,8 +67,6 @@ def assign_density(grid, *,
     if grid.boxsize <= 0.0:
         raise AssertionError('grid.boxsize is not set.')
         
-    
-    
     if xyz is not None:
         c._mass_assignment_from_array(xyz, weight, nbar,
                                       lssps._mass_assignment_scheme[mas],
@@ -76,3 +74,7 @@ def assign_density(grid, *,
     else:
         RuntimeError('xyz not provided')
         # TODO cat
+
+    if grid.shifted is not None:
+        assign_density(grid.shifted,
+                       cat=cat, xyz=xyz, weight=weight, nbar=nbar, mas=mas)

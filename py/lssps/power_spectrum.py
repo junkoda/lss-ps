@@ -78,7 +78,13 @@ def compute_plane_parallel(grid_delta, *,
     """
 
     if grid_delta.mode != 'fourier-space':
-        raise TypeError('grid is not in Fourier space')
+        print('fft')
+        grid_delta.fft()
+        #raise TypeError('grid is not in Fourier space')
+
+    if grid_delta.shifted is not None:
+        if grid_delta.interlacing != 'done':
+            grid_delta.interlace()
     
     _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu,
                               grid_delta._grid,

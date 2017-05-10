@@ -24,6 +24,7 @@ class Grid:
         self._grid = c._grid_alloc(nc)
         self.shifted = None
         self.boxsize = boxsize
+        self.interlacing = None
 
         if x0 is not None:
             self.x0 = x0
@@ -47,6 +48,19 @@ class Grid:
 
         return self
 
+    def interlace(self):
+        """perform interlacing"""
+
+        if self.shifted is None:
+            raise TypeError('grid.shifted is required for interlacing')
+        if self.mode != 'fourier-space':
+            raise RuntimeError('grid must be in Fourier space for interlacing')
+
+        c._interlacing(self._grid, self.shifted._grid)
+        self.interlacing = 'done'
+
+        return self
+
     def fft(self):
         """Fast Fourier Transform from real space to Fourier space"""
         c._grid_fft(self._grid)
@@ -67,7 +81,6 @@ class Grid:
         f['offset'] = self.offset
         sums = self.sums
 
-        print('grid.py sums', sums)
         f['sums'] = (sums[0], sums[1], sums[2])
         f['np'] = sums[3]
         f['n_mas'] = self.n_mas
@@ -170,7 +183,6 @@ class Grid:
     def sums(self):
         """Length of the cubic box on a side"""
         ss = c._grid_get_sums(self._grid)
-        print('ss', ss)
         return c._grid_get_sums(self._grid)
 
     @sums.setter
@@ -204,7 +216,7 @@ def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
     grid = Grid(nc, boxsize, x0, offset)
 
     if interlacing:
-        grid.shifted = Grid(nc, x0, boxsize, offset - 0.5)
+        grid.shifted = Grid(nc, boxsize, x0, offset - 0.5)
 
     grid.clear()
 

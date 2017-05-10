@@ -451,9 +451,6 @@ PyObject* py_grid_load_fx_from_array(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  std::cerr << "a.ndim " << a.ndim << std::endl;
-  std::cerr << "a.shape " << a.shape[0] << std::endl;
-  
   size_t nc= grid->nc;
   Py_ssize_t nc_check= static_cast<Py_ssize_t>(nc);
   if(a.shape[0] != nc_check || a.shape[1] != nc_check ||

@@ -122,9 +122,6 @@ PyObject* py_mass_assignment_from_array(PyObject* self, PyObject* args)
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
-  // DEBUG
-  std::cerr << "py_mass_assignment grid boxsize " << grid->boxsize << std::endl;
-  
   //
   // Decode array information
   //

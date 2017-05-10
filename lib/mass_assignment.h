@@ -38,8 +38,6 @@ struct CIC {
       w0[k] = 1.0 - w1[k];                 //               left grid point
     }
 
-    //std::cerr << w << " " << w0[0]*w0[1]*w0[2] << std::endl;
-    
     d->add(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
     d->add(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
     d->add(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
@@ -119,7 +117,6 @@ void mass_assignment_template(float_type const * xyz,
   //     grid->n_mas = f.n_mas;
 
   assert(xyz);
-  std::cerr << "grid->boxsize " << grid->boxsize << std::endl; // DEBUG
   assert(grid->boxsize > 0);
   assert(grid->nc > 0);
   
@@ -163,7 +160,6 @@ void mass_assignment_template(float_type const * xyz,
  
   #pragma omp critical (__MASS_ASSIGNMENT__)
   {
-    std::cerr << "w_sum " << w_sum << std::endl;
     grid->total_weight += w_sum;
     grid->w2_sum += w2_sum;
     grid->nw2_sum += nw2_sum;
