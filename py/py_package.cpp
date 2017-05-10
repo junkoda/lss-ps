@@ -6,6 +6,7 @@
 
 #include "py_config.h"
 #include "py_msg.h"
+#include "py_cosmology.h"
 #include "py_catalogue.h"
 #include "py_grid.h"
 #include "py_mass_assignment.h"
@@ -23,6 +24,11 @@ static PyMethodDef methods[] = {
   {"_msg_set_loglevel", py_msg_set_loglevel, METH_VARARGS,
    "_msg_set_loglevel(lv); set loglevel"},
 
+  {"_cosmology_init", py_cosmology_init, METH_VARARGS,
+   "_cosmology_init(omega_m, z_max, n)"},
+  {"_cosmology_distance_redshift", py_cosmology_distance_redshift,
+   METH_VARARGS, "_cosmology_distance_redshift(d_array)"},
+   
   {"_catalogue_alloc", py_catalogue_alloc, METH_VARARGS,
    "allocate a new _cat opbject"},
   {"_catalogue_len", py_catalogue_len, METH_VARARGS,
