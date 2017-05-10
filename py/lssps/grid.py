@@ -48,6 +48,26 @@ class Grid:
 
         return self
 
+    def compute_fluctuation(self, grid_rand=None):
+        """Compute density fluctuation data -= rand
+
+        Args:
+           grid_rand: the grid of randoms  (may be None)
+        """
+
+        if grid_rand is None:
+            c._grid_compute_fluctuation_homogeneous(self._grid)
+        else:
+            c._grid_compute_fluctuation(self._grid, grid_rand._grid)
+
+        if self.shifted is not None:
+            if grid_rand is None:
+                self.shifted.compute_fluctuation()
+            else:
+                self.shifted.compute_fluctuation(grid_rand.shifted)
+
+        return self
+
     def interlace(self):
         """perform interlacing"""
 
@@ -223,30 +243,6 @@ def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
     return grid
 
 
-def compute_fluctuation(grid_data, grid_rand=None):
-    """Compute density fluctuation data = data - rand
-
-    Args:
-        data: a tuple of data grids
-        rand: a tuple of random grids (may be None)
-
-    Returns:
-        fluctutation grid (= grid_data)
-        data grids are modified and become fluctuation grid
-    """
-
-    if grid_rand is None:
-        c._grid_compute_fluctuation_homogeneous(grid_data._grid)
-    else:
-        c._grid_compute_fluctuation(grid_data._grid, grid_rand._grid)
-
-    if grid_data.shifted is not None:
-        if grid_rand is None:
-            compute_fluctuation(grid_data.shifted)
-        else:
-            compute_fluctuation(grid_data.shifted, grid_rand.shifted)
-
-    return grid_data
 
 def load_h5(filename):
     """
