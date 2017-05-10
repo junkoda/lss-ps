@@ -108,7 +108,7 @@ PyObject* py_grid_nc(PyObject* self, PyObject* args)
   return Py_BuildValue("n", grid->nc);
 }
 
-PyObject* py_grid_mode(PyObject* self, PyObject* args)
+PyObject* py_grid_get_mode(PyObject* self, PyObject* args)
 {
   // _grid_mode(_cat)
   // Return the mode of the grid real-space / fourier-space
@@ -129,6 +129,30 @@ PyObject* py_grid_mode(PyObject* self, PyObject* args)
 
   Py_RETURN_NONE;
 }
+
+PyObject* py_grid_set_mode(PyObject* self, PyObject* args)
+{
+  // _grid_mode(_grid, mode)
+  // set mode
+  // mode: 0 unknown
+  //       1 real-space
+  //       2 fourier-space
+  PyObject *py_grid;
+  int mode;
+
+  if(!PyArg_ParseTuple(args, "Oi", &py_grid, &mode)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->mode= static_cast<GridMode>(mode);
+
+  Py_RETURN_NONE;
+}
+
 
 PyObject* py_grid_get_boxsize(PyObject* self, PyObject* args)
 {

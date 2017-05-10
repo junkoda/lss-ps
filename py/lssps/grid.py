@@ -157,7 +157,16 @@ class Grid:
         """Current mode of the grid:
         'real-space' or 'fourier-space'
         """
-        return c._grid_mode(self._grid)
+        return c._grid_get_mode(self._grid)
+
+    @mode.setter
+    def mode(self, m):
+        if m == 'real-space':
+            c._grid_set_mode(self._grid, 1)
+        elif m == 'fourier-space':
+            c._grid_set_mode(self._grid, 2)
+        else:
+            raise TypeError('grid.mode must be real-space or fourier-space')
 
     @property
     def nc(self):

@@ -12,7 +12,7 @@
 #define FFTW(f) fftwf_ ## f
 #endif
 
-enum class GridMode {unknown_mode, real_space, fourier_space};
+enum class GridMode {unknown_mode=0, real_space, fourier_space};
 
 //
 // Class Grid
