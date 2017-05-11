@@ -63,7 +63,6 @@ PyObject* py_cosmology_distance_redshift(PyObject* self, PyObject* args)
 
   for(size_t i=0; i<n; ++i) {
     z[i]= cosmology_distance_redshift(d[i]);
-    std::cerr << d[i] << " " << z[i] << std::endl;
   }
 
   PyBuffer_Release(&a_d);

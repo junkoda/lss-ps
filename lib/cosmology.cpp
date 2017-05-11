@@ -98,7 +98,8 @@ double cosmology_compute_comoving_distance(const double a)
 double cosmology_distance_redshift(const double d)
 {
   assert(omega_m > 0.0);
-  assert(d <= d_max);
+  if(d > d_max)
+    return -1;
   
   return gsl_spline_eval(spline_dz, d, acc_dz);
 }
