@@ -1,3 +1,7 @@
+#
+# $ make
+#
+
 from distutils.core import setup, Extension
 import numpy as np
 import os
@@ -15,11 +19,11 @@ idirs = ['../lib', np.get_include()] + idirs
 # directories for libraries -L(dir)
 ldirs = os.environ["LDIRS"]
 if ldirs:
-    ldirs = ldirs.split(' ')
+    ldirs = ldirs.split(')
 else:
     ldirs = []
 
-libs = os.environ['LIBS'].split(' ')
+libs = os.environ['LIBS'].split()
 
 setup(name='lssps',
       version='0.0.1',

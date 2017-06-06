@@ -4,6 +4,7 @@ default: py
 CXX     := c++ -std=c++11
 CC      := $(CXX)
 
+# Extra compile options
 OPT     := -DDOUBLEPRECISION
 # OPT   += -fopenmp   # compiler option to enable OpenMP parallelisation
 
