@@ -78,7 +78,6 @@ def compute_plane_parallel(grid_delta, *,
     """
 
     if grid_delta.mode != 'fourier-space':
-        print('fft')
         grid_delta.fft()
 
     if grid_delta.shifted is not None:

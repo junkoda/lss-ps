@@ -54,30 +54,3 @@ def compute_density(catalogue_file, nc, *,
     return (grid,)
 
 
-def assign_density(grid, *,
-                   cat=None,
-                   xyz=None, weight=None, nbar=None,
-                   mas='CIC'):
-    """Assign density to an existing grid.
-    Args:
-        grid: A Grid object
-        mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
-    """
-
-    if grid.mode != 'real-space':
-        raise TypeError('grid is not in real-space mode')
-    
-    if grid.boxsize <= 0.0:
-        raise AssertionError('grid.boxsize is not set.')
-        
-    if xyz is not None:
-        c._mass_assignment_from_array(xyz, weight, nbar,
-                                      lssps._mass_assignment_scheme[mas],
-                                      grid._grid)
-    else:
-        RuntimeError('xyz not provided')
-        # TODO cat
-
-    if grid.shifted is not None:
-        assign_density(grid.shifted,
-                       cat=cat, xyz=xyz, weight=weight, nbar=nbar, mas=mas)

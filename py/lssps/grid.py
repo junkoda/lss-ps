@@ -125,30 +125,35 @@ class Grid:
                 g['fk'] = self.shifted[:]
 
         f.close()
-    # def assign_density(cat, mas):
-    #     """Assign density from particles in file or array"""
 
-    #     n_mas = lssps._mass_assignment_scheme[mas.upper()]
+    def assign_density(self, *,
+                       cat=None,
+                       xyz=None, weight=None, nbar=None,
+                       mas='CIC'):
+        """Assign density to this grid
+        Args:
+            mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
+            xyz    (array[n, 3]): position of particles in cartisian coodinate
+            weight (array[n]):
+            nbar:  (array[n]):    mean density without clustering
+        """
+
+        if self.mode != 'real-space':
+            raise TypeError('grid is not in real-space mode')
+    
+        if self.boxsize <= 0.0:
+            raise AssertionError('grid.boxsize is not set.')
         
-    #     # From CatalogueFile
-    #     if isinstance(catalogue_file, CatalogueFile):
-    #         c._mass_assignment(cat._f, x0, boxsize,
-    #                            n_mas, grid._grid, None)
+        if xyz is not None:
+            c._mass_assignment_from_array(xyz, weight, nbar,
+                                          lssps._mass_assignment_scheme[mas],
+                                          self._grid)
+        else:
+            RuntimeError('xyz not provided')
 
-
-    #     if interlacing:
-    #         grid_shifted = lssps.grid.zeros(nc)
-    #         c._mass_assignment(catalogue_file._f, x0, boxsize,
-    #                            n_mas, grid._grid, grid_shifted._grid)
-
-    #     return (grid, grid_shifted)
-
-    #if isinstance(cat, str):\
-        
-    # catalogue is the filename
-    #    cat = loadtxt(cat)
-
-
+        if self.shifted is not None:
+            self.shifted.assign_density(cat=cat, xyz=xyz, weight=weight,
+                                        nbar=nbar, mas=mas)
 
 
 
