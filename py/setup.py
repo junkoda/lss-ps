@@ -19,7 +19,7 @@ idirs = ['../lib', np.get_include()] + idirs
 # directories for libraries -L(dir)
 ldirs = os.environ["LDIRS"]
 if ldirs:
-    ldirs = ldirs.split(')
+    ldirs = ldirs.split()
 else:
     ldirs = []
 
