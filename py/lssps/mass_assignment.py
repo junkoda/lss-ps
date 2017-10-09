@@ -34,11 +34,11 @@ def compute_density(catalogue_file, nc, *,
     if not isinstance(catalogue_file, CatalogueFile):
         raise TypeError('CatalogueFile is not given to compute_density')
     
-    grid = lssps.grid.zeros(nc)
+    grid = lssps.grid.zeros(nc, boxsize)
     n_mas = lssps._mass_assignment_scheme[mas.upper()]
 
     if interlacing:
-        grid_shifted = lssps.grid.zeros(nc)
+        grid_shifted = lssps.grid.zeros(nc, boxsize)
         c._mass_assignment(catalogue_file._f, x0, boxsize,
                            n_mas, grid._grid, grid_shifted._grid)
 
