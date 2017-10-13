@@ -11,6 +11,7 @@
 #include "py_mass_assignment.h"
 #include "py_interlacing.h"
 #include "py_power_spectrum.h"
+#include "py_performance.h"
 
 using namespace std;
 
@@ -64,8 +65,6 @@ static PyMethodDef methods[] = {
    py_grid_compute_fluctuation_homogeneous, METH_VARARGS,
    "_grid_compute_fluctuation_homogeneous(_grid_data)"},
 
-  {"_mass_assignment", py_mass_assignment, METH_VARARGS,
-   "assign mass to a grid"},
   {"_mass_assignment_from_array", py_mass_assignment_from_array, METH_VARARGS,
    "assign mass to a grid from an array"},
 
@@ -87,6 +86,9 @@ static PyMethodDef methods[] = {
   {"_power_spectrum_compute_plane_parallel",
    py_power_spectrum_compute_plane_parallel, METH_VARARGS,
    "_power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu, _grid_delta, subtract_shotnoise, correct_mas)"},
+
+  {"_performance_xyz_sum", py_performance_xyz_sum, METH_VARARGS,
+   "compute sum of an xyz array"},
   
   {NULL, NULL, 0, NULL}
 };
