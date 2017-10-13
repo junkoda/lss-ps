@@ -1,3 +1,4 @@
+#include <iostream>
 #include <chrono>
 #include <cmath>
 #include <cassert>
@@ -73,7 +74,7 @@ void mass_assignment_from_particles(const vector<Particle>& cat,
   Float const * const weight= &cat[0].w;
   Float const * const nbar= &cat[0].nbar;
   const size_t stride= sizeof(Particle);
-  
+
   switch(mas) {
   case 1:
     //mass_assignment_template(cat, x0, boxsize, NGP(), parallelise, grid);

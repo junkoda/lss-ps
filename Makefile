@@ -1,12 +1,15 @@
 default: py
 
 # Set C++11 compiler
-CXX     := c++ -std=c++11
+#CXX     := c++ -std=c++11
+#CXX     := g++-7 -fopenmp -std=c++11
+OPENMP  := -fopenmp
+CXX     := g++-7 $(OPENMP) -std=c++11
 CC      := $(CXX)
 
 # Extra compile options
 OPT     := -DDOUBLEPRECISION
-# OPT   += -fopenmp   # compiler option to enable OpenMP parallelisation
+#OPT   += -fopenmp   # compiler option to enable OpenMP parallelisation
 
 # Set library path if they are in non-standard directories
 FFTW3_DIR ?= #e.g. /Users/jkoda/Research/opt/gcc/fftw3

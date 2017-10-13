@@ -41,7 +41,7 @@ class Grid {
   void add(const size_t ix, const size_t iy, const size_t iz,
 	   const Float val) {
     size_t index= (ix*nc + iy)*ncz + iz;
-    #pragma omp atomic
+    //#pragma omp atomic DEBUG!!!
     fx[index] += val;
   }
   
