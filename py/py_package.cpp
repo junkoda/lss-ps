@@ -7,7 +7,6 @@
 #include "py_config.h"
 #include "py_msg.h"
 #include "py_cosmology.h"
-#include "py_catalogue.h"
 #include "py_grid.h"
 #include "py_mass_assignment.h"
 #include "py_interlacing.h"
@@ -32,19 +31,6 @@ static PyMethodDef methods[] = {
    py_cosmology_compute_comoving_distance, METH_VARARGS,
    "_cosmology_compute_comoving_distance"},
    
-   
-  {"_catalogue_alloc", py_catalogue_alloc, METH_VARARGS,
-   "allocate a new _cat opbject"},
-  {"_catalogue_len", py_catalogue_len, METH_VARARGS,
-   "return number of particles in the catalogue"},
-  {"_catalogue_read_text", py_catalogue_read_text, METH_VARARGS,
-   "_catalogue_read_text(_cat, filename) read particle data"},
-  {"_catalogue_asarray", py_catalogue_asarray, METH_VARARGS,
-   "_catalogue_asarrary(_cat) return catalogue as a np.array"},
-
-  {"_catalogue_file_ascii_alloc", py_catalogue_file_ascii_alloc, METH_VARARGS,
-   "_catalogue_file_ascii_alloc(filename, ipos, iweights, inbar, Pest"},   
-
   {"_grid_alloc", py_grid_alloc, METH_VARARGS,
    "_grid_alloc(nc) allocate a new grid object"},
   {"_grid_fft", py_grid_fft, METH_VARARGS,
@@ -116,7 +102,6 @@ static struct PyModuleDef module = {
 
 PyMODINIT_FUNC
 PyInit__lssps(void) {
-  py_catalogue_module_init();
   py_grid_module_init();
   py_power_spectrum_module_init();    
   

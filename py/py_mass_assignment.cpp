@@ -12,32 +12,6 @@
 #include "py_util.h"
 
 using namespace std;
-/*
-PyObject* py_mass_assignment(PyObject* self, PyObject* args)
-{
-  // _mass_assignment_cic(_cat, x0, boxsize, mas, _grid)
-  PyObject *py_cat, *py_grid, *py_x0;
-  int mas;
-  double boxsize;
-
-  if(!PyArg_ParseTuple(args, "OOdiO",
-		       &py_cat, &py_x0, &boxsize, &mas, &py_grid))
-    return NULL;
-
-  Catalogue const * const cat=
-    (Catalogue const *) PyCapsule_GetPointer(py_cat, "_Catalogue");
-  py_assert_ptr(cat);
-
-  Grid* const grid= (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
-  py_assert_ptr(grid);
-
-  Float x0[]= {0, 0, 0};
-
-  mass_assignment(cat, x0, boxsize, mas, grid);
-
-  Py_RETURN_NONE;
-}
-*/
 
 // Assign density to a grid or a pair of grid
 PyObject* py_mass_assignment(PyObject* self, PyObject* args)
