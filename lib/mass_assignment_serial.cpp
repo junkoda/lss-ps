@@ -1,15 +1,16 @@
-#ifndef MASS_ASSIGNMENT_H
-#define MASS_ASSIGNMENT_H 1
+//
+// Serial mass assignment
+// Only for measuring parallelisation performance
+//
+
+
 
 #include <iostream>
 #include <vector>
 #include "catalogue.h"
 #include "grid.h"
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
+namespace {
 //
 // Mass assignment functions
 //  x: position relative to the cubic box corner in units of grid spacing;
@@ -17,26 +18,19 @@
 //     where nc is the number of grids per dimension
 
 struct NGP {
-  void operator()(const double x[], const double w, Grid* const d)  {
+  void operator()(const double x[], const double w, Grid* const d) const {
     int ix[3];
     for(int i=0; i<3; ++i)
       ix[i] = (int) floor(x[i] + 0.5);
 
-    if(ix_left <= ix[0] && ix[0] < ix_right) {
-      
-      count++;
-      d->add(ix[0], ix[1], ix[2], w);
-      
-    }
+    d->add(ix[0], ix[1], ix[2], w);
   }
   static const int n_mas = 1;
-  int ix_left, ix_right;
-  size_t count;
 };
     
 
 struct CIC {
-  void operator()(const double x[], const double w, Grid* const d)  {
+  void operator()(const double x[], const double w, Grid* const d) const {
     int ix[3], ix0[3], ix1[3];
     double w0[3], w1[3];
 
@@ -49,32 +43,23 @@ struct CIC {
       w0[k] = 1.0 - w1[k];                 //               left grid point
     }
 
-    if(ix_left <= ix0[0] && ix0[0] < ix_right) {
-      count++;
 
-      d->add(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
-      d->add(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
-      d->add(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
-      d->add(ix0[0], ix1[1], ix1[2], w*w0[0]*w1[1]*w1[2]);
-    }
+    d->add(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
+    d->add(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
+    d->add(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
+    d->add(ix0[0], ix1[1], ix1[2], w*w0[0]*w1[1]*w1[2]);
 
-    if(ix_left <= ix1[0] && ix1[0] < ix_right) {
-      count++;
-
-      d->add(ix1[0], ix0[1], ix0[2], w*w1[0]*w0[1]*w0[2]);
-      d->add(ix1[0], ix1[1], ix0[2], w*w1[0]*w1[1]*w0[2]);
-      d->add(ix1[0], ix0[1], ix1[2], w*w1[0]*w0[1]*w1[2]);
-      d->add(ix1[0], ix1[1], ix1[2], w*w1[0]*w1[1]*w1[2]);
-    }
+    d->add(ix1[0], ix0[1], ix0[2], w*w1[0]*w0[1]*w0[2]);
+    d->add(ix1[0], ix1[1], ix0[2], w*w1[0]*w1[1]*w0[2]);
+    d->add(ix1[0], ix0[1], ix1[2], w*w1[0]*w0[1]*w1[2]);
+    d->add(ix1[0], ix1[1], ix1[2], w*w1[0]*w1[1]*w1[2]);
   }
 
-  int ix_left, ix_right;
   static const int n_mas = 2;
-  size_t count;
 };
 
 struct TSC {
-  void operator()(const double x[], const double w, Grid* const d)  {
+  void operator()(const double x[], const double w, Grid* const d) const {
     int ix0[3];
 
     double ww[3][3];
@@ -90,22 +75,17 @@ struct TSC {
 
     for(int dix=0; dix<3; ++dix) {
       int ix= (ix0[0] + dix - 1 + d->nc) % d->nc;
-      if(ix_left <= ix && ix < ix_right) {
-	for(int diy=0; diy<3; ++diy) {
-	  int iy= (ix0[1] + diy - 1 + d->nc) % d->nc;
-	  for(int diz=0; diz<3; ++diz) {
-	    int iz= (ix0[2] + diz - 1 + d->nc) % d->nc;
-	    count++;
-	    d->add(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
-	  }
+      for(int diy=0; diy<3; ++diy) {
+	int iy= (ix0[1] + diy - 1 + d->nc) % d->nc;
+	for(int diz=0; diz<3; ++diz) {
+	  int iz= (ix0[2] + diz - 1 + d->nc) % d->nc;
+	  d->add(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
 	}
       }
     }
   }
 
   static const int n_mas = 3;
-  int ix_left, ix_right;
-  size_t count;
 };
 
 //
@@ -155,44 +135,6 @@ void mass_assignment_template(float_type const * xyz,
 		      grid->x0_box[1] + grid->offset*dx,
 		      grid->x0_box[2] + grid->offset*dx};
 
-  std::cerr << "np= " << np << std::endl;
-
-  #pragma omp parallel firstprivate(xyz, weight, nbar)
-  {
-#ifdef _OPENMP
-    int ithread= omp_get_thread_num();
-    int nthread= omp_get_num_threads();
-#else
-    int ithread= 0;
-    int nthread= 1;
-#endif
-
-    int ix_left= ithread*nc/nthread;
-    int ix_right= (ithread + 1)*nc/nthread;
-
-    double x_left= (ix_left - 0.5*f.n_mas);
-    double x_right= (ix_right + 0.5*f.n_mas);
-
-    MAS f_local;
-    f_local.ix_left = ix_left;
-    f_local.ix_right= ix_right;
-    f_local.count= 0;
-
-    /*
-    #pragma omp critical
-    {
-      std::cerr << ithread << " / " << nthread << " "
-	        << ix_left << " - " << ix_right << " , "
-		<< x_left << " - " << x_right << std::endl;
-	
-
-      std::cerr << ithread << " / " << nthread << " "
-	        << ix_left << " - " << ix_right << std::endl;
-
-		}
-    */
-
-
     long double w_sum = 0.0;
     long double w2_sum = 0.0;
     long double nw2_sum = 0.0;
@@ -208,15 +150,10 @@ void mass_assignment_template(float_type const * xyz,
       nw2_sum += nb*w2;
     
       rx[0] = (xyz[0] - x0[0])*dx_inv;
+      rx[1] = (xyz[1] - x0[1])*dx_inv;
+      rx[2] = (xyz[2] - x0[2])*dx_inv;
 
-      if((x_left <= rx[0] && rx[0] <= x_right) ||
-	 (rx[0] >= x_left + dnc) ||
-	 (rx[0] <= x_right - dnc)) {
-	rx[1] = (xyz[1] - x0[1])*dx_inv;
-	rx[2] = (xyz[2] - x0[2])*dx_inv;
-
-	f_local(rx, w, grid);
-      }
+      f(rx, w, grid);
       
       xyz    = (float_type*) ((char*) xyz    + xyz_stride);
 
@@ -226,46 +163,23 @@ void mass_assignment_template(float_type const * xyz,
 	nbar   = (float_type*) ((char*) nbar   + nbar_stride);
     }
 
-    if(ithread == 0) {
-      grid->total_weight = w_sum;
-      grid->w2_sum = w2_sum;
-      grid->nw2_sum = nw2_sum;
-      grid->np = np;
-      grid->n_mas = f.n_mas;
-    }
-
-    #pragma omp critical
-    {
-      std::cerr << "count " << ithread << " / " << nthread << " = " << f_local.count << std::endl;
-    }
-
-  }
+    grid->total_weight = w_sum;
+    grid->w2_sum = w2_sum;
+    grid->nw2_sum = nw2_sum;
+    grid->np = np;
+    grid->n_mas = f.n_mas;
 }
 
-
-/*
-void mass_assignment(const std::vector<Particle>& cat,
-		     const Float x0[], const Float boxsize,
-		     const int mas,
-		     const bool parallel,
-		     Grid* const grid);
-*/
-//
-// Wrapper of mass_assignment_template for vector<Particle>
-//
-void mass_assignment_from_particles(const std::vector<Particle>& cat,
-				    const int mas, const bool parallelise,
-				    Grid* const grid);
+} // end of unnamed namespace
 
 //
 // Wrapping mass_assignment_template with variable mas
 //
-template<typename float_type>
-void mass_assignment_from_array(float_type const * const xyz,
+void mass_assignment_from_array_serial(double const * const xyz,
 				const size_t xyz_stride,
-				float_type const * const weight,
+				double const * const weight,
 				const size_t weight_stride,
-				float_type const * const nbar,
+				double const * const nbar,
 				const size_t nbar_stride,
 				const size_t np,
 				const int mas,
@@ -308,4 +222,4 @@ void mass_assignment_from_array(float_type const * const xyz,
 }
 
 
-#endif
+
