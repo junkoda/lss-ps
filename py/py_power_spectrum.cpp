@@ -1,6 +1,3 @@
-//
-// wrapping lib/catalogue.cpp
-//
 #include "msg.h"
 #include <iostream>
 #include "power_spectrum.h"

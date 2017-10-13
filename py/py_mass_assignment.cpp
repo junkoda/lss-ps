@@ -1,6 +1,3 @@
-//
-// wrapping lib/catalogue.cpp
-//
 #include <iostream>
 #include "msg.h"
 #include "catalogue.h"
@@ -12,64 +9,6 @@
 #include "py_util.h"
 
 using namespace std;
-
-// Assign density to a grid or a pair of grid
-PyObject* py_mass_assignment(PyObject* self, PyObject* args)
-{
-  // _mass_assignment(_f, _x0, boxsize, mas, _grid)
-  // Args:
-  //     _f: CatalogueFile
-  //     _x0: sequence of x0
-  //     mas (int): 1 for NGP, 2 for CIC, ...
-  //     _grid: a _Grid pointer
-  //            or a sequence of two _Grid pointers (interlacing)
-  PyObject *py_f, *py_grid, *py_grid_shifted;
-  int mas;
-
-  if(!PyArg_ParseTuple(args, "OOdiOO",
-		       &py_f, &mas,
-		       &py_grid, &py_grid_shifted))
-    return NULL;
-
-  CatalogueFile* const f=
-    (CatalogueFile*) PyCapsule_GetPointer(py_f, "_CatalogueFile");
-  py_assert_ptr(f);
-
-  Grid* const grid=
-    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
-  py_assert_ptr(grid);
-
-  Grid* grid_shifted= nullptr;
-  if(py_grid_shifted != Py_None) {
-    grid_shifted = (Grid*) PyCapsule_GetPointer(py_grid_shifted, "_Grid");
-    py_assert_ptr(grid_shifted);
-  }
-  
-  static size_t buffer_size = 100000;
-  
-  f->open();
-
-  #pragma omp parallel
-  {
-    vector<Particle> cat;
-    cat.reserve(buffer_size);
-
-    while(true) {
-      f->read(buffer_size, cat);
-      if(cat.empty())
-	break;
-      
-      mass_assignment_from_particles(cat, mas, false, grid);
-
-      if(grid_shifted)
-	mass_assignment_from_particles(cat, mas, false, grid_shifted);
-    }
-  }
-
-  f->close();
-
-  Py_RETURN_NONE;
-}
 
 
 PyObject* py_mass_assignment_from_array(PyObject* self, PyObject* args)
@@ -210,5 +149,4 @@ PyObject* py_mass_assignment_from_array(PyObject* self, PyObject* args)
 
   Py_RETURN_NONE;
 }
-
 
