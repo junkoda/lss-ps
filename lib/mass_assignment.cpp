@@ -63,6 +63,7 @@ void mass_assignment_template(const vector<Particle>& cat,
 //
 // Wrapper for for vector<Particle>
 //
+ /*
 void mass_assignment_from_particles(const vector<Particle>& cat,
 				    const int mas, const bool parallelise,
 				    Grid* const grid)
@@ -106,5 +107,5 @@ void mass_assignment_from_particles(const vector<Particle>& cat,
 	       mas);
   }
 }
-
+ */
 

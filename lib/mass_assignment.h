@@ -17,22 +17,26 @@
 //     where nc is the number of grids per dimension
 
 struct NGP {
-  void operator()(const double x[], const double w, Grid* const d) const {
+  void operator()(const double x[], const double w, Grid* const d)  {
     int ix[3];
-    for(int k=0; k<3; ++k) {
-      ix[k] = (int) floor(x[k] + 0.5);
-    }
+    for(int i=0; i<3; ++i)
+      ix[i] = (int) floor(x[i] + 0.5);
 
-    if(ix_left <= ix[0] && ix[0] < ix_right)
+    if(ix_left <= ix[0] && ix[0] < ix_right) {
+      
+      count++;
       d->add(ix[0], ix[1], ix[2], w);
+      
+    }
   }
   static const int n_mas = 1;
   int ix_left, ix_right;
+  size_t count;
 };
     
 
 struct CIC {
-  void operator()(const double x[], const double w, Grid* const d) const {
+  void operator()(const double x[], const double w, Grid* const d)  {
     int ix[3], ix0[3], ix1[3];
     double w0[3], w1[3];
 
@@ -46,6 +50,8 @@ struct CIC {
     }
 
     if(ix_left <= ix0[0] && ix0[0] < ix_right) {
+      count++;
+
       d->add(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
       d->add(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
       d->add(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
@@ -53,6 +59,8 @@ struct CIC {
     }
 
     if(ix_left <= ix1[0] && ix1[0] < ix_right) {
+      count++;
+
       d->add(ix1[0], ix0[1], ix0[2], w*w1[0]*w0[1]*w0[2]);
       d->add(ix1[0], ix1[1], ix0[2], w*w1[0]*w1[1]*w0[2]);
       d->add(ix1[0], ix0[1], ix1[2], w*w1[0]*w0[1]*w1[2]);
@@ -62,10 +70,11 @@ struct CIC {
 
   int ix_left, ix_right;
   static const int n_mas = 2;
+  size_t count;
 };
 
 struct TSC {
-  void operator()(const double x[], const double w, Grid* const d) const {
+  void operator()(const double x[], const double w, Grid* const d)  {
     int ix0[3];
 
     double ww[3][3];
@@ -86,6 +95,7 @@ struct TSC {
 	  int iy= (ix0[1] + diy - 1 + d->nc) % d->nc;
 	  for(int diz=0; diz<3; ++diz) {
 	    int iz= (ix0[2] + diz - 1 + d->nc) % d->nc;
+	    count++;
 	    d->add(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
 	  }
 	}
@@ -95,6 +105,7 @@ struct TSC {
 
   static const int n_mas = 3;
   int ix_left, ix_right;
+  size_t count;
 };
 
 //
@@ -144,10 +155,17 @@ void mass_assignment_template(float_type const * xyz,
 		      grid->x0_box[1] + grid->offset*dx,
 		      grid->x0_box[2] + grid->offset*dx};
 
+  std::cerr << "np= " << np << std::endl;
+
   #pragma omp parallel firstprivate(xyz, weight, nbar)
   {
+#ifdef _OPENMP
     int ithread= omp_get_thread_num();
     int nthread= omp_get_num_threads();
+#else
+    int ithread= 0;
+    int nthread= 1;
+#fi
 
     int ix_left= ithread*nc/nthread;
     int ix_right= (ithread + 1)*nc/nthread;
@@ -158,11 +176,22 @@ void mass_assignment_template(float_type const * xyz,
     MAS f_local;
     f_local.ix_left = ix_left;
     f_local.ix_right= ix_right;
+    f_local.count= 0;
 
+    /*
     #pragma omp critical
     {
-      std::cerr << ithread << " / " << nthread << std::endl;
-    }
+      std::cerr << ithread << " / " << nthread << " "
+	        << ix_left << " - " << ix_right << " , "
+		<< x_left << " - " << x_right << std::endl;
+	
+
+      std::cerr << ithread << " / " << nthread << " "
+	        << ix_left << " - " << ix_right << std::endl;
+
+		}
+    */
+
 
     long double w_sum = 0.0;
     long double w2_sum = 0.0;
@@ -180,12 +209,9 @@ void mass_assignment_template(float_type const * xyz,
     
       rx[0] = (xyz[0] - x0[0])*dx_inv;
 
-      // this should not be correct due to periodic wrapup.
-      // DEBUG
-      //  unit of x_left is wrong!!!
       if((x_left <= rx[0] && rx[0] <= x_right) ||
 	 (rx[0] >= x_left + dnc) ||
-	 (rx[0] <= x_right + dnc)) {
+	 (rx[0] <= x_right - dnc)) {
 	rx[1] = (xyz[1] - x0[1])*dx_inv;
 	rx[2] = (xyz[2] - x0[2])*dx_inv;
 
@@ -207,6 +233,12 @@ void mass_assignment_template(float_type const * xyz,
       grid->np = np;
       grid->n_mas = f.n_mas;
     }
+
+    #pragma omp critical
+    {
+      std::cerr << "count " << ithread << " / " << nthread << " = " << f_local.count << std::endl;
+    }
+
   }
 }
 
@@ -242,10 +274,6 @@ void mass_assignment_from_array(float_type const * const xyz,
 {
   // parallelise = true if you want to parallelise the mass assignment
   // within this function call
-
-  //std::cerr << "mass_assignment_from_array\n";
-  //std::cerr << "parallelise " << parallelise << std::endl;
-  //std::cerr << "omp_get_max_threads " << omp_get_max_threads() << std::endl;
 
   switch(mas) {
   case 1:
