@@ -23,7 +23,7 @@ struct NGP {
     for(int i=0; i<3; ++i)
       ix[i] = (int) floor(x[i] + 0.5);
 
-    d->add(ix[0], ix[1], ix[2], w);
+    d->add_atomic(ix[0], ix[1], ix[2], w);
   }
   static const int n_mas = 1;
 };
@@ -44,15 +44,15 @@ struct CIC {
     }
 
 
-    d->add(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
-    d->add(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
-    d->add(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
-    d->add(ix0[0], ix1[1], ix1[2], w*w0[0]*w1[1]*w1[2]);
+    d->add_atomic(ix0[0], ix0[1], ix0[2], w*w0[0]*w0[1]*w0[2]);
+    d->add_atomic(ix0[0], ix1[1], ix0[2], w*w0[0]*w1[1]*w0[2]);
+    d->add_atomic(ix0[0], ix0[1], ix1[2], w*w0[0]*w0[1]*w1[2]);
+    d->add_atomic(ix0[0], ix1[1], ix1[2], w*w0[0]*w1[1]*w1[2]);
 
-    d->add(ix1[0], ix0[1], ix0[2], w*w1[0]*w0[1]*w0[2]);
-    d->add(ix1[0], ix1[1], ix0[2], w*w1[0]*w1[1]*w0[2]);
-    d->add(ix1[0], ix0[1], ix1[2], w*w1[0]*w0[1]*w1[2]);
-    d->add(ix1[0], ix1[1], ix1[2], w*w1[0]*w1[1]*w1[2]);
+    d->add_atomic(ix1[0], ix0[1], ix0[2], w*w1[0]*w0[1]*w0[2]);
+    d->add_atomic(ix1[0], ix1[1], ix0[2], w*w1[0]*w1[1]*w0[2]);
+    d->add_atomic(ix1[0], ix0[1], ix1[2], w*w1[0]*w0[1]*w1[2]);
+    d->add_atomic(ix1[0], ix1[1], ix1[2], w*w1[0]*w1[1]*w1[2]);
   }
 
   static const int n_mas = 2;
@@ -79,7 +79,7 @@ struct TSC {
 	int iy= (ix0[1] + diy - 1 + d->nc) % d->nc;
 	for(int diz=0; diz<3; ++diz) {
 	  int iz= (ix0[2] + diz - 1 + d->nc) % d->nc;
-	  d->add(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
+	  d->add_atomic(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
 	}
       }
     }
@@ -134,39 +134,40 @@ void mass_assignment_template(float_type const * xyz,
 		      grid->x0_box[1] + grid->offset*dx,
 		      grid->x0_box[2] + grid->offset*dx};
 
-    long double w_sum = 0.0;
-    long double w2_sum = 0.0;
-    long double nw2_sum = 0.0;
+  long double w_sum = 0.0;
+  long double w2_sum = 0.0;
+  long double nw2_sum = 0.0;
 
-    for(size_t i=0; i<np; ++i) {
-      Float rx[3];
-      double w = weight == nullptr ? 1.0 : *weight;
-      double nb = nbar == nullptr ? 1.0 : *nbar;
-      
-      const double w2 = w*w;
-      w_sum += w;
-      w2_sum += w2;
-      nw2_sum += nb*w2;
+  #pragma omp parallel for
+  for(size_t i=0; i<np; ++i) {
+    Float rx[3];
+    double w = weight == nullptr ? 1.0 : *weight;
+    double nb = nbar == nullptr ? 1.0 : *nbar;
     
-      rx[0] = (xyz[0] - x0[0])*dx_inv;
-      rx[1] = (xyz[1] - x0[1])*dx_inv;
-      rx[2] = (xyz[2] - x0[2])*dx_inv;
-
-      f(rx, w, grid);
+    const double w2 = w*w;
+    w_sum += w;
+    w2_sum += w2;
+    nw2_sum += nb*w2;
+    
+    rx[0] = (xyz[0] - x0[0])*dx_inv;
+    rx[1] = (xyz[1] - x0[1])*dx_inv;
+    rx[2] = (xyz[2] - x0[2])*dx_inv;
+    
+    f(rx, w, grid);
       
-      xyz    = (float_type*) ((char*) xyz    + xyz_stride);
-
-      if(weight)
-	weight = (float_type*) ((char*) weight + weight_stride);
-      if(nbar)
-	nbar   = (float_type*) ((char*) nbar   + nbar_stride);
-    }
-
-    grid->total_weight = w_sum;
-    grid->w2_sum = w2_sum;
-    grid->nw2_sum = nw2_sum;
-    grid->np = np;
-    grid->n_mas = f.n_mas;
+    xyz    = (float_type*) ((char*) xyz    + xyz_stride);
+    
+    if(weight)
+      weight = (float_type*) ((char*) weight + weight_stride);
+    if(nbar)
+      nbar   = (float_type*) ((char*) nbar   + nbar_stride);
+  }
+  
+  grid->total_weight = w_sum;
+  grid->w2_sum = w2_sum;
+  grid->nw2_sum = nw2_sum;
+  grid->np = np;
+  grid->n_mas = f.n_mas;
 }
 
 } // end of unnamed namespace
@@ -174,7 +175,7 @@ void mass_assignment_template(float_type const * xyz,
 //
 // Wrapping mass_assignment_template with variable mas
 //
-void mass_assignment_from_array_serial(double const * const xyz,
+void mass_assignment_from_array_atomic(double const * const xyz,
 				const size_t xyz_stride,
 				double const * const weight,
 				const size_t weight_stride,

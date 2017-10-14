@@ -67,6 +67,8 @@ static PyMethodDef methods[] = {
 
   {"_mass_assignment_from_array", py_mass_assignment_from_array, METH_VARARGS,
    "assign mass to a grid from an array"},
+  {"_mass_assignment_variations", py_mass_assignment_variations, METH_VARARGS,
+   "assign mass to a grid from an array (serial or atomic)"},
 
   {"_interlacing", py_interlacing, METH_VARARGS,
    "_interlacing(_grid1, _grid2)"},

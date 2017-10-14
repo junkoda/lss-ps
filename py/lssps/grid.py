@@ -129,7 +129,7 @@ class Grid:
     def assign_density(self, *,
                        cat=None,
                        xyz=None, weight=None, nbar=None,
-                       mas='CIC'):
+                       mas='CIC', parallel='default'):
         """Assign density to this grid
         Args:
             mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
@@ -145,15 +145,26 @@ class Grid:
             raise AssertionError('grid.boxsize is not set.')
         
         if xyz is not None:
-            c._mass_assignment_from_array(xyz, weight, nbar,
-                                          lssps._mass_assignment_scheme[mas],
-                                          self._grid)
+            if parallel == 'default':
+                c._mass_assignment_from_array(xyz, weight, nbar,
+                                        lssps._mass_assignment_scheme[mas],
+                                        self._grid)
+            elif parallel == 'serial' or parallel == 'atomic':
+                c._mass_assignment_variations(parallel,
+                                        xyz, weight, nbar,
+                                        lssps._mass_assignment_scheme[mas],
+                                        self._grid)
+            else:
+                raise TypeError('Unknown parallel = %s in Grid.assign_mass()' %
+                                parallel)
+
+                                              
         else:
             RuntimeError('xyz not provided')
-
+            
         if self.shifted is not None:
             self.shifted.assign_density(cat=cat, xyz=xyz, weight=weight,
-                                        nbar=nbar, mas=mas)
+                                        nbar=nbar, mas=mas, parallel=parallel)
 
 
 
