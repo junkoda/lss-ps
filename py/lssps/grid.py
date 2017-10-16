@@ -143,6 +143,8 @@ class Grid:
     
         if self.boxsize <= 0.0:
             raise AssertionError('grid.boxsize is not set.')
+
+        mas = mas.upper()
         
         if xyz is not None:
             if parallel == 'default':

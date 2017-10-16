@@ -189,7 +189,7 @@ void mass_assignment_from_array_atomic(double const * const xyz,
   // parallelise = true if you want to parallelise the mass assignment
   // within this function call
 
-  std::cerr << "mass_assignment_serial\n";
+  std::cerr << "mass_assignment_atomic\n";
 
   switch(mas) {
   case 1:
