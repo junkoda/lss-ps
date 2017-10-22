@@ -53,6 +53,7 @@ setup(name='lssps',
                      'py_power_spectrum.cpp', 'py_interlacing.cpp',
                      'py_performance.cpp',
                      'py_mass_assignment_variations.cpp',
+                     'py_yamamoto.cpp'
                     ],
                     include_dirs = idirs,
                     extra_compile_args = [os.environ['OPT']],
