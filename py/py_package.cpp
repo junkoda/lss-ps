@@ -12,6 +12,7 @@
 #include "py_interlacing.h"
 #include "py_power_spectrum.h"
 #include "py_performance.h"
+#include "py_mean_density.h"
 
 using namespace std;
 
@@ -91,6 +92,9 @@ static PyMethodDef methods[] = {
 
   {"_performance_xyz_sum", py_performance_xyz_sum, METH_VARARGS,
    "compute sum of an xyz array"},
+
+  {"_mean_density_from_grid", py_mean_density_from_grid, METH_VARARGS,
+   "_mean_density_from_grid(_grid, xyz, nbar)"},
   
   {NULL, NULL, 0, NULL}
 };
