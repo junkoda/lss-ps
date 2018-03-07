@@ -13,19 +13,19 @@ using namespace std;
 
 PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
 {
-  // _mass_assignment_from_array(_grid, xyz, nbar)
+  // _mass_assignment_from_array(_grid, xyz, fac, nbar)
   // Args:
   //     _grid: a _Grid pointer
   //     xyz:    The array of xyz
+  //     fac:    nbar = fac*grid(x)
   //     nbar:   The array of nbar, can be None
 
   PyObject *py_xyz, *py_nbar;
   PyObject *py_grid;
   double fac;
 
-  if(!PyArg_ParseTuple(args, "OdOO",
-		       &py_grid, &fac,
-		       &py_xyz, &py_nbar))
+  if(!PyArg_ParseTuple(args, "OOdO",
+		       &py_grid, &py_xyz, &fac, &py_nbar))
     return NULL;
 
   Grid* const grid=
