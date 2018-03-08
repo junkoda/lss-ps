@@ -14,6 +14,7 @@ class PowerSpectrum {
   PowerSpectrum& operator+=(const PowerSpectrum& ps);
 
   int n, nmu;
+  double shot_noise;
   
   std::valarray<int> nmodes, nmodes2d;
   std::valarray<double> k, p0, p2, p4;

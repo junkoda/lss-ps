@@ -199,3 +199,17 @@ PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
   return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
 }
 
+PyObject* py_power_spectrum_shotnoise(PyObject* self, PyObject* args)
+{
+  PyObject *py_ps;
+
+  if(!PyArg_ParseTuple(args, "O", &py_ps)) {
+    return NULL;
+  }
+
+  PowerSpectrum* const ps=
+    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
+  py_assert_ptr(ps);
+
+  return Py_BuildValue("d", ps->shot_noise);
+}

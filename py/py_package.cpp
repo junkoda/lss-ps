@@ -89,6 +89,8 @@ static PyMethodDef methods[] = {
   {"_power_spectrum_compute_plane_parallel",
    py_power_spectrum_compute_plane_parallel, METH_VARARGS,
    "_power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu, _grid_delta, subtract_shotnoise, correct_mas)"},
+  {"_power_spectrum_shotnoise",py_power_spectrum_shotnoise, METH_VARARGS,
+   "_power_spectrum_shotnoise(_ps)"},
 
   {"_performance_xyz_sum", py_performance_xyz_sum, METH_VARARGS,
    "compute sum of an xyz array"},

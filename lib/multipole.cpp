@@ -184,6 +184,8 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   msg_printf(msg_info, "Time multipoles %e\n",
              std::chrono::duration<double>(te - ts).count());
 
+  ps->shot_noise= shot_noise;
+
   return ps;
 }
 

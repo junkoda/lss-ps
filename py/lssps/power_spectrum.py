@@ -30,6 +30,7 @@ class PowerSpectrum:
         self.P4 = c._power_spectrum_P4_asarray(self._ps)
 
         self.n = c._power_spectrum_len(self._ps)
+        self.shot_noise = c._power_spectrum_shotnoise(self._ps)
 
     def __len__(self):
         """Number of bins"""
