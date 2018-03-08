@@ -24,7 +24,9 @@ void mean_density_from_grid(Grid const * const grid,
   const Float boxsize= grid->boxsize;
   const Float dx_inv= nc/boxsize;
   Float const * const x0 = grid->x0_box;
-  Float const * const d= grid->fx;
+  //Float const * const d= grid->fx;
+
+  const size_t ncz= nc/2 + 1;
   
   for(size_t i=0; i<np; ++i) {
     int ix= (int) floor((xyz[0] - x0[0])*dx_inv);
@@ -35,9 +37,9 @@ void mean_density_from_grid(Grid const * const grid,
     size_t iiy= (iy + nc) % nc;
     size_t iiz= (iz + nc) % nc;
 
-    size_t index= (iix*nc + iiy)*nc + iiz;
+    //size_t index= (iix*nc + iiy)*nc + iiz;
 
-    *nbar = fac*d[index];
+    *nbar = fac*(*grid)(iix, iiy, iiz); //fac*d[index];
     
     xyz  = (float_type*) ((char*) xyz    + xyz_stride);
     nbar  = (float_type*) ((char*) nbar   + nbar_stride);
