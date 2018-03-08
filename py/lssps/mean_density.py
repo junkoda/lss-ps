@@ -1,14 +1,14 @@
 import numpy as np
 import lssps._lssps as c
 
-def from_grid(grid, x, factor):
+def from_grid(grid, xyz, factor):
     """
     Compute nbar at position xyz from given grid
     nbar[i] = factor*grid(x[i]) 
 
     Args:
       grid (Grid): Grid object of mean number density
-      x (array): Array of positions; 3 columns xyz
+      xyz (array): Array of positions; 3 columns for x, y, z
       factor (float): nbar = factor*grid(x)
 
     Returns:
@@ -17,6 +17,6 @@ def from_grid(grid, x, factor):
 
     nbar = np.empty(xyz.shape[0])
     
-    c._py_mean_density_from_grid(grid, xyz, factor, nbar)
+    c._mean_density_from_grid(grid._grid, xyz, factor, nbar)
 
     return nbar
