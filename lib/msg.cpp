@@ -6,7 +6,7 @@
 
 namespace {
   enum LogLevel log_level;
-  char prefix[8]= "";
+  char prefix[8]= "# ";
 }
 
 

@@ -13,6 +13,7 @@
 #include "py_power_spectrum.h"
 #include "py_performance.h"
 #include "py_mean_density.h"
+#include "py_etc.h"
 
 using namespace std;
 
@@ -37,6 +38,8 @@ static PyMethodDef methods[] = {
    "_grid_alloc(nc) allocate a new grid object"},
   {"_grid_fft", py_grid_fft, METH_VARARGS,
    "_grid_fft(_grid); apply FFT to the grid"},
+  {"_grid_fft_inverse", py_grid_fft_inverse, METH_VARARGS,
+   "_grid_fft_inverser(_grid); apply inverse FFT to the grid"},
   {"_grid_nc", py_grid_nc, METH_VARARGS, "return nc"},
   {"_grid_get_mode", py_grid_get_mode, METH_VARARGS, "return grid mode"},
   {"_grid_set_mode", py_grid_set_mode, METH_VARARGS, "set grid mode"},
@@ -50,6 +53,10 @@ static PyMethodDef methods[] = {
   {"_grid_set_sums", py_grid_set_sums, METH_VARARGS, "set sums"},
   {"_grid_get_nmas", py_grid_get_nmas, METH_VARARGS, "get n_mas"},
   {"_grid_set_nmas", py_grid_set_nmas, METH_VARARGS, "set n_mas"},
+  {"_grid_get_pk_normalisation", py_grid_get_pk_normalisation, METH_VARARGS,
+   "set pk_normalisation"},
+  {"_grid_set_pk_normalisation", py_grid_set_pk_normalisation, METH_VARARGS,
+   "set pk_normalisation"},
 
   {"_grid_fx_asarray", py_grid_fx_asarray, METH_VARARGS,
    "return real-space grid as an np.array"},
@@ -97,6 +104,10 @@ static PyMethodDef methods[] = {
 
   {"_mean_density_from_grid", py_mean_density_from_grid, METH_VARARGS,
    "_mean_density_from_grid(_grid, xyz, nbar)"},
+
+  {"_etc_gaussian_smoothing", py_etc_gaussian_smoothing, METH_VARARGS,
+   "_etc_gaussian_smoothing(_grid, sigma_smoothing)"},
+
   
   {NULL, NULL, 0, NULL}
 };

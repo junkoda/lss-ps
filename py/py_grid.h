@@ -8,6 +8,7 @@ py_grid_module_init();
 
 PyObject* py_grid_alloc(PyObject* self, PyObject* args);
 PyObject* py_grid_fft(PyObject* self, PyObject* args);
+PyObject* py_grid_fft_inverse(PyObject* self, PyObject* args);
 PyObject* py_grid_nc(PyObject* self, PyObject* args);
 PyObject* py_grid_get_mode(PyObject* self, PyObject* args);
 PyObject* py_grid_set_mode(PyObject* self, PyObject* args);
@@ -21,6 +22,8 @@ PyObject* py_grid_get_sums(PyObject* self, PyObject* args);
 PyObject* py_grid_set_sums(PyObject* self, PyObject* args);
 PyObject* py_grid_get_nmas(PyObject* self, PyObject* args);
 PyObject* py_grid_set_nmas(PyObject* self, PyObject* args);
+PyObject* py_grid_get_pk_normalisation(PyObject* self, PyObject* args);
+PyObject* py_grid_set_pk_normalisation(PyObject* self, PyObject* args);
 
 PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args);
 PyObject* py_grid_fk_asarray(PyObject* self, PyObject* args);

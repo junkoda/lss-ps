@@ -23,7 +23,8 @@ void grid_print_time()
 // class Grid
 //
 Grid::Grid(const int nc_) :
-  nc(nc_), ncz(2*(nc_/2 + 1)), mode(GridMode::real_space), offset(0), boxsize(0),
+  nc(nc_), ncz(2*(nc_/2 + 1)), mode(GridMode::real_space),
+  offset(0), boxsize(0), shot_noise(0.0), pk_normalisation(1.0),
   total_weight(0), n_mas(0)
 {
   auto ts = std::chrono::high_resolution_clock::now();
@@ -64,6 +65,32 @@ void Grid::fft()
   FFTW(execute)(plan);
 
   mode = GridMode::fourier_space;
+  auto te = std::chrono::high_resolution_clock::now();
+  time_fft += std::chrono::duration<double>(te - ts).count();
+}
+
+void Grid::fft_inverse()
+{
+  // Inverse Fourier transform the grid
+  auto ts = std::chrono::high_resolution_clock::now();
+
+  if(mode != GridMode::fourier_space) {
+    msg_printf(msg_error,
+	       "Error: trying to Inverse FFT a grid not in fourier-space mode\n");
+    throw AssertionError();
+  }
+
+  FFTW(plan) plan_inverse;
+    
+  plan_inverse= FFTW(plan_dft_c2r_3d)(nc, nc, nc, (FFTW(complex)*) fx, fx, 
+				      FFTW_ESTIMATE);
+    
+  FFTW(execute)(plan_inverse);
+
+  FFTW(destroy_plan)(plan_inverse);
+
+  mode = GridMode::real_space;
+
   auto te = std::chrono::high_resolution_clock::now();
   time_fft += std::chrono::duration<double>(te - ts).count();
 }

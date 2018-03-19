@@ -1,5 +1,5 @@
 //
-// wrapping lib/catalogue.cpp
+// wrapping lib/grid.cpp
 //
 #include "msg.h"
 #include "grid.h"
@@ -30,6 +30,7 @@ py_grid_module_init()
 
 
 static void py_grid_free(PyObject *obj);
+
 
 //
 // class Grid
@@ -91,9 +92,32 @@ PyObject* py_grid_fft(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+PyObject* py_grid_fft_inverse(PyObject* self, PyObject* args)
+{
+  // Inverse Fourier transform the grid
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  try {
+    grid->fft_inverse();
+  }
+  catch(AssertionError) {
+    PyErr_SetString(PyExc_MemoryError, "Grid Inverse FFT error");
+  }
+
+  Py_RETURN_NONE;
+}
+
 PyObject* py_grid_nc(PyObject* self, PyObject* args)
 {
-  // _grid_nc(_cat)
+  // _grid_nc(_grid)
   // Return the number of grid points per dimension
   PyObject *py_grid;
 
@@ -110,7 +134,7 @@ PyObject* py_grid_nc(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_mode(PyObject* self, PyObject* args)
 {
-  // _grid_mode(_cat)
+  // _grid_mode(_grid)
   // Return the mode of the grid real-space / fourier-space
   PyObject *py_grid;
 
@@ -156,7 +180,7 @@ PyObject* py_grid_set_mode(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_boxsize(PyObject* self, PyObject* args)
 {
-  // _grid_get_boxsize(_cat)
+  // _grid_get_boxsize(_grid)
   // Return boxsize
   PyObject *py_grid;
 
@@ -173,7 +197,7 @@ PyObject* py_grid_get_boxsize(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_boxsize(PyObject* self, PyObject* args)
 {
-  // _grid_set_boxsize(_cat, boxsize)
+  // _grid_set_boxsize(_grid, boxsize)
   // Set boxsize
   PyObject *py_grid;
   double boxsize;
@@ -193,7 +217,7 @@ PyObject* py_grid_set_boxsize(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_x0(PyObject* self, PyObject* args)
 {
-  // _grid_get_x0(_cat, x0)
+  // _grid_get_x0(_grid, x0)
   // Return x0_box
   PyObject *py_grid;
   double x0[3];
@@ -212,7 +236,7 @@ PyObject* py_grid_get_x0(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_x0(PyObject* self, PyObject* args)
 {
-  // _grid_set_x0(_cat, x0, y0, z0)
+  // _grid_set_x0(_grid, x0, y0, z0)
   // Set x0_box
   PyObject *py_grid;
   double x0[3];
@@ -233,7 +257,7 @@ PyObject* py_grid_set_x0(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_offset(PyObject* self, PyObject* args)
 {
-  // _grid_get_offset(_cat)
+  // _grid_get_offset(_grid)
   // Return offset
   PyObject *py_grid;
 
@@ -250,7 +274,7 @@ PyObject* py_grid_get_offset(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_offset(PyObject* self, PyObject* args)
 {
-  // _grid_set_offset(_cat, offset)
+  // _grid_set_offset(_grid, offset)
   // set offset
   PyObject *py_grid;
   double offset;
@@ -270,7 +294,7 @@ PyObject* py_grid_set_offset(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_sums(PyObject* self, PyObject* args)
 {
-  // _grid_get_sums(_cat)
+  // _grid_get_sums(_grid)
   // Return sum of weights, total_weight, w2_sum, nw2_sum
   PyObject *py_grid;
 
@@ -291,7 +315,7 @@ PyObject* py_grid_get_sums(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_sums(PyObject* self, PyObject* args)
 {
-  // _grid_set_sum(_cat, total_weight, w2_sum, nw2_sum, np)
+  // _grid_set_sum(_grid, total_weight, w2_sum, nw2_sum, np)
   PyObject *py_grid;
   double w_sum, w2_sum, nw2_sum;
   unsigned long np;
@@ -315,7 +339,7 @@ PyObject* py_grid_set_sums(PyObject* self, PyObject* args)
 
 PyObject* py_grid_get_nmas(PyObject* self, PyObject* args)
 {
-  // _grid_get_nmas(_cat)
+  // _grid_get_nmas(_grid)
   // Return the degree of mass assighment
   PyObject *py_grid;
 
@@ -332,7 +356,7 @@ PyObject* py_grid_get_nmas(PyObject* self, PyObject* args)
 
 PyObject* py_grid_set_nmas(PyObject* self, PyObject* args)
 {
-  // _grid_set_nmas(_cat, boxsize)
+  // _grid_set_nmas(_grid, nmas)
   PyObject *py_grid;
   int n_mas;
 
@@ -345,6 +369,42 @@ PyObject* py_grid_set_nmas(PyObject* self, PyObject* args)
   py_assert_ptr(grid);
 
   grid->n_mas= n_mas;
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_grid_get_pk_normalisation(PyObject* self, PyObject* args)
+{
+  // _grid_get_pk_normalisation(_grid)
+  // Return the degree of mass assighment
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  return Py_BuildValue("d", grid->pk_normalisation);
+}
+
+PyObject* py_grid_set_pk_normalisation(PyObject* self, PyObject* args)
+{
+  // _grid_set_nmas(_grid, pk_normalisation)
+  PyObject *py_grid;
+  double value;
+
+  if(!PyArg_ParseTuple(args, "Od", &py_grid, &value)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->pk_normalisation= value;
 
   Py_RETURN_NONE;
 }
@@ -372,7 +432,7 @@ PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args)
 		       (npy_intp) (sizeof(Float)*ncz),
 		       (npy_intp) (sizeof(Float))};
   return PyArray_New(&PyArray_Type, nd, dims, NPY_FLOAT_TYPE, strides,
-  grid->fx, 0, 0, 0);
+  grid->fx, 0, NPY_ARRAY_WRITEABLE, 0);
 }
 
 
@@ -503,4 +563,4 @@ PyObject* py_grid_load_fx_from_array(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
-	
+

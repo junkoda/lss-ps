@@ -52,6 +52,7 @@ class Grid {
   }
 
   void fft();
+  void fft_inverse();
   void clear();
   void write(const char filename[]);
   

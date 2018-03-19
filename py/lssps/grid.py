@@ -88,9 +88,23 @@ class Grid:
 
     def fft(self):
         """Fast Fourier Transform from real space to Fourier space"""
+        if self.mode != 'real-space':
+            raise RuntimeError('grid is not in real space')
+
         c._grid_fft(self._grid)
         if self.shifted is not None:
             self.shifted.fft()
+
+        return self
+
+    def fft_inverse(self):
+        """Inverse Fast Fourier Transform from Fourier space to real space"""
+        if self.mode != 'fourier-space':
+            raise RuntimeError('grid is not in Fourier space')
+        
+        c._grid_fft_inverse(self._grid)
+        if self.shifted is not None:
+            self.shifted.fft_inverse()
 
         return self
 
@@ -247,6 +261,14 @@ class Grid:
     def n_mas(self, value):
         c._grid_set_nmas(self._grid, value)
 
+    @property
+    def pk_normalisation(self):
+        """Normalisation factor for power spectrum"""
+        return c._grid_get_pk_normalisation(self._grid)
+
+    @mode.setter
+    def pk_normalisation(self, value):
+        c._grid_set_pk_normalisation(self._grid, value)
 
 
 

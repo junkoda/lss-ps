@@ -100,6 +100,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 
   const double shot_noise= subtract_shotnoise ? grid->shot_noise : 0;
   msg_printf(msg_info, "Shot noise subtraction: %e\n", shot_noise);
+  msg_printf(msg_info, "Pk normalisation %e\n", grid->pk_normalisation);
 
   #pragma omp parallel num_threads(omp_get_max_threads())
   {
