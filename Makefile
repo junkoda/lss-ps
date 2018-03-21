@@ -14,8 +14,9 @@ OPT     := -DDOUBLEPRECISION
 # Set library path if they are in non-standard directories
 FFTW3_DIR ?= #e.g. /Users/jkoda/Research/opt/gcc/fftw3
 GSL_DIR   ?= #e.g. /Users/jkoda/Research/opt/gcc/gsl
+HDF5_DIR  ?=
 
-DIR_PATH   = $(FFTW3_DIR) $(GSL_DIR)
+DIR_PATH   = $(FFTW3_DIR) $(GSL_DIR) $(HDF5_DIR)
 
 IDIRS    += $(foreach dir, $(DIR_PATH), $(dir)/include)
 LDIRS    += $(foreach dir, $(DIR_PATH), $(dir)/lib)

@@ -220,7 +220,7 @@ void mass_assignment_template(float_type const * xyz,
 		      grid->x0_box[1] + grid->offset*dx,
 		      grid->x0_box[2] + grid->offset*dx};
 
-  std::cerr << "np= " << np << std::endl;
+  //std::cerr << "np= " << np << std::endl;
 
   // num_threads(omp_get_max_threads()) 
   #pragma omp parallel firstprivate(xyz, weight, nbar)
@@ -304,6 +304,7 @@ void mass_assignment_template(float_type const * xyz,
 
     auto te = std::chrono::high_resolution_clock::now();
 
+    /*
     #pragma omp critical
     {
       std::cerr << "count " << ithread << " / " << nthread <<
@@ -311,6 +312,7 @@ void mass_assignment_template(float_type const * xyz,
 	        << std::chrono::duration<double>(te - ts).count()
 		<< std::endl;
     }
+    */
   }
 }
 
