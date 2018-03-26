@@ -163,10 +163,10 @@ void mass_assignment_template(float_type const * xyz,
       nbar   = (float_type*) ((char*) nbar   + nbar_stride);
   }
   
-  grid->total_weight = w_sum;
-  grid->w2_sum = w2_sum;
-  grid->nw2_sum = nw2_sum;
-  grid->np = np;
+  grid->total_weight += w_sum;
+  grid->w2_sum += w2_sum;
+  grid->nw2_sum += nw2_sum;
+  grid->np += np;
   grid->n_mas = f.n_mas;
 }
 
