@@ -24,6 +24,8 @@ struct Node {
 class KNeighbors {
  public:
   KNeighbors(const int knbr);
+
+  void clear();
   
   void push_back(const Float r2, const index_t idx) {
     // Insert r2 to the orderd vector v

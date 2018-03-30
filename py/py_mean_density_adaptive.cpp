@@ -3,6 +3,7 @@
 #include "py_mean_density_adaptive.h"
 #include "py_assert.h"
 
+/*
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 
@@ -12,6 +13,7 @@
 #define NPY_FLOAT_TYPE NPY_FLOAT
 #endif
 
+
 PyMODINIT_FUNC
 py_mean_density_adaptive_module_init()
 {
@@ -19,6 +21,7 @@ py_mean_density_adaptive_module_init()
 
   return NULL;
 }
+*/
 
 using namespace std;
 
@@ -40,6 +43,7 @@ void construct_vector(float_type const * xyz,
   p.n_average = 0;
   
   for(size_t i=0; i<np; ++i) {
+    p.idx= i; // original index
     p.x[0] = xyz[0];
     p.x[1] = xyz[1];
     p.x[2] = xyz[2];
@@ -128,22 +132,22 @@ PyObject* py_kdpoints_from_array(PyObject* self, PyObject* args)
 		      "Expected a 1-dimensional array for weight");
       return NULL;
     }
+
+    if(weight.shape[0] != xyz.shape[0]) {
+      PyErr_SetString(PyExc_TypeError, "Length of xyz and weight arrays differ");
+      return NULL;
+    }
+
+    if(strcmp(xyz.format, weight.format) != 0) {
+      PyErr_SetString(PyExc_TypeError,
+	 "data type (double/single precision) of xyz and weight are not the same");
+      return NULL;
+    }
   }
 
   if(xyz.suboffsets || weight.suboffsets) {
     PyErr_SetString(PyExc_TypeError,
 	    "_mean_density_adaptive cannot handle array with suboffsets");
-    return NULL;
-  }
-
-  if(weight.buf && (weight.shape[0] != xyz.shape[0])) {
-    PyErr_SetString(PyExc_TypeError, "Length of xyz and weight arrays differ");
-    return NULL;
-  }
-
-  if(strcmp(xyz.format, weight.format) != 0) {
-    PyErr_SetString(PyExc_TypeError,
-      "data type (double/single precision) of xyz and weight are not the same");
     return NULL;
   }
     
@@ -169,9 +173,9 @@ PyObject* py_kdpoints_from_array(PyObject* self, PyObject* args)
     }
 
     construct_vector<float>((float*) xyz.buf,
-			     xyz.strides[0],
-			     (float*) weight.buf,
-			     weight.strides[0],
+			    xyz.strides[0],
+			    (float*) weight.buf,
+			    weight.strides[0],
 			    xyz.shape[0],
 			    *pv);
   }
@@ -218,7 +222,7 @@ PyObject* py_kdpoints_density_as_array(PyObject* self, PyObject* args)
   // Decode array information
   //
 
-  // xyz array
+  // output nbar array
   Py_buffer nbar;
   if(PyObject_GetBuffer(py_nbar, &nbar, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
     return NULL;
@@ -248,10 +252,14 @@ PyObject* py_kdpoints_density_as_array(PyObject* self, PyObject* args)
   double* const out= (double*) nbar.buf;
   
   for(size_t i=0; i<n; ++i) {
+    // kdtree construction modifies the order of particles
+    // returns density in the original order
     index_t idx= v[i].idx;
-    assert(0 <= idx && idx < n);
+    assert(0 <= idx && idx < static_cast<index_t>(n));
     out[idx]= v[i].n_local;
   }
+
+  cerr << "py 2852 " << v[2852].n_local << " " << v[2852].idx << endl;
 
   Py_RETURN_NONE;
 }

@@ -17,12 +17,14 @@ using namespace std;
 //   Annual Review of Astronomy and Astrophysics, 30 (1992), pp. 543-574.
 static inline Float kernel(const Float r, const Float h)
 {
+  //assert(r > 0.0);
+
   const Float fac= 1.0/(M_PI*h*h*h);
   const Float q= r/h;
 
-  if(r > 2.0)
+  if(q > 2.0)
     return 0.0;
-  else if(r > 1.0)
+  else if(q > 1.0)
     return 0.25*fac*pow(2.0 - q, 3);
 
   return fac*(1.0 - 1.5*q*q*(1.0 - 0.5*q));
@@ -61,8 +63,16 @@ KNeighbors::KNeighbors(const int knbr)
 {
   v_r2.resize(knbr + 1, numeric_limits<Float>::max());
   v_r2[0]= 0;
-
+  
   v_idx.resize(knbr + 1, -1);
+}
+
+void KNeighbors::clear()
+{
+  v_r2.assign(v_r2.size(), numeric_limits<Float>::max());
+  v_idx.assign(v_idx.size(), -1);
+
+  v_r2[0]= 0;
 }
 
 static inline int cut_direction(const Float boxsize3[])
@@ -97,6 +107,18 @@ KDTree::KDTree(vector<KDPoint>& v_, const int quota_) :
   v(v_), quota(quota_), nodes(nullptr), n_nodes(0), height_max(0)
 {
   construct_balanced();
+
+  //DEBUG
+  //test KNeighbor class
+  /*
+  int k=8;
+  KNeighbors knbr(k);
+  for(int i=1; i<=10; ++i)
+    knbr.push_back(0.5*(10 - i + 1), 0);
+
+  for(int i=1; i<=k; ++i)
+    printf("%d %f / %f\n", i, knbr.r2(i), knbr.r2_max());
+  */
 }
 
 KDTree::~KDTree()
@@ -213,14 +235,14 @@ void KDTree::construct_balanced_recursive(const size_t inode, const int height,
 
   boxsize3[k] /= 2;
 
-  const size_t imid= ibegin + (iend - ibegin)/2;
+  const index_t imid= ibegin + (iend - ibegin)/2;
   assert(ibegin < imid && imid < iend - 1);
   nth_element(v.begin() + ibegin, v.begin() + imid, v.begin() + iend,
 	      CompPoints<KDPoint>(k));
 
   // construct left sub nodes (contains particles with smaller x[k])
-  const size_t ileft= left_child(inode);
-  assert(0 <= ileft && ileft < n_nodes);
+  const index_t ileft= left_child(inode);
+  assert(0 <= ileft && ileft < static_cast<index_t>(n_nodes));
   nodes[ileft].k= k;
 
   construct_balanced_recursive(ileft, height + 1, ibegin, imid, left, right, boxsize3);
@@ -230,7 +252,7 @@ void KDTree::construct_balanced_recursive(const size_t inode, const int height,
 
   // construct right sub nodes (contains particles with larger x[k])
   Float left1[3], right1[3];
-  const size_t iright= right_child(inode);
+  const index_t iright= right_child(inode);
   assert(0 <= iright && ileft < iright);
   nodes[iright].k= k;
   construct_balanced_recursive(iright, height + 1, imid, iend, left1, right1, boxsize3);
@@ -272,10 +294,10 @@ void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
   // Add neightbor particles if this node is a leaf
   if(node->iend - node->ibegin <= quota) {
     for(index_t j=node->ibegin; j<node->iend; ++j) {
-      assert(0 <= j && j < v.size());
+      assert(0 <= j && j < static_cast<index_t>(v.size()));
 
       Float r2= dist2(x, v[j].x);
-      if(r2 > 0) {
+      if(r2 > 0) {//DEBUG
 	// Adding the density of the particle itself makes the density systematically higher
 	nbr.push_back(r2, j);
       }
@@ -308,16 +330,23 @@ void KDTree::adaptive_kernel_density(vector<KDPoint>& v, const int knbr)
   // For each particle in v, search for k nearest neighbors
   // and assign the density of particle i to the neighbors
   KNeighbors nbr(knbr);
-  for(size_t i=0; i<1; ++i) { // DEBUG!!! i<n
+  for(size_t i=0; i<n; ++i) {
+    nbr.clear();
     collect_k_nearest_neighbors_recursive(0, v[i].x, nbr);
 
-    const Float h= sqrt(nbr.r2_max()); // smoothing length
-    
-    for(int j=1; j<=knbr; ++j) {
+    const Float h= 0.5*sqrt(nbr.r2_max()); // smoothing length
+
+    for(int j=1; j<=knbr; ++j) {//DEBUG j=1
       index_t inbr = nbr.idx(j);
       assert(0 <= inbr && static_cast<size_t>(inbr) < v.size());
-      
+
       v[inbr].n_local += kernel(sqrt(nbr.r2(j)), h);
     }
   }
+
+  //for(size_t i=0; i<n; ++i)
+    
+    //cerr << i << " " << v[i].n_local << endl;
+  //cerr << "n_local[0] = " << v[0].n_local << " idx " << v[0].idx << endl;
+  //cerr << "2852 " << v[2852].n_local << endl;
 }

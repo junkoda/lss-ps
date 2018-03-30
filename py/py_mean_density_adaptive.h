@@ -3,8 +3,8 @@
 
 #include "Python.h"
 
-PyMODINIT_FUNC
-py_mean_density_adaptive_module_init();
+//PyMODINIT_FUNC
+//py_mean_density_adaptive_module_init();
 
 
 PyObject* py_kdpoints_alloc(PyObject* self, PyObject* args);

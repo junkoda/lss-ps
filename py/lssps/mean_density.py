@@ -32,7 +32,7 @@ class Points:
     @property
     def density(self):
         a = np.zeros(len(self))
-        c._mean_density_adaptive_estimate(self._points, a)
+        c._kdpoints_density_as_array(self._points, a)
         return a
 
     @property
