@@ -12,25 +12,37 @@ using namespace std;
 // local functions
 //
 
-// Indexing of a binary tree
+// Cubic spline kernel: [Monaghan1992]
+//   J. Monaghan, Smoothed Particle Hydrodynamics,
+//   Annual Review of Astronomy and Astrophysics, 30 (1992), pp. 543-574.
+static inline Float kernel(const Float r, const Float h)
+{
+  const Float fac= 1.0/(M_PI*h*h*h);
+  const Float q= r/h;
+
+  if(r > 2.0)
+    return 0.0;
+  else if(r > 1.0)
+    return 0.25*fac*pow(2.0 - q, 3);
+
+  return fac*(1.0 - 1.5*q*q*(1.0 - 0.5*q));
+}
+
+
+// Node index of the left child node
 static inline size_t left_child(const size_t i)
 {
   return (i << 1) + 1;
 }
 
+// Node index of the right child node
 static inline size_t right_child(const size_t i)
 {
   return (i << 1) + 2;
 }
 
-/*
-static inline bool is_leaf(KdTree const * const tree)
-{
-  return (tree->iend - tree->ibegin) < KdTree::quota;
-}
-*/
-
 // Comparison function object
+// Compares the coordinate of kth axis of two points p.x[k] < q.x[k]
 template<typename T> class CompPoints {
  public:
   CompPoints(const int direction) : k(direction) {}
@@ -43,36 +55,19 @@ template<typename T> class CompPoints {
 };
 
 
-template <typename float_type>
-void construct_vector(float_type const * const xyz,
-		      const size_t xyz_stride,
-		      float_type const * weight,
-		      const size_t weight_stride,
-		      const size_t np)
-{
-  vector<KDPoint> v;
-  v.reserve(np);
 
-  KDPoint p;
-  p.w = 0;
-  p.n_local = 0;
-  p.n_average = 0;
-  
-  for(size_t i=0; i<np; ++i) {
-    p.x[0] = xyz[0];
-    p.x[1] = xyz[1];
-    p.x[2] = xyz[2];
-    xyz= (float_type*) ((char*) xyz + xyz_stride);
-    
-    if(weight) {
-      p.w = *weight;
-      weight = (float_type*) ((char*) weight + weight_stride);
-    }
-    v.push_back(p);
-  }
+
+KNeighbors::KNeighbors(const int knbr)
+{
+  v_r2.resize(knbr + 1, numeric_limits<Float>::max());
+  v_r2[0]= 0;
+
+  v_idx.resize(knbr + 1, -1);
 }
 
-
+//
+// Class KDTree
+//
 void KDTree::compute_bounding_box(const size_t ibegin,
 				  const size_t iend,
 				  Float left[], Float right[])
@@ -106,6 +101,16 @@ static inline int cut_direction(const Float boxsize3[])
     k=0;
 
   return k;
+}
+
+static inline Float dist2(const Float x[], const Float y[])
+{
+  // 3D Euclidian distance with periodic boundary condition
+  Float dx= x[0] - y[0];
+  Float dy= x[1] - y[1];
+  Float dz= x[2] - y[2];
+
+  return dx*dx + dy*dy + dz*dz;
 }
 
 
@@ -239,4 +244,74 @@ void KDTree::construct_balanced_recursive(const size_t inode,
   right[2]= max(right[2], right1[2]);
 }
 
+//
+// Find neighbors recurlively
+//
+void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
+						   const Float x[],
+						   KNeighbors& nbr)
+{
+  // Find k nearest neighbor particles near position x[]
+  // and push it to the Nbr object
 
+  Node const * const node= nodes + inode;
+  const int k= node->k;
+  const Float eps2= nbr.r2_max();
+  const Float eps= sqrt(eps2);
+
+  // If this node is more than eps away from x, no k-nearest neighbors
+  // are in this node
+  if(x[k] < node->left  - eps || x[k] > node->right + eps) {
+    return; // This node is far enough from position x
+  }
+
+  // Add neightbor particles if this node is a leaf
+  if(node->iend - node->ibegin <= quota) {
+    for(index_t j=node->ibegin; j<node->iend; ++j) {
+      Float r2= dist2(x, v[j].x);
+      if(r2 > 0) {
+	// Adding the density of the particle itself makes the density systematically higher
+	nbr.push_back(r2, j);
+      }
+    }
+    return;
+  }
+
+  // Search subtrees recursively
+  collect_k_nearest_neighbors_recursive(left_child(inode), x, nbr);
+  collect_k_nearest_neighbors_recursive(right_child(inode), x, nbr);
+}
+
+void KDTree::adaptive_kernel_density(vector<KDPoint>& v, const int knbr)
+{
+  // Args:
+  //   knbr (int): number of neighbors used for adaptive kernel
+  //               density estimation
+  //
+  // Input:
+  //   Particles positions v[i].x
+  // Output:
+  //   Estimated density v[i].n_local
+  //
+  const size_t n= v.size();
+
+  // Reset n_local
+  for(size_t i=0; i<n; ++i)
+    v[i].n_local= 0;
+
+  // For each particle in v, search for k nearest neighbors
+  // and assign the density of particle i to the neighbors
+  KNeighbors nbr(knbr);
+  for(size_t i=0; i<n; ++i) {
+    collect_k_nearest_neighbors_recursive(0, v[i].x, nbr);
+
+    const Float h= sqrt(nbr.r2_max()); // smoothing length
+    
+    for(int j=1; j<=knbr; ++j) {
+      index_t inbr = nbr.idx(j);
+      assert(0 <= inbr && static_cast<size_t>(inbr) < v.size());
+      
+      v[inbr].n_local += kernel(sqrt(nbr.r2(j)), h);
+    }
+  }
+}

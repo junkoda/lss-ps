@@ -1,5 +1,5 @@
 #ifndef PY_POWER_SPECTRUM_H
-#define PY_POWER_SPECTRUM_H
+#define PY_POWER_SPECTRUM_H 1
 
 #include "Python.h"
 

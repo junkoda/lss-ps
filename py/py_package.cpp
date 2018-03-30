@@ -13,6 +13,7 @@
 #include "py_power_spectrum.h"
 #include "py_performance.h"
 #include "py_mean_density.h"
+#include "py_mean_density_adaptive.h"
 #include "py_etc.h"
 
 using namespace std;
@@ -108,6 +109,12 @@ static PyMethodDef methods[] = {
   {"_etc_gaussian_smoothing", py_etc_gaussian_smoothing, METH_VARARGS,
    "_etc_gaussian_smoothing(_grid, sigma_smoothing)"},
 
+  {"_kdpoints_alloc", py_kdpoints_alloc, METH_VARARGS,
+   "_kdpoints_alloc()"},
+  {"_kdpoints_from_array", py_kdpoints_from_array, METH_VARARGS,
+   "_kdpoints_from_array(_kdpoints, xyz, w)"},
+  {"_mean_density_adaptive_estimate", py_mean_density_adaptive_estimate,
+   METH_VARARGS, "_mean_density_adaptive_estimate(_kdtree, _points, knbr)"},
   
   {NULL, NULL, 0, NULL}
 };

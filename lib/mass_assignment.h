@@ -233,7 +233,7 @@ void mass_assignment_template(float_type const * xyz,
       int nthread= 1;  
     #endif
 
-    auto ts = std::chrono::high_resolution_clock::now();
+      //auto ts = std::chrono::high_resolution_clock::now();
 
     int ix_left= ithread*nc/nthread;
     int ix_right= (ithread + 1)*nc/nthread;
@@ -302,7 +302,7 @@ void mass_assignment_template(float_type const * xyz,
       grid->n_mas = f.n_mas;
     }
 
-    auto te = std::chrono::high_resolution_clock::now();
+    //auto te = std::chrono::high_resolution_clock::now();
 
     /*
     #pragma omp critical
