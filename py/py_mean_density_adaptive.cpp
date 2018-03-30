@@ -12,6 +12,14 @@
 #define NPY_FLOAT_TYPE NPY_FLOAT
 #endif
 
+PyMODINIT_FUNC
+py_mean_density_adaptive_module_init()
+{
+  import_array();
+
+  return NULL;
+}
+
 using namespace std;
 
 // Create a vector of KDPoint from pointers of float_type (double or float)
@@ -52,7 +60,6 @@ static void py_kdpoints_free(PyObject *obj);
 // KDPoints
 //   wrapper for vector<KDPoint>
 //
-
 
 PyObject* py_kdpoints_alloc(PyObject* self, PyObject* args)
 {
@@ -171,6 +178,79 @@ PyObject* py_kdpoints_from_array(PyObject* self, PyObject* args)
   else {
     PyErr_SetString(PyExc_TypeError, "Expected an array of floats or doubles");
     return NULL;
+  }
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_kdpoints_len(PyObject* self, PyObject* args)
+{
+  // _kdpoints_len(_points)
+  PyObject *py_kdpoints;
+
+  if(!PyArg_ParseTuple(args, "O", &py_kdpoints)) {
+    return NULL;
+  }
+
+  vector<KDPoint>* const pv= 
+    (vector<KDPoint>*) PyCapsule_GetPointer(py_kdpoints, "_KDPoints");
+  py_assert_ptr(pv);
+
+  return Py_BuildValue("K", (unsigned long long) pv->size());
+}
+  
+PyObject* py_kdpoints_density_as_array(PyObject* self, PyObject* args)
+{
+  // Copy points.density to the given array
+  // _kdpoints_alloc_from_array(_kdpoints, nbar)
+  PyObject *py_kdpoints, *py_nbar;
+
+  if(!PyArg_ParseTuple(args, "OO", &py_kdpoints, &py_nbar)) {
+    return NULL;
+  }
+
+  vector<KDPoint> const * const pv= 
+    (vector<KDPoint> const *) PyCapsule_GetPointer(py_kdpoints, "_KDPoints");
+  py_assert_ptr(pv);
+  const vector<KDPoint>& v= *pv;
+
+  //
+  // Decode array information
+  //
+
+  // xyz array
+  Py_buffer nbar;
+  if(PyObject_GetBuffer(py_nbar, &nbar, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
+    return NULL;
+  
+  if(nbar.ndim != 1) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 1-dimensional array for nbar");
+    return NULL;
+  }
+
+  if(nbar.suboffsets) {
+    PyErr_SetString(PyExc_TypeError,
+	    "_mean_density_adaptive cannot handle array with suboffsets");
+    return NULL;
+  }
+
+  if(static_cast<size_t>(nbar.shape[0]) != pv->size()) {
+    PyErr_SetString(PyExc_TypeError, "Length of points and nbar array differ");
+    return NULL;
+  }
+
+  if(strcmp(nbar.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError, "Expeced an array of double for nbar");
+    return NULL;
+  }
+
+  const size_t n= pv->size();
+  double* const out= (double*) nbar.buf;
+  
+  for(size_t i=0; i<n; ++i) {
+    index_t idx= v[i].idx;
+    assert(0 <= idx && idx < n);
+    out[idx]= v[i].n_local;
   }
 
   Py_RETURN_NONE;

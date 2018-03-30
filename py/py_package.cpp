@@ -113,6 +113,13 @@ static PyMethodDef methods[] = {
    "_kdpoints_alloc()"},
   {"_kdpoints_from_array", py_kdpoints_from_array, METH_VARARGS,
    "_kdpoints_from_array(_kdpoints, xyz, w)"},
+  {"_kdpoints_density_as_array", py_kdpoints_density_as_array, METH_VARARGS,
+   "_kdpoints_density_as_array(_points, nbar)"},
+  {"_kdpoints_len", py_kdpoints_len, METH_VARARGS,
+   "_kdpoints_len(_points)"},
+
+  {"_kdtree_alloc", py_kdtree_alloc, METH_VARARGS,
+   "_kdtree_alloc()"},
   {"_mean_density_adaptive_estimate", py_mean_density_adaptive_estimate,
    METH_VARARGS, "_mean_density_adaptive_estimate(_kdtree, _points, knbr)"},
   
@@ -131,7 +138,8 @@ static struct PyModuleDef module = {
 PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_grid_module_init();
-  py_power_spectrum_module_init();    
+  py_power_spectrum_module_init();
+  //py_mean_density_adaptive_module_init();
   
   return PyModule_Create(&module);
 }

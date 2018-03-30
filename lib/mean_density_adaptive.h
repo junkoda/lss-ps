@@ -87,11 +87,12 @@ class KDTree {
 
   Node* nodes;
   size_t n_nodes;
+  int height_max;
 
   void construct_balanced();
-  void construct_balanced_recursive(const size_t inode, 
-			    const index_t ibegin, const index_t iend,
-			    Float left[], Float right[], Float boxsize3[]);
+  void construct_balanced_recursive(const size_t inode, const int height,
+				    const index_t ibegin, const index_t iend,
+				    Float left[], Float right[], Float boxsize3[]);
   void collect_k_nearest_neighbors_recursive(const size_t inode,
 					     const Float x[],
 					     KNeighbors& nbr);

@@ -23,12 +23,17 @@ def from_grid(grid, xyz, factor):
 
 class Points:
     def __init__(self, xyz, w=None):
-        self._points= c._kdPoints_alloc();
+        self._points= c._kdpoints_alloc();
         c._kdpoints_from_array(self._points, xyz, w)
 
+    def __len__(self):
+        return c._kdpoints_len(self._points)
+        
     @property
     def density(self):
-        return None
+        a = np.zeros(len(self))
+        c._mean_density_adaptive_estimate(self._points, a)
+        return a
 
     @property
     def density_averaged(self):
@@ -36,11 +41,11 @@ class Points:
 
 class KDTree:
     def __init__(self, points, *, quota=16):
-        self._kdtree= _kdtree_alloc(points._points, quota)
+        self._kdtree= c._kdtree_alloc(points._points, quota)
 
     def estimate_density_adaptive(self, points, knbr):
         if not (knbr > 0):
             raise ValError('knbr must be positive; knbr= %d' % knbr)
         
-        c._mean_density_adaptive_estimate(self._kdtree, points, knbr)
+        c._mean_density_adaptive_estimate(self._kdtree, points._points, knbr)
 

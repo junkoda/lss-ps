@@ -65,32 +65,6 @@ KNeighbors::KNeighbors(const int knbr)
   v_idx.resize(knbr + 1, -1);
 }
 
-//
-// Class KDTree
-//
-void KDTree::compute_bounding_box(const size_t ibegin,
-				  const size_t iend,
-				  Float left[], Float right[])
-{
-  // Compute the bounding box, the cuboid that encloses all particles
-  // v[ibegin] to v[iend - 1]
-  assert(v.size() > 0);
-  
-  left[0]= right[0]= v[ibegin].x[0];
-  left[1]= right[1]= v[ibegin].x[1];
-  left[2]= right[2]= v[ibegin].x[2];
-
-  for(size_t i=ibegin+1; i<iend; ++i) {
-    left[0]= min(left[0], v[i].x[0]);
-    left[1]= min(left[1], v[i].x[1]);
-    left[2]= min(left[2], v[i].x[2]);
-
-    right[0]= max(right[0], v[i].x[0]);
-    right[1]= max(right[1], v[i].x[1]);
-    right[2]= max(right[2], v[i].x[2]);
-  }
-}
-
 static inline int cut_direction(const Float boxsize3[])
 {
   // Find the longest edge of a cuboid
@@ -120,14 +94,37 @@ static inline Float dist2(const Float x[], const Float y[])
 //
 
 KDTree::KDTree(vector<KDPoint>& v_, const int quota_) :
-  v(v_), quota(quota_), nodes(nullptr), n_nodes(0)
+  v(v_), quota(quota_), nodes(nullptr), n_nodes(0), height_max(0)
 {
-
+  construct_balanced();
 }
 
 KDTree::~KDTree()
 {
 
+}
+
+void KDTree::compute_bounding_box(const size_t ibegin,
+				  const size_t iend,
+				  Float left[], Float right[])
+{
+  // Compute the bounding box, the cuboid that encloses all particles
+  // v[ibegin] to v[iend - 1]
+  assert(v.size() > 0);
+  
+  left[0]= right[0]= v[ibegin].x[0];
+  left[1]= right[1]= v[ibegin].x[1];
+  left[2]= right[2]= v[ibegin].x[2];
+
+  for(size_t i=ibegin+1; i<iend; ++i) {
+    left[0]= min(left[0], v[i].x[0]);
+    left[1]= min(left[1], v[i].x[1]);
+    left[2]= min(left[2], v[i].x[2]);
+
+    right[0]= max(right[0], v[i].x[0]);
+    right[1]= max(right[1], v[i].x[1]);
+    right[2]= max(right[2], v[i].x[2]);
+  }
 }
 
 //
@@ -138,7 +135,8 @@ void KDTree::construct_balanced()
   // Construct a balanced kd tree calling construct_balanced_recursive
   assert(quota > 0);
   // Compute the size of the kdtree and allocate the memory for nodes
-  const size_t np= v.size();
+  const size_t np= v.size(); assert(np > 0);
+  
   size_t nleaf= 1;
   size_t height_new= 0;
   while(quota*nleaf < np) {
@@ -165,6 +163,8 @@ void KDTree::construct_balanced()
     throw MemoryError();
   }
 
+  height_max= height_new;
+
   // Compute the bounding box for particles
   Float left[3], right[3];
   Float boxsize3[3];
@@ -174,7 +174,7 @@ void KDTree::construct_balanced()
   boxsize3[1]= right[1] - left[1];
   boxsize3[2]= right[2] - left[2];
 
-  construct_balanced_recursive(0, 0, v.size(), left, right, boxsize3);
+  construct_balanced_recursive(0, 0, 0, v.size(), left, right, boxsize3);
 
   nodes[0].k= 0;
   nodes[0].left= left[0];
@@ -182,7 +182,7 @@ void KDTree::construct_balanced()
 }
 
 
-void KDTree::construct_balanced_recursive(const size_t inode, 
+void KDTree::construct_balanced_recursive(const size_t inode, const int height,
 				  const index_t ibegin, const index_t iend,
 				  Float left[], Float right[], Float boxsize3[])
 {
@@ -214,25 +214,28 @@ void KDTree::construct_balanced_recursive(const size_t inode,
   boxsize3[k] /= 2;
 
   const size_t imid= ibegin + (iend - ibegin)/2;
+  assert(ibegin < imid && imid < iend - 1);
   nth_element(v.begin() + ibegin, v.begin() + imid, v.begin() + iend,
 	      CompPoints<KDPoint>(k));
 
   // construct left sub nodes (contains particles with smaller x[k])
   const size_t ileft= left_child(inode);
   assert(0 <= ileft && ileft < n_nodes);
-  node[ileft].k= k;
-  construct_balanced_recursive(ileft, ibegin, imid, left, right, boxsize3);
-  node[ileft].left= left[k];
-  node[ileft].right= right[k];
+  nodes[ileft].k= k;
+
+  construct_balanced_recursive(ileft, height + 1, ibegin, imid, left, right, boxsize3);
+
+  nodes[ileft].left= left[k];
+  nodes[ileft].right= right[k];
 
   // construct right sub nodes (contains particles with larger x[k])
   Float left1[3], right1[3];
   const size_t iright= right_child(inode);
   assert(0 <= iright && ileft < iright);
-  node[iright].k= k;
-  construct_balanced_recursive(iright, imid, iend, left1, right1, boxsize3);
-  node[iright].left= left1[k];
-  node[iright].right= right1[k];
+  nodes[iright].k= k;
+  construct_balanced_recursive(iright, height + 1, imid, iend, left1, right1, boxsize3);
+  nodes[iright].left= left1[k];
+  nodes[iright].right= right1[k];
 
   // Compute left and right with the values returned from children nodes
   left[0]= min(left[0], left1[0]);
@@ -254,6 +257,7 @@ void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
   // Find k nearest neighbor particles near position x[]
   // and push it to the Nbr object
 
+  assert(0 <= inode && inode < n_nodes);
   Node const * const node= nodes + inode;
   const int k= node->k;
   const Float eps2= nbr.r2_max();
@@ -268,6 +272,8 @@ void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
   // Add neightbor particles if this node is a leaf
   if(node->iend - node->ibegin <= quota) {
     for(index_t j=node->ibegin; j<node->iend; ++j) {
+      assert(0 <= j && j < v.size());
+
       Float r2= dist2(x, v[j].x);
       if(r2 > 0) {
 	// Adding the density of the particle itself makes the density systematically higher
@@ -302,7 +308,7 @@ void KDTree::adaptive_kernel_density(vector<KDPoint>& v, const int knbr)
   // For each particle in v, search for k nearest neighbors
   // and assign the density of particle i to the neighbors
   KNeighbors nbr(knbr);
-  for(size_t i=0; i<n; ++i) {
+  for(size_t i=0; i<1; ++i) { // DEBUG!!! i<n
     collect_k_nearest_neighbors_recursive(0, v[i].x, nbr);
 
     const Float h= sqrt(nbr.r2_max()); // smoothing length
