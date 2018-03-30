@@ -11,6 +11,8 @@
 #include <fftw3.h>
 #include <hdf5.h>
 
+typedef int index_t;
+
 #ifdef DOUBLEPRECISION
 typedef double Float;
 
