@@ -46,7 +46,7 @@ class KDTree:
 
         self._kdtree= c._kdtree_alloc(points._points, quota)
         c._kdtree_compute_rk(self._kdtree, knbr)
-        c._kdtree_update_statistics(self._kdtree)
+        c._kdtree_update_node_statistics(self._kdtree)
 
     def estimate_density_adaptive(self, xyz):
         """
@@ -57,7 +57,7 @@ class KDTree:
 
         return a
 
-    def estimate_density_average_adaptive(self, xyz, knbr):
+    def estimate_density_averaged(self, xyz, knbr):
         """
         Compute the average of approximately k neighbors around points xyz
 

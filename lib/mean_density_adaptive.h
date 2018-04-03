@@ -117,6 +117,13 @@ class KDTree {
 				 Float left3[], Float right3[],
 				 size_t* const n, Float* sum);
 
+  Float estimate_density(const Float x[], const int knbr);
+  Float estimate_density_recursive(const size_t inode,
+				   const Float x[],
+				   const int knbr,
+				   Float boxsize3[]);
+
+
 };
 
 
