@@ -113,12 +113,11 @@ class KDTree {
 					 Float left3[], Float right3[]);
 
   void average_density_recursive(const size_t inode,
-				 const Float x[], const Float r,
-				 Float left3[], Float right3[],
+				 const Float x[], const Float r, Float dx[],
 				 size_t* const n, Float* sum);
 
-  Float estimate_density(const Float x[], const int knbr);
-  Float estimate_density_recursive(const size_t inode,
+  Float estimate_approx_density(const Float x[], const int knbr);
+  Float estimate_approx_density_recursive(const size_t inode,
 				   const Float x[],
 				   const int knbr,
 				   Float boxsize3[]);
