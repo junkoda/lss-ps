@@ -40,12 +40,35 @@ class Points:
         return None
 
 class KDTree:
-    def __init__(self, points, *, quota=16):
-        self._kdtree= c._kdtree_alloc(points._points, quota)
+    def __init__(self, points, knbr, *, quota=16):
+        if not (knbr > 0):
+            raise ValError('knbr must be positive; knbr= %d' % knbr)
 
-    def estimate_density_adaptive(self, points, knbr):
+        self._kdtree= c._kdtree_alloc(points._points, quota)
+        c._kdtree_compute_rk(self._kdtree, knbr)
+        c._kdtree_update_statistics(self._kdtree)
+
+    def estimate_density_adaptive(self, xyz):
+        """
+        xyz (array [n, 3]): positions for density estiamtion
+        """
+        a = np.zeros(xyz.shape[0])
+        c._mean_density_adaptive_estimate(self._kdtree, xyz, a)
+
+        return a
+
+    def estimate_density_average_adaptive(self, xyz, knbr):
+        """
+        Compute the average of approximately k neighbors around points xyz
+
+        Args:
+          xyz (array): array of positions shape (n_particles, 3)
+          knbar (int): number of particles avraging over
+        """
         if not (knbr > 0):
             raise ValError('knbr must be positive; knbr= %d' % knbr)
         
-        c._mean_density_adaptive_estimate(self._kdtree, points._points, knbr)
+        a = np.zeros(xyz.shape[0])
+        c._mean_density_average_estimate(self._kdtree, xyz, knbr, a)
 
+        return a

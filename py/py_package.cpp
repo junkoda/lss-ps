@@ -120,8 +120,14 @@ static PyMethodDef methods[] = {
 
   {"_kdtree_alloc", py_kdtree_alloc, METH_VARARGS,
    "_kdtree_alloc()"},
+  {"_kdtree_compute_rk", py_kdtree_compute_rk, METH_VARARGS,
+   "_kdtree_compute_rk(_kdtree, knbr)"},
+  {"_kdtree_update_node_statistics", py_kdtree_update_node_statistics,
+   METH_VARARGS, "_kdtree_update_node_statistics(_kdtree)"},
   {"_mean_density_adaptive_estimate", py_mean_density_adaptive_estimate,
    METH_VARARGS, "_mean_density_adaptive_estimate(_kdtree, _points, knbr)"},
+  {"_mean_density_average_estimate", py_mean_density_average_estimate,
+   METH_VARARGS, "_mean_density_average_estimate(_kdtree, xyz, knbr, nbar)"},   
   
   {NULL, NULL, 0, NULL}
 };

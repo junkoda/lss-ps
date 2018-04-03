@@ -40,7 +40,7 @@ void construct_vector(float_type const * xyz,
   KDPoint p;
   p.w = 1;
   p.n_local = 0;
-  p.n_average = 0;
+  //p.n_average = 0;
   
   for(size_t i=0; i<np; ++i) {
     p.idx= i; // original index
@@ -303,35 +303,236 @@ void py_kdtree_free(PyObject *obj)
   delete kdtree;
 }
 
-//
-// Density estimation
-//
-PyObject* py_mean_density_adaptive_estimate(PyObject* self, PyObject* args)
+
+PyObject* py_kdtree_compute_rk(PyObject* self, PyObject* args)
 {
-  // _mean_density_adaptive_estimate(_kdtree, _points, knbr)
+  // _mean_density_adaptive_estimate(_kdtree, knbr)
   
   // Args:
   //     _kdtree (_KDTree)
-  //     _points (_KDPoints)
   //     knbr (int): number of neighbors for the density estimation
   // Output:
-  //     points.density
+  //     n_local and rk in _kdtree
 
-  PyObject *py_kdtree, *py_points;
+  PyObject *py_kdtree;
   int knbr;
 
-  if(!PyArg_ParseTuple(args, "OOi", &py_kdtree, &py_points, &knbr))
+  if(!PyArg_ParseTuple(args, "Oi", &py_kdtree, &knbr))
     return NULL;
 
   KDTree* const kdtree=
     (KDTree*) PyCapsule_GetPointer(py_kdtree, "_KDTree");
   py_assert_ptr(kdtree);
 
-  vector<KDPoint>* const pv= 
-    (vector<KDPoint>*) PyCapsule_GetPointer(py_points, "_KDPoints");
-  py_assert_ptr(pv);
+  kdtree->compute_rk(knbr);
 
-  kdtree->adaptive_kernel_density(*pv, knbr);
+  Py_RETURN_NONE;
+}
+
+PyObject* py_kdtree_update_node_statistics(PyObject* self, PyObject* args)
+{
+  // _mean_density_adaptive_estimate(_kdtree)
+  
+  // Args:
+  //     _kdtree (_KDTree)
+  // Result:
+  //     left_h, right_h, density_sum in nodes
+
+  PyObject *py_kdtree;
+
+  if(!PyArg_ParseTuple(args, "O", &py_kdtree))
+    return NULL;
+
+  KDTree* const kdtree=
+    (KDTree*) PyCapsule_GetPointer(py_kdtree, "_KDTree");
+  py_assert_ptr(kdtree);
+
+  kdtree->update_node_statistics();
+
+  Py_RETURN_NONE;
+}
+
+//
+// Density estimation
+//
+PyObject* py_mean_density_adaptive_estimate(PyObject* self, PyObject* args)
+{
+  // _mean_density_adaptive_estimate(_kdtree, xyz, nbar)
+  
+  // Args:
+  //     _kdtree (_KDTree)
+  //     xyz (array)
+  //     nbar (array) [output]:
+  //
+  // Prerequisite:
+  //     kdtree.compute_rk
+  //     kdtree.update_statistics
+  //
+  PyObject *py_kdtree, *py_xyz, *py_nbar;
+
+  if(!PyArg_ParseTuple(args, "OOO", &py_kdtree, &py_xyz, &py_nbar))
+    return NULL;
+
+  KDTree* const kdtree=
+    (KDTree*) PyCapsule_GetPointer(py_kdtree, "_KDTree");
+  py_assert_ptr(kdtree);
+
+  // decode xyz array
+  Py_buffer xyz;
+  if(PyObject_GetBuffer(py_xyz, &xyz, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
+    return NULL;
+  
+  if(xyz.ndim != 2) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 2-dimensional array for xyz");
+    return NULL;
+  }
+  else if(xyz.suboffsets) {
+    PyErr_SetString(PyExc_TypeError,
+		    "_mean_density_adaptive cannot handle array with suboffsets");
+    return NULL;
+  }
+  else if(strcmp(xyz.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError,
+		    "xyz array is expected to be an array of double");
+  }
+  else if(xyz.strides[1] != sizeof(double)) {
+    PyErr_SetString(PyExc_TypeError,
+		    "xyz array is expected to be contigeous in 2nd direction");
+    return NULL;
+  }
+
+  // decode output nbar array
+  Py_buffer nbar;
+  if(PyObject_GetBuffer(py_nbar, &nbar, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
+    return NULL;
+  
+  if(nbar.ndim != 1) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 1-dimensional array for nbar");
+    return NULL;
+  }
+  else if(nbar.suboffsets) {
+    PyErr_SetString(PyExc_TypeError,
+		    "_mean_density_adaptive cannot handle array with suboffsets");
+    return NULL;
+  }
+  else if(nbar.shape[0] != xyz.shape[0]) {
+    PyErr_SetString(PyExc_TypeError, "Length of points and nbar array differ");
+    return NULL;
+  }
+  else if(strcmp(nbar.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError, "Expeced an array of double for nbar");
+    return NULL;
+  }
+
+  double const * x= (double*) xyz.buf;
+  const size_t x_stride= xyz.strides[0];
+  const size_t np= xyz.shape[0];
+  double* navg= (double*) nbar.buf;
+  const size_t navg_stride= nbar.strides[0];
+
+  Float xx[3];
+  
+  for(size_t i=0; i<np; ++i) {
+    xx[0]= x[0];
+    xx[1]= x[1];
+    xx[2]= x[2];
+
+    *navg= (double) kdtree->adaptive_kernel_density(xx);
+
+    x= (double*) ((char*) x + x_stride);
+    navg= (double*) ((char*) navg + navg_stride);
+  }
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_mean_density_average_estimate(PyObject* self, PyObject* args)
+{
+  // _mean_density_average_estimate(_kdtree, xyz, knbr)
+  
+  // Args:
+  //     _kdtree (_KDTree)
+  //     _points (array): xyz positions
+  //     knbr (int): number of neighbors for avereging
+  //     nbar (array): output mean density
+  // Output:
+  //     nbar array
+
+  PyObject *py_kdtree, *py_xyz, *py_nbar;
+  int knbr;
+
+  if(!PyArg_ParseTuple(args, "OOiO", &py_kdtree, &py_xyz, &knbr, &py_nbar))
+    return NULL;
+
+  KDTree* const kdtree=
+    (KDTree*) PyCapsule_GetPointer(py_kdtree, "_KDTree");
+  py_assert_ptr(kdtree);
+
+  // decode xyz array
+  Py_buffer xyz;
+  if(PyObject_GetBuffer(py_xyz, &xyz, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
+    return NULL;
+  
+  if(xyz.ndim != 2) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 2-dimensional array for xyz");
+    return NULL;
+  }
+  else if(xyz.suboffsets) {
+    PyErr_SetString(PyExc_TypeError,
+		    "_mean_density_adaptive cannot handle array with suboffsets");
+    return NULL;
+  }
+  else if(strcmp(xyz.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError,
+		    "xyz array is expected to be an array of double");
+  }
+  else if(xyz.strides[1] != sizeof(double)) {
+    PyErr_SetString(PyExc_TypeError,
+		    "xyz array is expected to be contigeous in 2nd direction");
+    return NULL;
+  }
+
+  // decode output nbar array
+  Py_buffer nbar;
+  if(PyObject_GetBuffer(py_nbar, &nbar, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
+    return NULL;
+  
+  if(nbar.ndim != 1) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 1-dimensional array for nbar");
+    return NULL;
+  }
+  else if(nbar.suboffsets) {
+    PyErr_SetString(PyExc_TypeError,
+		    "_mean_density_adaptive cannot handle array with suboffsets");
+    return NULL;
+  }
+  else if(nbar.shape[0] != xyz.shape[0]) {
+    PyErr_SetString(PyExc_TypeError, "Length of points and nbar array differ");
+    return NULL;
+  }
+  else if(strcmp(nbar.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError, "Expeced an array of double for nbar");
+    return NULL;
+  }
+
+  double const * x= (double*) xyz.buf;
+  const size_t x_stride= xyz.strides[0];
+  const size_t np= xyz.shape[0];
+  double* navg= (double*) nbar.buf;
+  const size_t navg_stride= nbar.strides[0];
+
+  Float xx[3];
+  
+  for(size_t i=0; i<np; ++i) {
+    xx[0]= x[0];
+    xx[1]= x[1];
+    xx[2]= x[2];
+
+    *navg= (double) kdtree->adaptive_average_density(xx, knbr, 0);
+
+    x= (double*) ((char*) x + x_stride);
+    navg= (double*) ((char*) navg + navg_stride);
+  }
 
   Py_RETURN_NONE;
 }

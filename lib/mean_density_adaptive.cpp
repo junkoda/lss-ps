@@ -1,12 +1,15 @@
 #include <iostream>
 #include <limits>
 #include <algorithm>
+#include <cmath>
 #include <cassert>
 #include "config.h"
 #include "error.h"
 #include "mean_density_adaptive.h"
 
 using namespace std;
+
+static size_t count_debug= 0.0;
 
 //
 // local functions
@@ -15,10 +18,9 @@ using namespace std;
 // Cubic spline kernel: [Monaghan1992]
 //   J. Monaghan, Smoothed Particle Hydrodynamics,
 //   Annual Review of Astronomy and Astrophysics, 30 (1992), pp. 543-574.
-static inline Float kernel(const Float r, const Float h)
+static inline Float kernel(const Float r, const Float rk)
 {
-  //assert(r > 0.0);
-
+  const Float h= 0.5*rk;
   const Float fac= 1.0/(M_PI*h*h*h);
   const Float q= r/h;
 
@@ -37,10 +39,16 @@ static inline size_t left_child(const size_t i)
   return (i << 1) + 1;
 }
 
-// Node index of the right child node
+// Index of the right child node
 static inline size_t right_child(const size_t i)
 {
   return (i << 1) + 2;
+}
+
+// Index of a child (left for ichild=0, right for ichild=1
+static inline size_t child(const size_t i, const size_t ichild)
+{
+  return (i << 1) + (1 + ichild);
 }
 
 // Comparison function object
@@ -57,8 +65,9 @@ template<typename T> class CompPoints {
 };
 
 
-
-
+//
+// Class KNeighbors
+//
 KNeighbors::KNeighbors(const int knbr)
 {
   v_r2.resize(knbr + 1, numeric_limits<Float>::max());
@@ -97,8 +106,6 @@ static inline Float dist2(const Float x[], const Float y[])
   return dx*dx + dy*dy + dz*dz;
 }
 
-
-
 //
 // KDTree class
 //
@@ -107,23 +114,11 @@ KDTree::KDTree(vector<KDPoint>& v_, const int quota_) :
   v(v_), quota(quota_), nodes(nullptr), n_nodes(0), height_max(0)
 {
   construct_balanced();
-
-  //DEBUG
-  //test KNeighbor class
-  /*
-  int k=8;
-  KNeighbors knbr(k);
-  for(int i=1; i<=10; ++i)
-    knbr.push_back(0.5*(10 - i + 1), 0);
-
-  for(int i=1; i<=k; ++i)
-    printf("%d %f / %f\n", i, knbr.r2(i), knbr.r2_max());
-  */
 }
 
 KDTree::~KDTree()
 {
-
+  free(nodes);
 }
 
 void KDTree::compute_bounding_box(const size_t ibegin,
@@ -192,9 +187,12 @@ void KDTree::construct_balanced()
   Float boxsize3[3];
   
   compute_bounding_box(0, v.size(), left, right);
-  boxsize3[0]= right[0] - left[0];
-  boxsize3[1]= right[1] - left[1];
-  boxsize3[2]= right[2] - left[2];
+
+  for(int k=0; k<3; ++k) {
+    boxsize3[k]= right[k] - left[k];
+    left3_root[k]= left[k];
+    right3_root[k]= right[k];
+  }
 
   construct_balanced_recursive(0, 0, 0, v.size(), left, right, boxsize3);
 
@@ -224,6 +222,7 @@ void KDTree::construct_balanced_recursive(const size_t inode, const int height,
   node->iend= iend;
   
   if(iend - ibegin <= quota) {
+    // Update bounding box based on the particles in this node
     compute_bounding_box(ibegin, iend, left, right);
     node->left= left[node->k];
     node->right= right[node->k];
@@ -259,7 +258,9 @@ void KDTree::construct_balanced_recursive(const size_t inode, const int height,
   nodes[iright].left= left1[k];
   nodes[iright].right= right1[k];
 
-  // Compute left and right with the values returned from children nodes
+  // Update left and right
+  // Original left/right was half of the parent node, this is updated to a smaller bounding box
+  // based on the children nodes
   left[0]= min(left[0], left1[0]);
   left[1]= min(left[1], left1[1]);
   left[2]= min(left[2], left1[2]);
@@ -279,6 +280,8 @@ void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
   // Find k nearest neighbor particles near position x[]
   // and push it to the Nbr object
 
+  count_debug++;
+
   assert(0 <= inode && inode < n_nodes);
   Node const * const node= nodes + inode;
   const int k= node->k;
@@ -297,8 +300,8 @@ void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
       assert(0 <= j && j < static_cast<index_t>(v.size()));
 
       Float r2= dist2(x, v[j].x);
-      if(r2 > 0) {//DEBUG
-	// Adding the density of the particle itself makes the density systematically higher
+      if(r2 > 0) { // Adding the density of the particle itself makes
+	           // the density systematically higher
 	nbr.push_back(r2, j);
       }
     }
@@ -306,12 +309,25 @@ void KDTree::collect_k_nearest_neighbors_recursive(const size_t inode,
   }
 
   // Search subtrees recursively
-  collect_k_nearest_neighbors_recursive(left_child(inode), x, nbr);
-  collect_k_nearest_neighbors_recursive(right_child(inode), x, nbr);
+  size_t iright= right_child(inode);
+  int inear= x[nodes[iright].k] > nodes[iright].left;
+  // inear = 0: search left node first
+  // inear = 1: search right node first
+  
+  collect_k_nearest_neighbors_recursive(child(inode, inear), x, nbr);
+  collect_k_nearest_neighbors_recursive(child(inode, !inear), x, nbr);
+
+  // DEBUG
+  //collect_k_nearest_neighbors_recursive(child(inode, 0), x, nbr);
+  //collect_k_nearest_neighbors_recursive(child(inode, 1), x, nbr);
+
 }
 
-void KDTree::adaptive_kernel_density(vector<KDPoint>& v, const int knbr)
+void KDTree::compute_rk(const int knbr)
 {
+  // Compute rk and n_local
+  //
+  //
   // Args:
   //   knbr (int): number of neighbors used for adaptive kernel
   //               density estimation
@@ -319,34 +335,295 @@ void KDTree::adaptive_kernel_density(vector<KDPoint>& v, const int knbr)
   // Input:
   //   Particles positions v[i].x
   // Output:
+  //   Distance to kth neighbor v[i].rk
   //   Estimated density v[i].n_local
   //
   const size_t n= v.size();
 
   // Reset n_local
   for(size_t i=0; i<n; ++i)
-    v[i].n_local= 0;
+    v[i].n_local= 0;  
 
   // For each particle in v, search for k nearest neighbors
   // and assign the density of particle i to the neighbors
   KNeighbors nbr(knbr);
   for(size_t i=0; i<n; ++i) {
     nbr.clear();
+    count_debug= 0;
     collect_k_nearest_neighbors_recursive(0, v[i].x, nbr);
+    //cerr << "count: " << count_debug << endl;
 
-    const Float h= 0.5*sqrt(nbr.r2_max()); // smoothing length
+    const Float rk= sqrt(nbr.r2_max());
+    const Float w= v[i].w;
+    v[i].rk= rk;
 
-    for(int j=1; j<=knbr; ++j) {//DEBUG j=1
+    for(int j=1; j<=knbr; ++j) {
       index_t inbr = nbr.idx(j);
       assert(0 <= inbr && static_cast<size_t>(inbr) < v.size());
 
-      v[inbr].n_local += kernel(sqrt(nbr.r2(j)), h);
+      v[inbr].n_local += w*kernel(sqrt(nbr.r2(j)), rk);
     }
   }
-
-  //for(size_t i=0; i<n; ++i)
-    
-    //cerr << i << " " << v[i].n_local << endl;
-  //cerr << "n_local[0] = " << v[0].n_local << " idx " << v[0].idx << endl;
-  //cerr << "2852 " << v[2852].n_local << endl;
 }
+
+/*
+Float KDTree::adaptive_kernel_density(const Float x[])
+{
+  // Args:
+  //   Position x
+  //
+  // Prerequisit:
+  //   compute_rk(knbr)
+  // Output:
+  //   Estimated density at position x
+  //
+
+  // For each particle in v, search for k nearest neighbors
+  // and assign the density of particle i to the neighbors
+
+  adaptive_kernel_density_recursive(0, x);
+    collect_k_nearest_neighbors_recursive(0, v[i].x, nbr);
+    cerr << "count: " << count_debug << endl;
+
+    const Float h= 0.5*sqrt(nbr.r2_max()); // smoothing length
+    const Float w= v[i].w;
+
+    for(int j=1; j<=knbr; ++j) {
+      index_t inbr = nbr.idx(j);
+      assert(0 <= inbr && static_cast<size_t>(inbr) < v.size());
+
+      v[inbr].n_local += w*kernel(sqrt(nbr.r2(j)), h);
+    }
+  }
+}
+*/
+
+Float KDTree::adaptive_kernel_density(const Float x[], size_t inode)
+{
+  //
+  // Args:
+  //   x[3]:  poisiton for the density estiamtion
+  //   inode: compute density within node i (0 for first call)
+  //
+  Node const * const node= nodes + inode;
+  const int k= node->k;
+
+  // The resulting densityg
+  Float dens= 0;
+  
+  if(x[k] < node->left_h || x[k] > node->right_h) {
+    // This node does not contribute to the density at x
+    return 0;
+  }
+
+  if(node->iend - node->ibegin <= quota) {
+    // This is a leaf; compute density from particles in this node
+    for(index_t j=node->ibegin; j<node->iend; ++j) {
+      assert(0 <= j && j < static_cast<index_t>(v.size()));
+      Float r2= dist2(x, v[j].x);
+      if(r2 > 0) {
+	dens += v[j].w*kernel(sqrt(r2), v[j].rk);
+      }
+    }
+    return dens;
+  }
+
+  dens += adaptive_kernel_density(x, left_child(inode));
+  dens += adaptive_kernel_density(x, right_child(inode));
+
+  return dens;
+}
+
+/*
+Float KDTree::compute_density_sum_recursive(const size_t inode)
+{
+  // Compute the sum of all densities within the node
+  // The sum will be stored in nodes[inode].density_sum
+  Float sum= 0;
+  
+  assert(0 <= inode && inode < n_nodes);
+  Node* const node= nodes + inode;
+
+  // Sum n_local  if this node is a leaf
+  if(node->iend - node->ibegin <= quota) {
+    for(index_t j=node->ibegin; j<node->iend; ++j) {
+      assert(0 <= j && j < static_cast<index_t>(v.size()));
+
+      sum += v[j].n_local;
+    }
+    node->density_sum= sum;
+    return sum;
+  }
+
+  // Search subtrees recursively
+  sum += compute_density_sum_recursive(left_child(inode));
+  sum += compute_density_sum_recursive(right_child(inode));
+
+  node->density_sum= sum;
+  return sum;
+}
+*/
+
+void KDTree::update_node_statistics()
+{
+  Float left3[3], right3[3];
+  for(int k=0; k<3; ++k) {
+    left3[k]= left3_root[k];
+    right3[k]= right3_root[k];
+  }
+  
+  update_node_statistice_recursive(0, left3, right3);
+}
+
+Float KDTree::update_node_statistice_recursive(const size_t inode,
+				     Float left3[], Float right3[])
+{
+  //
+  // Output
+  //   density_sum: sum of v[i].n_local in this node
+  //   left_h:      minimum of v[i].x[k] - v[i].rk in this node
+  //   right_h:     maximum of v[i].x[k] + v[i].rk in this node
+  //                where k= node->k
+  //
+  Float sum= 0;
+  
+  assert(0 <= inode && inode < n_nodes);
+  Node* const node= nodes + inode;
+
+  const int k= node->k;
+  left3[k]= node->left;
+  right3[k]= node->right;
+
+  // Sum n_local  if this node is a leaf
+  if(node->iend - node->ibegin <= quota) {
+    node->left_h= left3[k];
+    node->right_h= right3[k];
+    
+    for(index_t j=node->ibegin; j<node->iend; ++j) {
+      assert(0 <= j && j < static_cast<index_t>(v.size()));
+      node->left_h= min(node->left_h, node->left - v[j].rk);
+      node->right_h= max(node->right_h, node->right + v[j].rk);
+
+      sum += v[j].n_local;
+    }
+    node->density_sum= sum;
+    return sum;
+  }
+
+  // Traverse subnodes recursively
+  sum += update_node_statistice_recursive(left_child(inode), left3, right3);
+
+  Float left3b[]= {left3[0], left3[1], left3[2]};
+  Float right3b[]= {right3[0], right3[1], right3[2]};
+  sum += update_node_statistice_recursive(right_child(inode), left3b, right3b);
+
+  // Update using subnode information
+  Node* const left_node= nodes + left_child(inode);
+  Node* const right_node= nodes + right_child(inode);
+
+  node->left_h= min(left_node->left_h, right_node->left_h);
+  node->right_h= min(left_node->right_h, right_node->right_h);
+
+  node->density_sum= sum;
+  
+  return sum;
+}
+
+void KDTree::average_density_recursive(const size_t inode,
+				       const Float x[], const Float r,
+				       Float left3[], Float right3[],
+				       size_t* const n, Float* sum)
+{
+  // Compute the average density of neighbors within radius R about x
+  // Args:
+  //   left3: minum of particle positions
+  //   right3: maximum of particle positions
+  // Output:
+  //   *n: number of particles within the sphere
+  //   *sum: sum of local densities (n_local) within the sphere
+  assert(0 <= inode && inode < n_nodes);
+  Node* const node= nodes + inode;
+  const int k= node->k;
+  left3[k]= node->left;
+  right3[k]= node->right;
+
+  // If this node is more than eps away from x, no k-nearest neighbors
+  // are in this node
+  if(x[k] < node->left  - r || x[k] > node->right + r) {
+    return; // This node is far enough from position x
+  }
+
+  Float density_sum= 0;
+  size_t num= 0;
+  
+  // node is completely within radius r
+  /*
+  if(x[0] - r <= left3[0] && right3[0] <= x[0] + r &&
+     x[1] - r <= left3[1] && right3[1] <= x[1] + r &&
+     x[2] - r <= left3[2] && right3[2] <= x[2] + r) {
+    
+    density_sum += node->density_sum;
+    num += node->iend - node->ibegin;
+  }
+  */
+     
+
+  // Add neightbor particles if this node is a leaf
+  if(node->iend - node->ibegin <= quota) {
+    for(index_t j=node->ibegin; j<node->iend; ++j) {
+      assert(0 <= j && j < static_cast<index_t>(v.size()));
+
+      Float rj2= dist2(x, v[j].x);
+      
+      if(rj2 <= r*r) {
+	density_sum += v[j].n_local;
+	num++;
+      }
+    }
+
+    *sum += density_sum;
+    *n   += num;
+    return;
+  }
+
+  // Search subtrees recursively
+  average_density_recursive(left_child(inode), x, r,
+			    left3, right3, n, sum);
+  average_density_recursive(right_child(inode), x, r,
+			    left3, right3, n, sum);
+}
+
+Float KDTree::adaptive_average_density(const Float x[], const int knbr, Float r_guess)
+{
+  // Average n_local of k neighbor particles around position x
+  //
+  // Args:
+  //    x[3]: position
+  //    knbr: approximate number of neighbor, k, that the local density will be averaged
+  //    r_guess: initial guess of the radius containing k neighbors (0 for automatic guess)
+
+  if(r_guess == 0) {
+    // guess from global density
+    const double vol= (right3_root[0] - left3_root[0])*(right3_root[1] - left3_root[1])*(right3_root[2] - left3_root[2]);
+    const index_t np= nodes->iend - nodes->ibegin;
+    r_guess = pow(vol/(4.0/3.0*M_PI*np), 1.0/3.0);
+  }
+  
+  Float left3[3], right3[3];
+  for(int k=0; k<3; ++k) {
+    left3[k]= left3_root[k];
+    right3[k]= right3_root[k];
+  }
+
+  size_t n_particles;
+  Float density_sum;
+  
+  average_density_recursive(0, x, r_guess, left3, right3,
+			    &n_particles, &density_sum);
+
+  cerr << r_guess << " " << density_sum << " / " << n_particles << endl;
+
+  return density_sum/n_particles;
+
+}
+

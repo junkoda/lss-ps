@@ -9,13 +9,16 @@ struct KDPoint {
   index_t idx; // original index
   Float x[3];  // cartisian corrdinate of this point
   Float w;     // weight of this point
-  Float n_local, n_average;
+  Float rk;    // distance to the kth nearest neighbor
+  Float n_local;
 };
 
 struct Node {
   int k;                   // axis 0,1,2 which this node is dived into two    
   Float left, right;       // min & max coordinate of the particles
   index_t ibegin, iend;    // index range of particles in this node
+  Float density_sum;
+  Float left_h, right_h;   // min & max of density support (left - rk, right+rk)
 };
 
 //
@@ -74,14 +77,18 @@ class KNeighbors {
 
 class KDTree {
  public:
-  //KDTree();
   KDTree(std::vector<KDPoint>& v_, const int quota_);
   ~KDTree();
-  //~KDtree();
+
+  void compute_rk(const int knbr);
 
   void compute_bounding_box(const size_t ibegin, const size_t iend,
 			    Float left[], Float right[]);
-  void adaptive_kernel_density(std::vector<KDPoint>& v, const int knbr);
+  void update_node_statistics();
+  //void adaptive_kernel_density(std::vector<KDPoint>& v, const int knbr);
+  //Float adaptive_kernel_density(const Float x[]);
+  Float adaptive_kernel_density(const Float x[], size_t inode=0);
+  Float adaptive_average_density(const Float x[], const int knbr, Float r_guess);
  private:
   std::vector<KDPoint>& v;
   index_t quota; // number of particles in the leaf (bottom node)
@@ -91,13 +98,24 @@ class KDTree {
   size_t n_nodes;
   int height_max;
 
+  Float left3_root[3], right3_root[3];
+
   void construct_balanced();
   void construct_balanced_recursive(const size_t inode, const int height,
-				    const index_t ibegin, const index_t iend,
-				    Float left[], Float right[], Float boxsize3[]);
+				 const index_t ibegin, const index_t iend,
+				 Float left[], Float right[], Float boxsize3[]);
   void collect_k_nearest_neighbors_recursive(const size_t inode,
 					     const Float x[],
 					     KNeighbors& nbr);
+    
+  //Float compute_density_sum_recursive(const size_t inode);
+  Float update_node_statistice_recursive(const size_t inode,
+					 Float left3[], Float right3[]);
+
+  void average_density_recursive(const size_t inode,
+				 const Float x[], const Float r,
+				 Float left3[], Float right3[],
+				 size_t* const n, Float* sum);
 
 };
 
