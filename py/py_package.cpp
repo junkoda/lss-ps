@@ -58,6 +58,10 @@ static PyMethodDef methods[] = {
    "set pk_normalisation"},
   {"_grid_set_pk_normalisation", py_grid_set_pk_normalisation, METH_VARARGS,
    "set pk_normalisation"},
+  {"_grid_get_param", py_grid_get_param, METH_VARARGS,
+   "get a grid parameter"},
+  {"_grid_set_param_double", py_grid_set_param_double, METH_VARARGS,
+   "set a floating point parameter"},
 
   {"_grid_fx_asarray", py_grid_fx_asarray, METH_VARARGS,
    "return real-space grid as an np.array"},
@@ -78,6 +82,8 @@ static PyMethodDef methods[] = {
    "assign mass to a grid from an array"},
   {"_mass_assignment_variations", py_mass_assignment_variations, METH_VARARGS,
    "assign mass to a grid from an array (serial or atomic)"},
+  {"_mass_assignment_correct_mas", py_mass_assignment_correct_mas, METH_VARARGS,
+   "correct mass assignment window function"},
 
   {"_interlacing", py_interlacing, METH_VARARGS,
    "_interlacing(_grid1, _grid2)"},

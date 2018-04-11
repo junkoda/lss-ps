@@ -383,6 +383,8 @@ PyObject* py_grid_get_pk_normalisation(PyObject* self, PyObject* args)
     return NULL;
   }
 
+  cerr << "DEBUG py_grid_get_pk_normalisation()\n";
+
   Grid const * const grid=
     (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
@@ -399,6 +401,9 @@ PyObject* py_grid_set_pk_normalisation(PyObject* self, PyObject* args)
   if(!PyArg_ParseTuple(args, "Od", &py_grid, &value)) {
     return NULL;
   }
+
+  cerr << "DEBUG py_grid_set_pk_normalisation()" << value << endl;
+
 
   Grid* const grid=
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
@@ -564,3 +569,54 @@ PyObject* py_grid_load_fx_from_array(PyObject* self, PyObject* args)
 }
 
 
+PyObject* py_grid_get_param(PyObject* self, PyObject* args)
+{
+  // _grid_get_param(_grid, param)
+  // Return sum of weights, total_weight, w2_sum, nw2_sum
+  PyObject* py_grid;
+  char* param_name;
+
+  if(!PyArg_ParseTuple(args, "Os", &py_grid, &param_name)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  string param(param_name);
+
+  if(param == "shot_noise")
+    return Py_BuildValue("d", grid->shot_noise);
+
+  
+  PyErr_SetString(PyExc_ValueError, "Unknown grid parameter");
+  return NULL;
+}
+
+PyObject* py_grid_set_param_double(PyObject* self, PyObject* args)
+{
+  // _grid_set_sum(_grid, param, val)
+  PyObject *py_grid;
+  char* param_name;
+  double val;
+
+  if(!PyArg_ParseTuple(args, "Osd", &py_grid, &param_name, &val)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  string param(param_name);
+
+  if(param == "shot_noise")
+    grid->shot_noise= val;
+  else {
+    PyErr_SetString(PyExc_ValueError, "Unknown grid parameter");
+    return NULL;
+  }
+
+  Py_RETURN_NONE;
+}

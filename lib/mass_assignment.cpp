@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <complex>
 #include <chrono>
 #include <cmath>
 #include <cassert>
@@ -108,4 +110,86 @@ void mass_assignment_from_particles(const vector<Particle>& cat,
   }
 }
  */
+
+
+vector<Float> mass_assignment_correction_array(const int nc, const int deg)
+{
+  vector<Float> v(nc, 1.0);
+  
+  if(deg == 0) // mas_correction = false
+    return v;
+  
+  const int knq = nc/2;
+  const Float fac= M_PI/nc;
+
+  #pragma omp parallel for
+  for(int i=1; i<nc; ++i) {
+    int k= i <= knq ? i : i - nc;
+    Float sinc = sin(fac*k)/(fac*k);
+    v[i] = 1.0/pow(sinc, deg);
+  }
+  
+  return v;
+}
+
+void mass_assignment_correct_mas(Grid* const grid)
+{
+  auto ts = std::chrono::high_resolution_clock::now();
+
+  const int nc= grid->nc;
+  const double boxsize= grid->boxsize;
+  const int n_mas= grid->n_mas;
+
+  assert(nc > 0);
+  assert(boxsize > 0.0);
+  assert(grid->mode == GridMode::fourier_space);
+
+  vector<Float> mas_correction_array =
+    mass_assignment_correction_array(nc, n_mas);
+
+  const size_t nckz= nc/2+1;
+  const int ik_nq= nc/2;
+
+  complex<Float>* const fk= grid->fk;
+
+  #pragma omp parallel num_threads(omp_get_max_threads())
+  {
+    #pragma omp for
+    for(int ix=0; ix<nc; ++ix) {
+      int k[3];
+      k[0] = ix <= ik_nq ? ix : ix - nc;
+      
+      Float corr_x = mas_correction_array[ix];
+      
+      for(int iy=0; iy<nc; ++iy) {
+	k[1] = iy <= ik_nq ? iy : iy - nc;
+	
+	Float corr_xy = corr_x * mas_correction_array[iy];
+	
+	int kz0 = !(k[0] > 0 || (k[0] == 0 && k[1] > 0));
+	
+	for(int iz=kz0; iz<ik_nq; ++iz) {
+	  k[2]= iz;
+	  
+	  Float corr_xyz = corr_xy * mas_correction_array[iz];
+
+	  const size_t index= (ix + iy*nc)*nckz + iz;
+
+	  fk[index] *= corr_xyz;
+	  //fk[index] = corr_xyz*fk[index];
+	  //fk[index].real() = fk[index].real()/corr_xyz;
+	  //fk[index].imag() /= corr_xyz;
+
+
+	}
+      }
+    }
+  }
+			     
+  auto te = std::chrono::high_resolution_clock::now();
+  msg_printf(msg_info, "Time mass assignment correction %e\n",
+             std::chrono::duration<double>(te - ts).count());
+}
+
+
 

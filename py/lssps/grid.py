@@ -183,6 +183,8 @@ class Grid:
                                         nbar=nbar, mas=mas, parallel=parallel)
 
 
+    def correct_mas(self):
+        c._mass_assignment_correct_mas(self._grid)
 
     @property
     def mode(self):
@@ -244,7 +246,7 @@ class Grid:
 
     @property
     def sums(self):
-        """Length of the cubic box on a side"""
+        """Returns (w_sum, w2_sum, nw2_sum)"""
         ss = c._grid_get_sums(self._grid)
         return c._grid_get_sums(self._grid)
 
@@ -253,8 +255,26 @@ class Grid:
         c._grid_set_sums(self._grid, values[0], values[1], values[2], values[3])
 
     @property
+    def w_sum(self):
+        """ sum_i w_i"""
+        ss = self.sums
+        return ss[0]
+
+    @property
+    def w2_sum(self):
+        """ sum_i w_i^2"""
+        ss = self.sums
+        return ss[1]
+
+    @property
+    def nw2_sum(self):
+        """ sum_i nbar w_i^2"""
+        ss = self.sums
+        return ss[2]
+
+    @property
     def n_mas(self):
-        """Length of the cubic box on a side"""
+        """degree of mass assignment scheme 1 for NGP, 2 for CIC, 3 for TSC"""
         return c._grid_get_nmas(self._grid)
 
     @n_mas.setter
@@ -266,9 +286,20 @@ class Grid:
         """Normalisation factor for power spectrum"""
         return c._grid_get_pk_normalisation(self._grid)
 
-    @mode.setter
+    @pk_normalisation.setter
     def pk_normalisation(self, value):
+        #print('setting pk_nromalisataion', value)
         c._grid_set_pk_normalisation(self._grid, value)
+
+    @property
+    def shot_noise(self):
+        """Value of shot noise"""
+        return c._grid_get_param(self._grid, 'shot_noise')
+
+    @shot_noise.setter
+    def shot_noise(self, value):
+        c._grid_set_param_double(self._grid, 'shot_noise', value)
+
 
 
 

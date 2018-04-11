@@ -150,3 +150,22 @@ PyObject* py_mass_assignment_from_array(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+PyObject* py_mass_assignment_correct_mas(PyObject* self, PyObject* args)
+{
+  // _mass_assignment_from_array(_grid)
+  // Args:
+  //     _grid: a _Grid pointer
+
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid))
+    return NULL;
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  mass_assignment_correct_mas(grid);
+
+  Py_RETURN_NONE;
+}

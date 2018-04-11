@@ -12,6 +12,10 @@
 #include <omp.h>
 #endif
 
+std::vector<Float>
+mass_assignment_correction_array(const int nc, const int deg);
+void mass_assignment_correct_mas(Grid * const grid);
+  
 //
 // Mass assignment functions
 //  x: position relative to the cubic box corner in units of grid spacing;
