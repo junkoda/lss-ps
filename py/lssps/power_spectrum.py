@@ -82,8 +82,10 @@ def compute_plane_parallel(grid_delta, *,
         grid_delta.fft()
 
     if grid_delta.shifted is not None:
-        if grid_delta.interlacing != 'done':
+        if grid_delta.interlaced == False:
             grid_delta.interlace()
+
+    correct_mas = correct_mas and (not grid_delta.mas_corrected)
     
     _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu,
                               grid_delta._grid,

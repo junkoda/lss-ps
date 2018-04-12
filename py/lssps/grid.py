@@ -3,6 +3,7 @@ import lssps._lssps as c
 from numbers import Number
 import warnings
 import h5py
+impo
 
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension
@@ -26,7 +27,7 @@ class Grid:
         self._grid = c._grid_alloc(nc)
         self.shifted = None
         self.boxsize = boxsize
-        self.interlacing = None
+        self.interlaced = False
 
         if x0 is not None:
             self.x0 = x0
@@ -46,7 +47,8 @@ class Grid:
         """Reset the grid with zeros"""
         c._grid_clear(self._grid)
         self.mode = 'real-space'
-        self.interlacing = None
+        self.interlaced = False
+        self.mas_corrected = False
         
         if self.shifted is not None:
             self.shifted.clear()
@@ -82,7 +84,7 @@ class Grid:
             raise RuntimeError('grid must be in Fourier space for interlacing')
 
         c._interlacing(self._grid, self.shifted._grid)
-        self.interlacing = 'done'
+        self.interlacing = True
 
         return self
 
@@ -184,7 +186,16 @@ class Grid:
 
 
     def correct_mas(self):
-        c._mass_assignment_correct_mas(self._grid)
+        if self.mode != 'fourier-space':
+            raise RuntimeError('Grid must be in fourier-space to correct_mas()')
+            
+        if not self.mas_corrected:
+            c._mass_assignment_correct_mas(self._grid)
+        else:
+            warnings.warn('MAS already corrected. Neglect correct_mas()',
+                          RuntimeWarning)
+
+        self.mas_corrected = True
 
     @property
     def mode(self):
