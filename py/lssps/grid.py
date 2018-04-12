@@ -3,7 +3,6 @@ import lssps._lssps as c
 from numbers import Number
 import warnings
 import h5py
-impo
 
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension
@@ -18,8 +17,8 @@ class Grid:
         grid.x0:
         grid.offset:
         grid.shifted: A grid shifted by half grid spacing (for interlacing)
-        grid.interlacing: 'done' if interlace() has been called. 
-                           Reset to None by clear()
+        grid.interlaced: True if interlace() has been called. 
+                         Reset to None by clear()
     """
 
     def __init__(self, nc, boxsize, x0=None, offset=None):
@@ -83,8 +82,11 @@ class Grid:
         if self.mode != 'fourier-space':
             raise RuntimeError('grid must be in Fourier space for interlacing')
 
+        if self.interlaced == True:
+            warnings.warn('Interlacing has already performed. Neglect interlace()', RuntimeWarning)
+
         c._interlacing(self._grid, self.shifted._grid)
-        self.interlacing = True
+        self.interlaced = True
 
         return self
 
@@ -194,6 +196,10 @@ class Grid:
         else:
             warnings.warn('MAS already corrected. Neglect correct_mas()',
                           RuntimeWarning)
+            return
+
+        if (self.shifted is not None) and (self.interlaced == False):
+            self.shifted.correct_mas()
 
         self.mas_corrected = True
 
