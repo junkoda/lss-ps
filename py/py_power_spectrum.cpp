@@ -221,10 +221,6 @@ PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
   // _grid4:
   //   Yamamoto-Scoccimarro is used if _delta4 is None
   //   Yamamoto-Bianchi otherwise
-  //
-  //
-
-
   
   double k_min, k_max, dk;
   PyObject *py_grid, *py_grid2, *py_grid4;

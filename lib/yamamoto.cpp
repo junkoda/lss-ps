@@ -28,9 +28,9 @@ class MultipoleBianchi {
 
     P.p0[ik] += norm(delta0_k)*corr;
     P.p2[ik] += 5.0*(delta2_k.real()*delta0_k.real() 
-	       + delta2_k.imag()*delta0_k.imag())*corr;
+	           + delta2_k.imag()*delta0_k.imag())*corr;
     P.p4[ik] += 9.0*(delta4_k.real()*delta0_k.real()
-	       + delta4_k.imag()*delta0_k.imag())*corr;
+	           + delta4_k.imag()*delta0_k.imag())*corr;
   }
 
   GridFFT const * const delta0;
@@ -56,7 +56,7 @@ class MultipoleScoccimarro {
     
     double P0_hat = norm(delta0_k)*corr;
     double P2_hat = 5.0*(delta2_k.real()*delta0_k.real() 
-	            + delta2_k.imag()*delta0_k.imag())*corr;
+	               + delta2_k.imag()*delta0_k.imag())*corr;
 
     double delta2_sq = norm(delta2_k)*corr;
 	

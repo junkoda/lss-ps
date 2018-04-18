@@ -32,15 +32,23 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
     if grid_moment is None:
         grid_moment = lssps.grid.zeros_like(grid)
 
+    # use same x0 for grid and grid.shifted
+    offset = grid.offset*(grid.boxsize/grid.nc)
+    x0 = (grid.x0[0] + offset,
+          grid.x0[1] + offset,
+          grid.x0[2] + offset)
+
     for idx in indices:
         # convert str '0000' to list [0, 0, 0, 0]
         idx_array = [int(x) for x in idx[0]]
 
         # assign Q_index(x)
-        c._yamamoto_compute_moment_x(grid._grid, idx_array, grid_moment._grid)
+        c._yamamoto_compute_moment_x(grid._grid, x0, idx_array,
+                                     grid_moment._grid)
 
         if grid.shifted is not None:
-            c._yamamoto_compute_moment_x(grid.shifted._grid, idx_array,
+            c._yamamoto_compute_moment_x(grid.shifted._grid, x0,
+                                         idx_array,
                                          grid_moment.shifted._grid)            
 
         # FFT to Q_index(k)
@@ -78,6 +86,7 @@ def compute_delta2(grid, *, grid_moment=None, grid2=None):
     indices = [('00', 1.5), ('11', 1.5), ('22', 1.5), # Q_xx + cyc.
                ('01', 3.0), ('12', 3.0), ('20', 3.0), # Q_xy + cyc.
               ]
+    #assert(len(indices) == 6)
 
     return _compute_delta_l(grid, indices,
                             grid_moment=grid_moment, grid_delta_l=grid2)

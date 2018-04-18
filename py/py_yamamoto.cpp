@@ -1,6 +1,7 @@
 #include <vector>
 
-#include "moment.h"
+#include "config.h" // Float
+#include "moment.h" // Moment2, Moment4
 #include "yamamoto.h"
 #include "py_yamamoto.h"
 #include "py_util.h"
@@ -12,11 +13,12 @@ PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
   // _yamamoto_compute_moment_x(_grid_delta, ij, _grid_moment)
   // grid_delta
   // ij (list): list of indeces len(ij) = 2 or 4
+  //            e.g. Q_ij(x) for [i, j], Q_ijkl(x) for [i, j, k, l]
 
-  PyObject *py_grid_delta, *py_list, *py_grid_moment;
+  PyObject *py_grid_delta, *py_list, *py_x0, *py_grid_moment;
 
-  if(!PyArg_ParseTuple(args, "OOO",
-		       &py_grid_delta, &py_list, &py_grid_moment))
+  if(!PyArg_ParseTuple(args, "OOOO",
+		       &py_grid_delta, &py_x0, &py_list, &py_grid_moment))
     return NULL;
 
   Grid const * const delta=
@@ -30,14 +32,17 @@ PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
   vector<int> v;
   sequence_to_vector<int>(py_list, v);
 
+  vector<Float> x0;
+  sequence_to_vector<Float>(py_x0, x0);
+
   if(v.size() == 2) {
-    moment_compute_x(delta, Moment2(v[0], v[1]), moment);
+    moment_compute_x(delta, x0.data(), Moment2(v[0], v[1]), moment);
   }
   else if(v.size() == 4) {
-    moment_compute_x(delta, Moment4(v[0], v[1], v[2], v[3]), moment);
+    moment_compute_x(delta, x0.data(), Moment4(v[0], v[1], v[2], v[3]), moment);
   }
   else {
-    PyErr_SetString(PyExc_TypeError, "length of indecies is nither 2 or 4");
+    PyErr_SetString(PyExc_ValueError, "length of indecies is nither 2 or 4");
     return NULL;
   }
 
