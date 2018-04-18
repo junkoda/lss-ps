@@ -59,16 +59,6 @@ void moment_compute_x(Grid const * const grid,
   const size_t ncz= grid->ncz;
   const double dx= grid->boxsize / nc;
 
-  // TODO
-  // Need to this what x0 should be for interlacing 
-  //double const * const x0= grid->x0_box;
-  /*
-  const double x0[]= {grid->x0_box[0] + grid->offset*dx,
-		      grid->x0_box[1] + grid->offset*dx,
-		      grid->x0_box[2] + grid->offset*dx};
-  */
-
-
   double* const m= grid_moment->fx;
   double const * const d= grid->fx;
 
