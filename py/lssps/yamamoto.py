@@ -147,7 +147,7 @@ def compute_yamamoto(grid_delta, kind, *,
 
     if kind.lower() == 'bianchi':
         grid4 = compute_delta4(grid_delta, grid_moment=grid_moment,
-                               grid2=grid2, grid4=grid4)
+                               grid4=grid4)
 
     # Fourier transform delta
     grid_delta.fft()
