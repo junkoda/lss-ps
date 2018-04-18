@@ -320,8 +320,8 @@ class Grid:
 
 
 
-def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
-    """Return a new empty grid filled with zeros
+def empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
+    """Return a new empty grid (uninitialised).
     Args:
         nc (int): number of grids per dimension
         boxsize: length of the box on a side
@@ -337,15 +337,34 @@ def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
     if interlacing:
         grid.shifted = Grid(nc, boxsize, x0, offset - 0.5)
 
+    return grid
+
+
+
+def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
+    """Return a new grid initialised with zeros.
+    Args:
+        nc (int): number of grids per dimension
+        boxsize: length of the box on a side
+        x0: corner of the box
+        offset: offset of the grid points from the box corner
+                give a tuple of 2 floats to set both offsets for
+                the main and shifted grid
+        interlacing: attach shifted grid which is shifted by half gridspacing
+    """
+    
+    grid = empty(nc, boxsize, x0, offset, interlacing=interlacing)
     grid.clear()
 
     return grid
-
 
 def zeros_like(grid):
     return zeros(grid.nc, grid.boxsize, grid.x0, grid.offset,
                  interlacing=(grid.shifted is not None))
 
+def empty_like(grid):
+    return empty(grid.nc, grid.boxsize, grid.x0, grid.offset,
+                 interlacing=(grid.shifted is not None))
 
 def load_h5(filename):
     """

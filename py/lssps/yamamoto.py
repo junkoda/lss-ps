@@ -20,7 +20,7 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
     Returns:
       grid_delta_l (Grid)
     """
-    
+
     if grid.mode != 'real-space':
         raise ValueError('grid is not in real space')
 
@@ -33,9 +33,10 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
         grid_moment = lssps.grid.zeros_like(grid)
 
     for idx in indices:
+        # convert str '0000' to list [0, 0, 0, 0]
         idx_array = [int(x) for x in idx[0]]
 
-        # Assign Q_index(x)
+        # assign Q_index(x)
         c._yamamoto_compute_moment_x(grid._grid, idx_array, grid_moment._grid)
 
         if grid.shifted is not None:
@@ -45,11 +46,12 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
         # FFT to Q_index(k)
         grid_moment.fft()
 
+        # interlacing
         if grid.shifted is not None:
             grid.interlaced = False
             grid.interlace()
 
-        # delta_l += (k_i/k)... Q_index(k)            
+        # delta_l += (k_i/k) (k_j/k) ... Q_ij..(k)            
         c._yamamoto_compute_moment_k(grid_moment._grid, idx_array, idx[1],
                                      grid_delta_l._grid)
 
@@ -113,6 +115,8 @@ def compute_delta4(grid, *, grid_moment=None, grid4=None):
     # (35/8) 12 Q_xxyz + cyc.
     fac = 3.0*35.0/2.0
     indices.extend([('0012', fac), ('1120', fac), ('2201', fac)])
+
+    assert(len(indices) == 15)
 
     return _compute_delta_l(grid, indices, grid_moment=grid_moment,
                             grid_delta_l=grid4)
