@@ -121,6 +121,9 @@ void moment_compute_k(Grid const * const grid,
       }
     }
   }
+  grid_out->mode= GridMode::fourier_space;
 }
+
+
 
 #endif

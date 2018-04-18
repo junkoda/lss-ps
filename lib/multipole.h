@@ -21,7 +21,7 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
 
 PowerSpectrum*
 multipole_compute_yamamoto_scoccimarro(const double k_min, const double k_max,
-			   const double dk, const int nmu,
+			   const double dk,
 			   Grid const * const grid,
 			   Grid const * const grid2,
 			   const bool subtract_shotnoise,
@@ -29,7 +29,7 @@ multipole_compute_yamamoto_scoccimarro(const double k_min, const double k_max,
 
 PowerSpectrum*
 multipole_compute_yamamoto_bianchi(const double k_min, const double k_max,
-			   const double dk, const int nmu,
+			   const double dk,
 			   Grid const * const grid,
 			   Grid const * const grid2,
 			   Grid const * const grid4,

@@ -11,6 +11,7 @@
 #include "py_mass_assignment.h"
 #include "py_interlacing.h"
 #include "py_power_spectrum.h"
+#include "py_yamamoto.h"
 #include "py_performance.h"
 #include "py_mean_density.h"
 #include "py_mean_density_adaptive.h"
@@ -103,8 +104,17 @@ static PyMethodDef methods[] = {
   {"_power_spectrum_compute_plane_parallel",
    py_power_spectrum_compute_plane_parallel, METH_VARARGS,
    "_power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu, _grid_delta, subtract_shotnoise, correct_mas)"},
+  {"_power_spectrum_compute_yamamoto",
+   py_power_spectrum_compute_yamamoto, METH_VARARGS,
+   "_power_spectrum_compute_yamamoto(k_min, k_max, dk, grid, grid2, grid4, subtract_shotnoise, correct_mas)"},
+
   {"_power_spectrum_shotnoise",py_power_spectrum_shotnoise, METH_VARARGS,
    "_power_spectrum_shotnoise(_ps)"},
+
+  {"_yamamoto_compute_moment_x", py_yamamoto_compute_moment_x, METH_VARARGS,
+   "_yamamoto_compute_moment_x"},  
+  {"_yamamoto_compute_moment_k", py_yamamoto_compute_moment_k, METH_VARARGS,
+   "_yamamoto_compute_moment_k"},   
 
   {"_performance_xyz_sum", py_performance_xyz_sum, METH_VARARGS,
    "compute sum of an xyz array"},

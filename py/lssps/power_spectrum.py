@@ -1,4 +1,6 @@
 import lssps._lssps as c
+#import lssps
+import lssps.yamamoto
 import numbers
 import numpy as np
 
@@ -95,3 +97,4 @@ def compute_plane_parallel(grid_delta, *,
     return PowerSpectrum(_ps)
 
     
+compute_yamamoto = lssps.yamamoto.compute_yamamoto

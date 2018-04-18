@@ -36,8 +36,11 @@ libs = os.environ['LIBS'].split()
 setup(name='lssps',
       version='0.0.1',
       author='Jun Koda',
-      py_modules=['lssps.msg', 'lssps.cosmology', 
-                  'lssps.grid', 
+      py_modules=['lssps.msg', 'lssps.cosmology',
+                  'lssps.grid',
+                  'lssps.power_spectrum',
+                  'lssps.interlacing',
+                  'lssps.compute',
       ],
       ext_modules=[
           Extension('lssps._lssps',

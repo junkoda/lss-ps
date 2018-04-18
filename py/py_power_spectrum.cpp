@@ -1,5 +1,6 @@
 #include "msg.h"
 #include <iostream>
+#include <string>
 #include "power_spectrum.h"
 #include "grid.h"
 #include "multipole.h"
@@ -124,10 +125,6 @@ PyObject* py_power_spectrum_P0_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  //for(int i=0; i<ps->n; ++i) {
-    //fprintf(stderr, "%e %e 0\n", ps->k[i], (*ps->p0[i]);
-    //}
-
   return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p0[0]);
 }
 
@@ -212,4 +209,62 @@ PyObject* py_power_spectrum_shotnoise(PyObject* self, PyObject* args)
   py_assert_ptr(ps);
 
   return Py_BuildValue("d", ps->shot_noise);
+}
+
+PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
+					     PyObject* args)
+{
+  // compute Yamamoto-Scoccimarro or Yamamoto-Bianchi power spectrum
+  // _power_spectrum_compute_yamamoto(k_min, k_max, dk,
+  //  _grid, _grid2, _grid4, subtract_shotnoise, correct_mas)
+  //
+  // _grid4:
+  //   Yamamoto-Scoccimarro is used if _delta4 is None
+  //   Yamamoto-Bianchi otherwise
+  //
+  //
+
+
+  
+  double k_min, k_max, dk;
+  PyObject *py_grid, *py_grid2, *py_grid4;
+  int subtract_shotnoise, correct_mas;
+
+  
+  if(!PyArg_ParseTuple(args, "dddOOOii",
+		       &k_min, &k_max, &dk,
+		       &py_grid, &py_grid2, &py_grid4,
+		       &subtract_shotnoise, &correct_mas)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  Grid const * const grid2=
+    (Grid const *) PyCapsule_GetPointer(py_grid2, "_Grid");
+  py_assert_ptr(grid2);
+
+
+  // Yamamoto-Scoccimaro is grid4 is None
+  if(py_grid4 == Py_None) {
+    PowerSpectrum* pss= 
+      multipole_compute_yamamoto_scoccimarro(k_min, k_max, dk, 
+					     grid, grid2,
+					     subtract_shotnoise, correct_mas);
+
+    return PyCapsule_New(pss, "_PowerSpectrum", py_power_spectrum_free);
+  }
+
+  // Yamamoto-Bianchi estimator
+  Grid const * const grid4=
+    (Grid const *) PyCapsule_GetPointer(py_grid4, "_Grid");
+  py_assert_ptr(grid4);
+
+  PowerSpectrum* psb= 
+  multipole_compute_yamamoto_bianchi(k_min, k_max, dk, 
+				     grid, grid2, grid4,
+				     subtract_shotnoise, correct_mas);
+  return PyCapsule_New(psb, "_PowerSpectrum", py_power_spectrum_free);
 }

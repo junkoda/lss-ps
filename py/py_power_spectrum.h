@@ -19,6 +19,9 @@ PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args);
 //PyObject* py_power_spectrum_compute_multipoles(PyObject* self, PyObject* args);
 PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
 						   PyObject* args);
+PyObject* py_power_spectrum_compute_yamamoto(PyObject* self, PyObject* args);
 
 PyObject* py_power_spectrum_shotnoise(PyObject* self, PyObject* args);
+
+
 #endif

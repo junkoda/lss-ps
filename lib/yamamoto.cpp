@@ -1,5 +1,8 @@
 #include "yamamoto.h"
 
+//
+// Yamamoto-Bianchi function object for compute_multipoles() algorithm
+//
 class MultipoleBianchi {
  public:
   explicit MultipoleBianchi(GridFFT const * const grid_delta0,
@@ -36,6 +39,9 @@ class MultipoleBianchi {
 };
 
 
+//
+// Yamamoto-Scoccimarro function object for compute_multipoles() algorithm
+//
 class MultipoleScoccimarro {
  public:
   MultipoleScoccimarro(Grid const * const delta0_,

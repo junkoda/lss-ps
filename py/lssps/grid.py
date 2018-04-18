@@ -342,6 +342,10 @@ def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
     return grid
 
 
+def zeros_like(grid):
+    return zeros(grid.nc, grid.boxsize, grid.x0, grid.offset,
+                 interlacing=(grid.shifted is not None))
+
 
 def load_h5(filename):
     """

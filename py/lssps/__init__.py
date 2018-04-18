@@ -7,6 +7,7 @@ import lssps.cosmology
 import lssps.performance
 import lssps.mean_density
 import lssps.etc
+import lssps.yamamoto
 
 msg = lssps.msg.LogLevel()
 
