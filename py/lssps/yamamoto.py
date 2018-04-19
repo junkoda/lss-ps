@@ -56,8 +56,8 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
 
         # interlacing
         if grid.shifted is not None:
-            grid.interlaced = False
-            grid.interlace()
+            grid_moment.interlaced = False
+            grid_moment.interlace()
 
         # delta_l += (k_i/k) (k_j/k) ... Q_ij..(k)            
         c._yamamoto_compute_moment_k(grid_moment._grid, idx_array, idx[1],
