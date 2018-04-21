@@ -9,7 +9,7 @@ cosmology with Python
 ### Requirements
 
 * C++11 compiler
-* Python3 and Numpy
+* Python3 and NumPy
 * FFTW and GSL libraries
 
 Edit Makefile for C++ compiler, non-standard library path.
@@ -86,3 +86,11 @@ for i in range(len(ps)):
     if ps.nmodes[i] > 0:
          print('%e %e %d' % (ps.k[i], ps.P0[i], ps.nmodes[i]))
 ```
+
+
+## References
+
+1. Feldman, Kaiser, and Peacock (1994), *Power-spectrum analysis of three-dimensional redshift surveys*, ApJ **426**, 23-37
+2. Sefusatti et al (2016), *Accurate estimators of correleation functions in Fourier space*, MNRAS **460**, 3624-3636 [interlacing]
+3. Bianchi et al (2015), *Measuring line-of-sight-dependent Fourier-space clustering using FFTs*, MNRAS **453*, L11-15 [Yamamoto-Bianchi estimator]
+4. Scoccimarro (2015), *Fast Estimators for Redshift-Space Clustering*, PRD **92**, 083532 [Yamamoto-Scoccimarro estimator]
