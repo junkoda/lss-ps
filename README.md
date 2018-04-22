@@ -42,8 +42,8 @@ import lssps
 
 # load 4 columns x, y, z, nbar
 # where nbar is the mean density (density without clustering) at each position
-data = np.loadtxt('data.txt') # load data xyz coordinate
-rand = np.loadtxt('rand.txt') # load random catalogue xyz coordinate
+data = np.loadtxt('data.txt') # load data (galaxy) catalogue
+rand = np.loadtxt('rand.txt') # load random catalogue
 
 # Assign density to grids
 boxsize = 3400.0       # length of a cube on a side
@@ -57,6 +57,7 @@ grid_rand = lssps.grid.zeros(nc, boxsize, x0, offset=0.5, interlacing=True)
 grid.assign_density(xyz=data[:, 0:3], nbar=data[:, 3], mas='CIC')
 grid_rand.assign_density(xyz=rand[:, 0:3], nbar=rand[:, 3], mas='CIC')
 # you can also set weight=...
+# mass-assignment schemes (mas) are 'NGP', 'CIC', or 'TSC'
 
 # Compute fluctuation field F(x) = n_data(x) - alpha*n_rand(x)
 # where alpha = data/random ratio

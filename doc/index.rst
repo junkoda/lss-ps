@@ -8,19 +8,10 @@ lssps
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorial:
-	     
-   compute_powerspectrum.rst
+   :caption: Class:
 
-.. .. automodule:: power_spectrum
-..   :members:
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Tutorial:
-
+   msg.rst
    power_spectrum.rst
-   catalogue.rst
    grid.rst
    
 

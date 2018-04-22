@@ -35,6 +35,9 @@ static PyMethodDef methods[] = {
   {"_cosmology_compute_comoving_distance",
    py_cosmology_compute_comoving_distance, METH_VARARGS,
    "_cosmology_compute_comoving_distance"},
+
+  {"_cosmology_growth_D", py_cosmology_growth_D, METH_VARARGS, "growth factor D"},
+  {"_cosmology_growth_f", py_cosmology_growth_rate_f, METH_VARARGS, "growth rate f"},
    
   {"_grid_alloc", py_grid_alloc, METH_VARARGS,
    "_grid_alloc(nc) allocate a new grid object"},

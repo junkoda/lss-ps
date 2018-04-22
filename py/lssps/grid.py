@@ -320,7 +320,7 @@ class Grid:
 
 
 
-def empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
+def empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=True):
     """Return a new empty grid (uninitialised).
     Args:
         nc (int): number of grids per dimension
@@ -341,7 +341,7 @@ def empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
 
 
 
-def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=False):
+def zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=True):
     """Return a new grid initialised with zeros.
     Args:
         nc (int): number of grids per dimension

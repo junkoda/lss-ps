@@ -71,6 +71,7 @@ PyObject* py_cosmology_distance_redshift(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+
 PyObject* py_cosmology_compute_comoving_distance(PyObject* self, PyObject* args)
 {
   double z;
@@ -81,4 +82,29 @@ PyObject* py_cosmology_compute_comoving_distance(PyObject* self, PyObject* args)
   double d= cosmology_compute_comoving_distance(a);
 
   return Py_BuildValue("d", d);
+}
+
+//
+// growth factor
+//
+PyObject* py_cosmology_growth_D(PyObject* self, PyObject* args)
+{
+  // _growth_D(a, omega_m)
+  double a, omega_m;
+  if(!PyArg_ParseTuple(args, "dd", &a, &omega_m)) {
+    return NULL;
+  }
+
+  return Py_BuildValue("d", cosmology_growth_D(a, omega_m));
+}
+
+PyObject* py_cosmology_growth_rate_f(PyObject* self, PyObject* args)
+{
+  // _growth_f(a, omega_m)
+  double a, omega_m;
+  if(!PyArg_ParseTuple(args, "dd", &a, &omega_m)) {
+    return NULL;
+  }
+
+  return Py_BuildValue("d", cosmology_growth_rate_f(a, omega_m));
 }
