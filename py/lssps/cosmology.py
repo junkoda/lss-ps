@@ -72,4 +72,4 @@ def f(omega_m, *, a=None, z=None):
             raise ValueError('Cannot set both a and z')
         a = 1.0/(1.0 + z)
 
-    return c._cosmology_growth_rate_f(a, omega_m)
+    return c._cosmology_growth_f(a, omega_m)

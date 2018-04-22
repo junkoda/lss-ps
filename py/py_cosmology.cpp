@@ -106,5 +106,5 @@ PyObject* py_cosmology_growth_rate_f(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  return Py_BuildValue("d", cosmology_growth_rate_f(a, omega_m));
+  return Py_BuildValue("d", cosmology_growth_f(a, omega_m));
 }

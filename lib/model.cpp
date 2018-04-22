@@ -2,8 +2,10 @@
 #include <cstdio>
 #include <cassert>
 #include <math>
-#include "model.h"
+
 #include "error.h"
+#include "cosmology.h"
+#include "model.h"
 
 static read_power_spectrum(const char filename[],
 			   vector<double>& v_k, vector<double>& v_P,

@@ -11,7 +11,7 @@ double cosmology_distance_redshift(const double d);
 double cosmology_redshift_distance(const double z);
 
 double cosmology_growth_D(const double a, const double omega_m);
-double cosmology_growth_rate_f(const double a, const double omega_m);
+double cosmology_growth_f(const double a, const double omega_m);
 
 
 

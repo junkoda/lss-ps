@@ -123,7 +123,7 @@ double cosmology_growth_D(const double a, const double omega_m)
   return growth(a, omega_m)/growth(1.0, omega_m);
 }
 
-double cosmology_growth_rate_f(const double a, const double omega_m)
+double cosmology_growth_f(const double a, const double omega_m)
 {
   // Growth rate f=dlnD/dlna
   const double D0= growth(1.0, omega_m);
