@@ -47,7 +47,9 @@ class Grid {
   void add_atomic(const size_t ix, const size_t iy, const size_t iz,
 	   const Float val) {
     size_t index= (ix*nc + iy)*ncz + iz;
+#ifdef _OPENMP
     #pragma omp atomic
+#endif
     fx[index] += val;
   }
 

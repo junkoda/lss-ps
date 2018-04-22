@@ -6,6 +6,7 @@
 PyMODINIT_FUNC
 py_power_spectrum_module_init();
 
+void py_power_spectrum_free(PyObject *obj);
 
 //PyObject* py_power_spectrum_alloc(PyObject* self, PyObject* args);
 PyObject* py_power_spectrum_len(PyObject* self, PyObject* args);

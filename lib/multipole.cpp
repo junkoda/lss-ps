@@ -43,7 +43,9 @@ void mas_correction_init(const int nc, const int n_mas)
   const int knq = nc/2;
   const Float fac= M_PI/nc;
 
-#pragma omp parallel for
+#ifdef _OPENMP
+  #pragma omp parallel for
+#endif
   for(int i=1; i<nc; ++i) {
     int k= i <= knq ? i : i - nc;
     Float sinc = sin(fac*k)/(fac*k);
@@ -59,7 +61,7 @@ void mas_correction_init(const int nc, const int n_mas)
 template <typename F>
 PowerSpectrum* compute_multipoles_template(const double k_min,
 					   const double k_max,
-					   const double dk, const int nmu,
+					   const double dk, 
 					   const F f,
 					   const bool subtract_shotnoise,
 					   const bool correct_mas,
@@ -91,7 +93,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   const double ik_max= min(k_nq, k_max)/k_fundamental;
   const double idk= dk/k_fundamental;
 
-  PowerSpectrum* const ps= new PowerSpectrum(n, nmu);
+  PowerSpectrum* const ps= new PowerSpectrum(n);
   PowerSpectrum& P= *ps;
 
   const size_t nckz= nc/2+1;
@@ -102,11 +104,15 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   msg_printf(msg_info, "Shot noise subtraction: %e\n", shot_noise);
   msg_printf(msg_info, "Pk normalisation %e\n", grid->pk_normalisation);
 
+#ifdef _OPENMP
   #pragma omp parallel num_threads(omp_get_max_threads())
+#endif
   {
-    PowerSpectrum ps_local(n, nmu);
-			   
+    PowerSpectrum ps_local(n);
+
+#ifdef _OPENMP
     #pragma omp for
+#endif
     for(int ix=0; ix<nc; ++ix) {
       int k[3];
       k[0] = ix <= ik_nq ? ix : ix - nc;
@@ -154,7 +160,9 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
 			   
 
     /// Local power spectrum in each core is added up to total
+#ifdef _OPENMP
     #pragma omp critical (__COLLECT_PK_1D__)
+#endif
     {
       P += ps_local;
     }
@@ -170,14 +178,6 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
       P.p0[i] = fac*P.p0[i] - shot_noise;
       P.p2[i] = fac*P.p2[i];
       P.p4[i] = fac*P.p4[i];
-    }
-  }
-
-  int nbin2d = P.nmu*P.n;
-  for(int i=0; i<nbin2d; ++i) {
-    if(P.nmodes2d[i] > 0) {
-      double fac = pk_fac/P.nmodes2d[i];
-      P.p2d[i] *= fac;
     }
   }
   
@@ -223,21 +223,6 @@ public:
     P.p0[ik] += delta2;
     P.p2[ik] += l2*delta2;
     P.p4[ik] += l4*delta2;
-
-    // 2D Power spectrum p2d(k, mu)
-    if(P.nmu > 0) {
-      double mu = sqrt(mu2);
-      int imu = static_cast<int>(mu*P.nmu); assert(0 <= imu && imu <= P.nmu);
-
-      if(imu == P.nmu) imu = P.nmu - 1;
-      int ibin2d = ik*P.nmu + imu;
-      fprintf(stderr, "%d %d %d %d %d\n", ik, imu, ibin2d, P.nmu, P.n);
-
-      if(0 <= ibin2d && ibin2d < P.nmu*P.n) {
-	P.p2d[ibin2d] += delta2;
-	P.nmodes2d[ibin2d]++;
-      }
-    }
   }
   Grid const * const grid;
 };
@@ -307,25 +292,25 @@ class MultipoleScoccimarro {
 
 PowerSpectrum*
 multipole_compute_monopole(const double k_min, const double k_max,
-			   const double dk, const int nmu,
+			   const double dk, 
 			   Grid const * const grid,
 			   const bool subtract_shotnoise,
 			   const bool correct_mas)
 {
-  return compute_multipoles_template(k_min, k_max, dk, nmu,
+  return compute_multipoles_template(k_min, k_max, dk, 
 				     Monopole(grid),
 				     subtract_shotnoise, correct_mas);
 }
 
 PowerSpectrum*
 multipole_compute_plane_parallel(const double k_min, const double k_max,
-				 const double dk, const int nmu,
+				 const double dk, 
 				 Grid const * const grid,
 				 const bool subtract_shotnoise,
 				 const bool correct_mas,
 				 const int line_of_sight)
 {
-  return compute_multipoles_template(k_min, k_max, dk, nmu,
+  return compute_multipoles_template(k_min, k_max, dk, 
   				     Multipole(grid),
 				     subtract_shotnoise, correct_mas,
 				     line_of_sight);
@@ -339,8 +324,7 @@ multipole_compute_yamamoto_scoccimarro(const double k_min, const double k_max,
 				       const bool subtract_shotnoise,
 				       const bool correct_mas)
 {
-  const int nmu= 0;
-  return compute_multipoles_template(k_min, k_max, dk, nmu,
+  return compute_multipoles_template(k_min, k_max, dk,
 				     MultipoleScoccimarro(grid, grid2),
 				     subtract_shotnoise, correct_mas);
 }
@@ -353,8 +337,7 @@ multipole_compute_yamamoto_bianchi(const double k_min, const double k_max, const
 			   const bool subtract_shotnoise,
 			   const bool correct_mas)
 {
-  const int nmu= 0;
-  return compute_multipoles_template(k_min, k_max, dk, nmu,
+  return compute_multipoles_template(k_min, k_max, dk,
 				     MultipoleBianchi(grid, grid2, grid4),
 				     subtract_shotnoise, correct_mas);
 }

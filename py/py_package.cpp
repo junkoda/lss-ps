@@ -16,6 +16,7 @@
 #include "py_mean_density.h"
 #include "py_mean_density_adaptive.h"
 #include "py_etc.h"
+#include "py_model.h"
 
 using namespace std;
 
@@ -106,7 +107,7 @@ static PyMethodDef methods[] = {
    "P4 array"},
   {"_power_spectrum_compute_plane_parallel",
    py_power_spectrum_compute_plane_parallel, METH_VARARGS,
-   "_power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu, _grid_delta, subtract_shotnoise, correct_mas)"},
+   "_power_spectrum_compute_plane_parallel(k_min, k_max, dk, _grid_delta, subtract_shotnoise, correct_mas)"},
   {"_power_spectrum_compute_yamamoto",
    py_power_spectrum_compute_yamamoto, METH_VARARGS,
    "_power_spectrum_compute_yamamoto(k_min, k_max, dk, grid, grid2, grid4, subtract_shotnoise, correct_mas)"},
@@ -147,7 +148,13 @@ static PyMethodDef methods[] = {
    METH_VARARGS, "_mean_density_adaptive_estimate(_kdtree, _points, knbr)"},
   {"_mean_density_average_estimate", py_mean_density_average_estimate,
    METH_VARARGS, "_mean_density_average_estimate(_kdtree, xyz, knbr, nbar)"},   
-  
+
+  {"_model_linear_alloc", py_model_linear_alloc, METH_VARARGS,
+   "_model_linear_alloc(filename, omega_m, z, b, redshift_space, sigma_v)"},
+  {"_model_call",py_model_call, METH_VARARGS,
+   "_model_call(_model, k, mu)"},
+  {"_model_compute_discrete_multipoles", py_model_compute_discrete_multipoles,
+   METH_VARARGS, "_model_compute_descrete_multipoles"},
   {NULL, NULL, 0, NULL}
 };
 

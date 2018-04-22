@@ -7,6 +7,7 @@ import lssps.performance
 import lssps.mean_density
 import lssps.etc
 import lssps.yamamoto
+import lssps.model
 
 msg = lssps.msg.LogLevel()
 

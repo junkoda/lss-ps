@@ -138,7 +138,9 @@ void mass_assignment_template(float_type const * xyz,
   long double w2_sum = 0.0;
   long double nw2_sum = 0.0;
 
+#ifdef _OPENMP
   #pragma omp parallel for
+#endif
   for(size_t i=0; i<np; ++i) {
     Float rx[3];
     double w = weight == nullptr ? 1.0 : *weight;

@@ -26,7 +26,7 @@ py_power_spectrum_module_init()
 }
 
 
-static void py_power_spectrum_free(PyObject *obj);
+//static void py_power_spectrum_free(PyObject *obj);
 
 
 /*
@@ -106,7 +106,7 @@ PyObject* py_power_spectrum_nmodes_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {ps->n};
 
-  return PyArray_SimpleNewFromData(nd, dims, NPY_INT, &ps->nmodes[0]);
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->nmodes[0]);
 }
 
 
@@ -167,17 +167,16 @@ PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args)
 PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
 						   PyObject* args)
 {
-  // _power_spectrum_compute_multipoles(k_min, k_max, dk, nmu,
+  // _power_spectrum_compute_multipoles(k_min, k_max, dk,
   //  grid, subtract_shotnoise, correct_mas)
   
   double k_min, k_max, dk;
-  int nmu;
   PyObject *py_grid;
   int subtract_shotnoise, correct_mas;
   int line_of_sight;
   
   if(!PyArg_ParseTuple(args, "dddiOiii",
-		       &k_min, &k_max, &dk, &nmu,
+		       &k_min, &k_max, &dk,
 		       &py_grid, &subtract_shotnoise, &correct_mas,
 		       &line_of_sight)) {
     return NULL;
@@ -188,7 +187,7 @@ PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
   py_assert_ptr(grid);
 
   PowerSpectrum* const ps=
-    multipole_compute_plane_parallel(k_min, k_max, dk, nmu,
+    multipole_compute_plane_parallel(k_min, k_max, dk,
 				     grid,
 				     subtract_shotnoise, correct_mas,
 				     line_of_sight);

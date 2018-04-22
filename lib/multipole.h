@@ -6,14 +6,14 @@
 
 PowerSpectrum*
 multipole_compute_monopole(const double k_min, const double k_max,
-			   const double dk, const int nmu,
+			   const double dk,
 			   Grid const * const grid,
 			   const bool subtract_shotnoise,
 			   const bool correct_mas);
 
 PowerSpectrum*
 multipole_compute_plane_parallel(const double k_min, const double k_max,
-				 const double dk, const int nmu,
+				 const double dk, 
 				 Grid const * const grid,
 				 const bool subtract_shotnoise,
 				 const bool correct_mas,

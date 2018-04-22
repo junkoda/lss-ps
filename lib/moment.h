@@ -62,7 +62,9 @@ void moment_compute_x(Grid const * const grid,
   double* const m= grid_moment->fx;
   double const * const d= grid->fx;
 
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
   for(size_t ix=0; ix<nc; ++ix) {
     double x[3];
     
@@ -104,7 +106,9 @@ void moment_compute_k(Grid const * const grid,
   std::complex<double> const * const d_k= grid->fk;
   std::complex<double>* const m_k= grid_out->fk;
 
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
   for(int ix=0; ix<nc; ++ix) {
     double k[3];
     k[0] = ix <= iknq ? ix : ix - nc;

@@ -226,8 +226,10 @@ void mass_assignment_template(float_type const * xyz,
 
   //std::cerr << "np= " << np << std::endl;
 
-  // num_threads(omp_get_max_threads()) 
+  // num_threads(omp_get_max_threads())
+#ifdef _OPENMP
   #pragma omp parallel firstprivate(xyz, weight, nbar)
+#endif
   {
     #ifdef _OPENMP
       int ithread= omp_get_thread_num();

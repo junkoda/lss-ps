@@ -9,14 +9,14 @@
 class PowerSpectrum {
  public:
   PowerSpectrum();
-  PowerSpectrum(const int nk, const int nmu=0);
+  PowerSpectrum(const int nk);
   
   PowerSpectrum& operator+=(const PowerSpectrum& ps);
 
-  int n, nmu;
+  int n;
   double shot_noise;
   
-  std::valarray<int> nmodes, nmodes2d;
+  std::valarray<double> nmodes, nmodes2d;
   std::valarray<double> k, p0, p2, p4;
   std::valarray<double> p2d;
  private:

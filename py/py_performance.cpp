@@ -19,7 +19,9 @@ void sum_from_array(float_type const * xyz,
 
   double sum_x=0.0, sum_y=0.0, sum_z=0.0;
 
+#ifdef _OPENMP
   #pragma omp parallel for reduction(+ : sum_x, sum_y, sum_z)
+#endif
   for(size_t i=0; i<np; ++i) {
     float_type const * const x=
       (float_type const * const)((char const * const) xyz + xyz_stride*i);

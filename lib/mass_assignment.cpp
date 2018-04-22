@@ -122,7 +122,9 @@ vector<Float> mass_assignment_correction_array(const int nc, const int deg)
   const int knq = nc/2;
   const Float fac= M_PI/nc;
 
+#ifdef _OPENMP
   #pragma omp parallel for
+#endif
   for(int i=1; i<nc; ++i) {
     int k= i <= knq ? i : i - nc;
     Float sinc = sin(fac*k)/(fac*k);
@@ -152,9 +154,13 @@ void mass_assignment_correct_mas(Grid* const grid)
 
   complex<Float>* const fk= grid->fk;
 
+#ifdef _OPENMP
   #pragma omp parallel num_threads(omp_get_max_threads())
+#endif
   {
+#ifdef _OPENMP
     #pragma omp for
+#endif
     for(int ix=0; ix<nc; ++ix) {
       int k[3];
       k[0] = ix <= ik_nq ? ix : ix - nc;

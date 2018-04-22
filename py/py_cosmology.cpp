@@ -98,7 +98,7 @@ PyObject* py_cosmology_growth_D(PyObject* self, PyObject* args)
   return Py_BuildValue("d", cosmology_growth_D(a, omega_m));
 }
 
-PyObject* py_cosmology_growth_rate_f(PyObject* self, PyObject* args)
+PyObject* py_cosmology_growth_f(PyObject* self, PyObject* args)
 {
   // _growth_f(a, omega_m)
   double a, omega_m;
