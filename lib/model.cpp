@@ -1,3 +1,4 @@
+#include <complex>
 #include <cstdio>
 #include <cassert>
 #include <vector>
@@ -7,6 +8,7 @@
 #include "msg.h"
 #include "error.h"
 #include "cosmology.h"
+#include "grid.h"
 #include "model.h"
 
 using namespace std;
@@ -111,7 +113,7 @@ double ModelLinear::operator()(const double k, const double mu) const
 }
 
 //
-// discrete power spectrum multipoles 
+// Discrete power spectrum multipoles 
 //
 vector<Float> mas_window_array(const int nc,
 			       const int mas_nc, const int mas_deg)
@@ -204,3 +206,52 @@ PowerSpectrum* model_compute_discrete_multipoles(const int nc,
   return ps;
 };
 
+//
+// Apply 3D window function
+//
+double model_apply_window_3d(const Model& model,
+			     Grid const * const grid,
+			     const double k)
+{
+  // Compute convolution
+  // P~(k) = int d3k'/(2pi)^3 |W(k')|^2 P(|k-k'|)
+  // for kvec = (k, 0, 0)
+  //
+  // grid is |W(k)|^2
+  const int nc= grid->nc;
+  const int nckz= nc/2 + 1;
+  const double iknq= nc/2;
+
+  const double fac= 2.0*M_PI/grid->boxsize;
+  //const double knq= M_PI/grid->boxsize*nc;
+
+  complex<Float> const * const fk= grid->fk;
+
+  long double P_conv= 0;
+  
+  for(int ix=0; ix<nc; ++ix) {
+    const double kx= ix <= iknq ? fac*ix : fac*(ix - nc);
+    for(int iy=0; iy<nc; ++iy) {
+      const double ky= iy <= iknq ? fac*iy : fac*(iy - nc);
+
+      int iz0 = !(kx > 0.0 || (kx == 0.0 && ky > 0.0));
+      for(int iz=iz0; iz<nckz; ++iz) {
+	const double kz= fac*iz;
+	const double k1x= k - kx;
+	const double k1= sqrt(k1x*k1x + ky*ky + kz*kz);
+
+	const size_t index= (ix*static_cast<size_t>(nc) + iy)*nckz + iz;
+	const double wk2= fk[index].real(); // |w(k_1)|^2
+	P_conv += model(k1, 0.0)*wk2; // P(k + kx, ky, kz)
+      }
+    }
+  }
+
+  // x2 for the other half of the complex d3k'
+  P_conv= 2.0*P_conv + model(k, 0.0)*fk[0].real();
+
+  const double vol= pow(grid->boxsize, 3.0);
+  // \int d3k/(2pi)^3 = 1/vol sum_k
+
+  return P_conv/vol;
+}

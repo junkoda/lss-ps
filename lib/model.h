@@ -4,6 +4,7 @@
 #include <vector>
 #include <gsl/gsl_spline.h>
 #include "power_spectrum.h"
+#include "grid.h"
 
 //
 // Model classes
@@ -46,6 +47,9 @@ PowerSpectrum* model_compute_discrete_multipoles(const int nc,
 						 const int mas_window_nc,
 						 const int mas_window_deg);
 
+double model_apply_window_3d(const Model& f,
+			     Grid const * const grid,
+			     const double k);
 
  
 #endif

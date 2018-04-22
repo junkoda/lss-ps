@@ -1,7 +1,11 @@
+#include <iostream>
 #include "model.h"
+#include "grid.h"
 #include "py_assert.h"
 #include "py_model.h"
 #include "py_power_spectrum.h"
+
+using namespace std;
 
 static void py_model_free(PyObject *obj);
 
@@ -85,4 +89,26 @@ PyObject* py_model_compute_discrete_multipoles(PyObject* self, PyObject* args)
 
   
   return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
+}
+
+PyObject* py_model_apply_window_3d(PyObject* self, PyObject* args)
+{
+  PyObject *py_model, *py_grid;
+  double k;
+  if(!PyArg_ParseTuple(args, "OOd",
+		       &py_model, &py_grid, &k)) {
+    return NULL;
+  }
+  
+  Model const * const model=
+    (Model const*) PyCapsule_GetPointer(py_model, "_Model");
+  py_assert_ptr(model);
+  
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  double ptilde = model_apply_window_3d(*model, grid, k);
+
+  return Py_BuildValue("d", ptilde);
 }

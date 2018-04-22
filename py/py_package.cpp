@@ -155,6 +155,9 @@ static PyMethodDef methods[] = {
    "_model_call(_model, k, mu)"},
   {"_model_compute_discrete_multipoles", py_model_compute_discrete_multipoles,
    METH_VARARGS, "_model_compute_descrete_multipoles"},
+  {"_model_apply_window_3d", py_model_apply_window_3d,
+   METH_VARARGS, "_model_apply_window_3d(_model, _grid, k)"},
+  
   {NULL, NULL, 0, NULL}
 };
 
