@@ -39,4 +39,5 @@ PyObject* py_grid_compute_fluctuation_homogeneous(PyObject* self,
 PyObject* py_grid_get_param(PyObject* self, PyObject* args);
 PyObject* py_grid_set_param_double(PyObject* self, PyObject* args);
 
+PyObject* py_grid_resize_fourier(PyObject* self, PyObject* args);
 #endif

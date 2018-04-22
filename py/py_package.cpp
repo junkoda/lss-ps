@@ -67,6 +67,8 @@ static PyMethodDef methods[] = {
    "get a grid parameter"},
   {"_grid_set_param_double", py_grid_set_param_double, METH_VARARGS,
    "set a floating point parameter"},
+  {"_grid_resize_fourier", py_grid_resize_fourier, METH_VARARGS,
+   "_grid_resize_fourier(_grid, _grid_new)"},
 
   {"_grid_fx_asarray", py_grid_fx_asarray, METH_VARARGS,
    "return real-space grid as an np.array"},
@@ -157,6 +159,8 @@ static PyMethodDef methods[] = {
    METH_VARARGS, "_model_compute_descrete_multipoles"},
   {"_model_apply_window_3d", py_model_apply_window_3d,
    METH_VARARGS, "_model_apply_window_3d(_model, _grid, k)"},
+  {"_model_create_grid", py_model_create_grid, METH_VARARGS,
+   "_model_create_grid"},
   
   {NULL, NULL, 0, NULL}
 };

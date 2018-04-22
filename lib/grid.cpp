@@ -230,3 +230,45 @@ void grid_compute_fluctuation_homogeneous(Grid& grid_data)
   msg_printf(msg_verbose, "Time fluctuation homogeneous %le\n",
 	     std::chrono::duration<double>(te - ts).count());
 }
+
+void grid_resize_fourier(Grid const * const grid, Grid* const grid_new)
+{
+  assert(grid->mode == GridMode::fourier_space);
+  
+  const int nc= grid->nc;
+  const int nc_new= grid_new->nc;
+  
+  grid_new->clear();
+
+  const size_t nckz= nc/2 + 1;
+  const size_t nckz_new= nc_new/2 + 1;
+  
+  const int iknq= min(nc, nc_new)/2;
+  const int iknq_new= nc_new/2;
+
+  complex<Float> const * const fk= grid->fk;
+  complex<Float>* const fk_new= grid_new->fk;
+  
+  for(int ix=0; ix<nc; ++ix) {
+    if(iknq_new < ix && ix < nc - iknq_new) continue;
+    int ix_new= ix <= iknq ? ix : nc_new - ix;
+    assert(nc_new - ix >= 0);
+    assert(0 <= ix_new && ix_new < nc_new);
+    for(int iy=0; iy<nc; ++iy) {
+      if(iknq_new < iy && iy < nc - iknq_new) continue;
+      assert(nc_new - iy >= 0);
+      int iy_new= iy <= iknq ? iy : nc_new - iy;
+      assert(0 <= iy_new && iy_new < nc_new);
+      for(int iz=0; iz<iknq; ++iz) {
+	size_t index= (ix*static_cast<size_t>(nc) + iy)*nckz + iz;
+	size_t index_new= (ix_new*static_cast<size_t>(nc_new) + iy_new)*nckz_new
+	                  + iz;
+	fk_new[index_new]= fk[index];
+      }
+    }
+  }
+  
+  grid_new->mode= GridMode::fourier_space;
+  grid_new->boxsize= grid->boxsize;
+}
+

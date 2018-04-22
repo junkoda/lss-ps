@@ -1,5 +1,6 @@
 import lssps._lssps as c
 from lssps.power_spectrum import PowerSpectrum
+import lssps
 
 class Model:
     def __init__(self, _model):
@@ -42,6 +43,11 @@ class Model:
         """
         return c._model_apply_window_3d(self._model, grid_window._grid, k)
 
+    def grid(self, nc, boxsize):
+        g = lssps.grid.empty(nc, boxsize, interlacing=False)
+        c._model_create_grid(self._model, g._grid)
+
+        return g
 
 
 def linear(filename, omega_m, z=0.0, *, b=1.0,

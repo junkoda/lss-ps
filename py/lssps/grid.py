@@ -318,8 +318,6 @@ class Grid:
         c._grid_set_param_double(self._grid, 'shot_noise', value)
 
 
-
-
 def empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=True):
     """Return a new empty grid (uninitialised).
     Args:
@@ -413,3 +411,9 @@ def load_h5(filename):
     return grid
 
 
+def resize_fourier(grid, nc_new):
+    grid_new= empty(nc_new, grid.boxsize, interlacing=False)
+    
+    c._grid_resize_fourier(grid._grid, grid_new._grid)
+
+    return grid_new

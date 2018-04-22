@@ -51,5 +51,6 @@ double model_apply_window_3d(const Model& f,
 			     Grid const * const grid,
 			     const double k);
 
- 
+void model_create_grid(const Model& model, Grid* const grid);
+
 #endif

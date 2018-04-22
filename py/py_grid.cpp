@@ -620,3 +620,26 @@ PyObject* py_grid_set_param_double(PyObject* self, PyObject* args)
 
   Py_RETURN_NONE;
 }
+
+
+PyObject* py_grid_resize_fourier(PyObject* self, PyObject* args)
+{
+  PyObject *py_grid, *py_grid_new;
+
+  if(!PyArg_ParseTuple(args, "OO", &py_grid, &py_grid_new)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  Grid* const grid_new=
+    (Grid*) PyCapsule_GetPointer(py_grid_new, "_Grid");
+  py_assert_ptr(grid);
+
+  grid_resize_fourier(grid, grid_new);
+
+  Py_RETURN_NONE;
+}
+

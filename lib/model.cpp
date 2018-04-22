@@ -255,3 +255,40 @@ double model_apply_window_3d(const Model& model,
 
   return P_conv/vol;
 }
+
+void model_create_grid(const Model& model, Grid* const grid)
+{
+  // Create a grid of model power spectrum
+  //
+  grid->clear();
+  const int nc= grid->nc;
+  //const Float boxsize= grid->boxsize;
+  
+  const int nckz= nc/2 + 1;
+  const int iknq= nc/2;
+  const double fac= 2.0*M_PI/grid->boxsize;
+
+  complex<Float>* const fk= grid->fk;
+
+  for(int ix=0; ix<nc; ++ix) {
+    const double kx= ix <= iknq ? fac*ix : fac*(ix - nc);
+    for(int iy=0; iy<nc; ++iy) {
+      const double ky= iy <= iknq ? fac*iy : fac*(iy - nc);
+
+      for(int iz=0; iz<nckz; ++iz) {
+	const double kz= fac*iz;
+	const double k= sqrt(kx*kx + ky*ky + kz*kz);
+
+	const size_t index= (ix*static_cast<size_t>(nc) + iy)*nckz + iz;
+	//fk[index].real()= model(k, 0.0);
+	fk[index]= complex<Float>(model(k, 0.0), 0.0);
+      }
+    }
+  }
+
+  fk[0]= 0.0;
+
+  grid->mode= GridMode::fourier_space;
+}
+
+

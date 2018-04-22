@@ -80,5 +80,5 @@ void grid_print_time();
 void grid_compute_fluctuation(Grid& grid1, Grid& grid_rand);
 void grid_compute_fluctuation_homogeneous(Grid& grid1);
 
-
+void grid_resize_fourier(Grid const * const grid, Grid* const grid_new);
 #endif

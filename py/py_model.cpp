@@ -112,3 +112,24 @@ PyObject* py_model_apply_window_3d(PyObject* self, PyObject* args)
 
   return Py_BuildValue("d", ptilde);
 }
+
+PyObject* py_model_create_grid(PyObject* self, PyObject* args)
+{
+  PyObject *py_model, *py_grid;
+  if(!PyArg_ParseTuple(args, "OO",
+		       &py_model, &py_grid)) {
+    return NULL;
+  }
+
+  Model const * const model=
+    (Model const*) PyCapsule_GetPointer(py_model, "_Model");
+  py_assert_ptr(model);
+  
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  model_create_grid(*model, grid);
+
+  Py_RETURN_NONE;
+}
