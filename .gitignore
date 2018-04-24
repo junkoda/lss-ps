@@ -1,0 +1,9 @@
+*~
+*.o
+*.a
+*.dylib
+*.so
+__pycache__
+data
+exec/lssps
+.DS_Store
