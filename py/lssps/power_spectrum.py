@@ -1,5 +1,4 @@
 import lssps._lssps as c
-#import lssps
 import lssps.yamamoto
 import numbers
 import numpy as np
@@ -79,7 +78,7 @@ def compute_plane_parallel(grid_delta, *,
     Returns:
         PowerSpectrum object
     """
-
+    
     if grid_delta.mode != 'fourier-space':
         grid_delta.fft()
 
@@ -88,8 +87,8 @@ def compute_plane_parallel(grid_delta, *,
             grid_delta.interlace()
 
     correct_mas = correct_mas and (not grid_delta.mas_corrected)
-    
-    _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk, nmu,
+
+    _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk,
                               grid_delta._grid,
                               subtract_shotnoise, correct_mas,
                               line_of_sight)

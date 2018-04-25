@@ -169,16 +169,19 @@ PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
 {
   // _power_spectrum_compute_multipoles(k_min, k_max, dk,
   //  grid, subtract_shotnoise, correct_mas)
+
+  cerr << "cerr plane parallel\n";
   
   double k_min, k_max, dk;
   PyObject *py_grid;
   int subtract_shotnoise, correct_mas;
   int line_of_sight;
-  
-  if(!PyArg_ParseTuple(args, "dddiOiii",
+
+  if(!PyArg_ParseTuple(args, "dddOiii",
 		       &k_min, &k_max, &dk,
 		       &py_grid, &subtract_shotnoise, &correct_mas,
 		       &line_of_sight)) {
+    cerr << "return NULL\n";
     return NULL;
   }
 
