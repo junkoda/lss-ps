@@ -2,7 +2,6 @@ import lssps
 import lssps._lssps as c
 from numbers import Number
 import warnings
-import h5py
 
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension
@@ -116,6 +115,8 @@ class Grid:
         """Save grid to an HDF5 file
         
         """
+        import h5py
+        
         f = h5py.File(filename, 'w')
         
         f['nc'] = self.nc
@@ -369,6 +370,7 @@ def load_h5(filename):
     Args:
         filename (str): file name of an HDF file
     """
+    import h5py
     
     if isinstance(filename, str):
         f = h5py.File(filename, 'r')
