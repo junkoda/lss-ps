@@ -41,6 +41,13 @@ class Grid:
         elif self.mode == 'fourier-space':
             return c._grid_fk_asarray(self._grid)[index]
 
+    def __setitem__(self, index, value):
+        """Set the grid value grid[ix, iy, iz]"""
+        if self.mode == 'real-space':
+            c._grid_fx_asarray(self._grid)[index] = value
+        elif self.mode == 'fourier-space':
+            c._grid_fk_asarray(self._grid)[index] = value
+
     def clear(self):
         """Reset the grid with zeros"""
         c._grid_clear(self._grid)
@@ -82,7 +89,8 @@ class Grid:
             raise RuntimeError('grid must be in Fourier space for interlacing')
 
         if self.interlaced == True:
-            warnings.warn('Interlacing has already performed. Neglect interlace()', RuntimeWarning)
+            warnings.warn('Interlacing has already been performed.'
+                          'Neglect interlace()', RuntimeWarning)
 
         c._interlacing(self._grid, self.shifted._grid)
         self.interlaced = True
@@ -92,7 +100,7 @@ class Grid:
     def fft(self):
         """Fast Fourier Transform from real space to Fourier space"""
         if self.mode != 'real-space':
-            raise RuntimeError('grid is not in real space')
+            raise RuntimeError('grid is not in real space: %s' % self.mode)
 
         c._grid_fft(self._grid)
         if self.shifted is not None:
@@ -220,6 +228,11 @@ class Grid:
         else:
             raise TypeError('grid.mode must be real-space or fourier-space')
 
+        if self.shifted is not None:
+            self.shifted.mode = m
+
+        return m
+
     @property
     def nc(self):
         """Number of grid points per dimension"""
@@ -306,7 +319,6 @@ class Grid:
 
     @pk_normalisation.setter
     def pk_normalisation(self, value):
-        #print('setting pk_nromalisataion', value)
         c._grid_set_pk_normalisation(self._grid, value)
 
     @property

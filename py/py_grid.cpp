@@ -383,8 +383,6 @@ PyObject* py_grid_get_pk_normalisation(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  cerr << "DEBUG py_grid_get_pk_normalisation()\n";
-
   Grid const * const grid=
     (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
@@ -401,9 +399,6 @@ PyObject* py_grid_set_pk_normalisation(PyObject* self, PyObject* args)
   if(!PyArg_ParseTuple(args, "Od", &py_grid, &value)) {
     return NULL;
   }
-
-  cerr << "DEBUG py_grid_set_pk_normalisation()" << value << endl;
-
 
   Grid* const grid=
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
