@@ -221,9 +221,11 @@ void grid_compute_fluctuation_homogeneous(Grid& grid_data)
 
   const double boxsize= grid_data.boxsize;
   const double vol= boxsize*boxsize*boxsize;
-  grid_data.pk_normalisation= vol
-                              / (grid_data.total_weight*grid_data.total_weight);
-  grid_data.shot_noise = vol / (double) grid_data.np;
+  grid_data.pk_normalisation= vol /
+    (grid_data.total_weight*grid_data.total_weight);
+  grid_data.shot_noise = vol*grid_data.w2_sum/(grid_data.w_sum*grid_data.w_sum);
+  //grid_data.shot_noise = vol / (double) grid_data.np;
+
   
   // time duration
   auto te = std::chrono::high_resolution_clock::now();

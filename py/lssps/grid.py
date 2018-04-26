@@ -153,16 +153,15 @@ class Grid:
 
         f.close()
 
-    def assign_density(self, *,
-                       cat=None,
-                       xyz=None, weight=None, nbar=None,
+    def assign_density(self, xyz=None, *,
+                       weight=None, nbar=None,
                        mas='CIC', parallel='default'):
         """Assign density to this grid
         Args:
-            mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
             xyz    (array[n, 3]): position of particles in cartisian coodinate
             weight (array[n]):
             nbar:  (array[n]):    mean density without clustering
+            mas:  The mass assignment scheme 'NGP', 'CIC', or 'TSC'
         """
 
         if self.mode != 'real-space':
