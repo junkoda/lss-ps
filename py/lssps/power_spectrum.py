@@ -44,10 +44,10 @@ class PowerSpectrum:
             
             a = np.zeros(n, 5)
             a[:, 0] = k
-            a[:, 1] = self.nmodes[index]
             a[:, 1] = self.P0[index]
             a[:, 2] = self.P2[index]
             a[:, 3] = self.P4[index]
+            a[:, 4] = self.nmodes[index]
 
             return a
 
@@ -61,7 +61,7 @@ class PowerSpectrum:
 
 
 def compute_plane_parallel(grid_delta, *,
-                           k_min=0.0, k_max=1.0, dk=0.01, nmu=0,
+                           k_min=0.0, k_max=1.0, dk=0.01,
                            subtract_shotnoise=True,
                            correct_mas= True, line_of_sight=2):
     """
@@ -70,7 +70,6 @@ def compute_plane_parallel(grid_delta, *,
         k_min (float): lower bound of k binning [h/Mpc]
         k_max (float): upper bound of k binning [h/Mpc]
         dk (float):    bin width [h/Mpc]
-        nmu (int):   number of mu = kz/k bins for 2D power spectrum
         subtract_shotnoise (bool)
         correct_mas (bool)
         line_of_sight (int): line of sight direction for multipoles

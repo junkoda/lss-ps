@@ -6,10 +6,10 @@
 
 // borrowed from <assert.h>
 #define py_assert_void(e)\
-  if(!(e)){PyErr_SetString(PyExc_TypeError, "py_assersion error"); return; }
+  if(!(e)){PyErr_SetString(PyExc_AssertionError, "py_assersion error");return; }
 
 #define py_assert_ptr(e)\
-  if(!(e)){PyErr_SetString(PyExc_TypeError, "py_assersion error"); return NULL; }
+  if(!(e)){PyErr_SetString(PyExc_AssertionError, "py_assersion error"); return NULL; }
 
 
 /*

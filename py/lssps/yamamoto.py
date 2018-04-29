@@ -132,7 +132,7 @@ def compute_delta4(grid, *, grid_moment=None, grid4=None):
 
 
 def compute_yamamoto(grid_delta, kind, *,
-                     k_min=0.0, k_max=1.0, dk=0.01, nmu=0,
+                     k_min=0.0, k_max=1.0, dk=0.01,
                      subtract_shotnoise=True,
                      correct_mas=True,
                      grid_moment=None, grid2=None, grid4=None):

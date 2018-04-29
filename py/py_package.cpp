@@ -16,6 +16,7 @@
 #include "py_mean_density.h"
 #include "py_mean_density_adaptive.h"
 #include "py_etc.h"
+#include "py_gadget_file.h"
 #include "py_model.h"
 
 using namespace std;
@@ -161,6 +162,11 @@ static PyMethodDef methods[] = {
    METH_VARARGS, "_model_apply_window_3d(_model, _grid, k)"},
   {"_model_create_grid", py_model_create_grid, METH_VARARGS,
    "_model_create_grid"},
+
+  {"_gadget_file_read_np", py_gadget_file_read_np, METH_VARARGS,
+   "_gadget_file_read_np(filename)"},
+  {"_gadget_file_read_header", py_gadget_file_read_header, METH_VARARGS,
+   "_gadget_file_read_header"},
   
   {NULL, NULL, 0, NULL}
 };
@@ -178,6 +184,7 @@ PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_grid_module_init();
   py_power_spectrum_module_init();
+  py_gadget_file_module_init();
   //py_mean_density_adaptive_module_init();
   
   return PyModule_Create(&module);
