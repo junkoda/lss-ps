@@ -167,6 +167,14 @@ static PyMethodDef methods[] = {
    "_gadget_file_read_np(filename)"},
   {"_gadget_file_read_header", py_gadget_file_read_header, METH_VARARGS,
    "_gadget_file_read_header"},
+  {"_gadget_file_alloc", py_gadget_file_alloc, METH_VARARGS,
+   "_gadget_file_alloc(filename)"},
+  {"_gadget_file_open", py_gadget_file_open, METH_VARARGS,
+   "_gadget_file_open(_gf)"},
+  {"_gadget_file_close", py_gadget_file_close, METH_VARARGS,
+   "_gadget_file_close(_gf)"},
+  {"_gadget_file_read", py_gadget_file_read, METH_VARARGS,
+   "_gadget_file_read(_gf, components, ibegin, iend, a)"},
   
   {NULL, NULL, 0, NULL}
 };
@@ -184,7 +192,7 @@ PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_grid_module_init();
   py_power_spectrum_module_init();
-  py_gadget_file_module_init();
+  //py_gadget_file_module_init();
   //py_mean_density_adaptive_module_init();
   
   return PyModule_Create(&module);

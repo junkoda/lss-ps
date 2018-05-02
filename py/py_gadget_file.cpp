@@ -1,43 +1,15 @@
 #include <cstdio>
 #include "msg.h"
+#include "error.h"
 #include "py_util.h"
 #include "py_assert.h"
+#include "gadget_file.h"
 #include "py_gadget_file.h"
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include "numpy/arrayobject.h"
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+//#include "numpy/arrayobject.h"
 
-struct gadget_file_header{
-  int      np[6];
-  double   mass[6];
-  double   time;
-  double   redshift;
-  int      flag_sfr;
-  int      flag_feedback;
-  unsigned int np_total[6];
-  int      flag_cooling;
-  int      num_files;
-  double   boxsize;
-  double   omega0;
-  double   omega_lambda;
-  double   hubble_param; 
-  int flag_stellarage;
-  int flag_metals;
-  unsigned int np_total_highword[6];
-  int  flag_entropy_instead_u;
-  char fill[60];
-  //char     fill[256- 6*4- 6*8- 2*8- 2*4- 6*4- 2*4 - 4*8];
-           /* fills to 256 Bytes */
-};
-
-PyMODINIT_FUNC
-py_gadget_file_module_init()
-{
-  import_array();
-
-  return NULL;
-}
-
+static void py_gadget_file_free(PyObject *obj);
 
 PyObject* py_gadget_file_read_np(PyObject* self, PyObject* args)
 {
@@ -71,8 +43,8 @@ PyObject* py_gadget_file_read_np(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  gadget_file_header h;
-  ret= fread(&h, sizeof(gadget_file_header), 1, fp);
+  GadgetFileHeader h;
+  ret= fread(&h, sizeof(GadgetFileHeader), 1, fp);
   py_assert_ptr(ret == 1);
   
   ret= fread(&sep_end, sizeof(int), 1, fp);
@@ -119,8 +91,8 @@ PyObject* py_gadget_file_read_header(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  gadget_file_header h;
-  ret= fread(&h, sizeof(gadget_file_header), 1, fp);
+  GadgetFileHeader h;
+  ret= fread(&h, sizeof(GadgetFileHeader), 1, fp);
   py_assert_ptr(ret == 1);
   
   ret= fread(&sep_end, sizeof(int), 1, fp);
@@ -145,4 +117,115 @@ PyObject* py_gadget_file_read_header(PyObject* self, PyObject* args)
 		       m[0], m[1], m[2], m[3], m[4], m[5],
 		       h.time, h.redshift, h.num_files,
 		       h.boxsize, h.omega0, h.omega_lambda, h.hubble_param);
+}
+
+
+PyObject* py_gadget_file_alloc(PyObject* self, PyObject* args)
+{
+  //_gadget_file_alloc(filename)
+  PyObject *bytes;
+  if(!PyArg_ParseTuple(args, "O&",
+		       PyUnicode_FSConverter, &bytes)) {
+    return NULL;
+  }
+  
+  char* filename;
+  Py_ssize_t len;
+  PyBytes_AsStringAndSize(bytes, &filename, &len);
+
+  GadgetFile* const gf= new GadgetFile(filename);
+  
+  return PyCapsule_New(gf, "_GadgetFile", py_gadget_file_free);
+}
+
+void py_gadget_file_free(PyObject *obj)
+{
+  // Delete the power spectrum object
+  // Called automatically by Python
+  GadgetFile* const gf=
+    (GadgetFile*) PyCapsule_GetPointer(obj, "_GadgetFile");
+  py_assert_void(gf);
+
+  delete gf;
+}
+
+PyObject* py_gadget_file_open(PyObject* self, PyObject* args)
+{
+  PyObject *py_gf;
+
+  if(!PyArg_ParseTuple(args, "O", &py_gf)) {
+    return NULL;
+  }
+
+  GadgetFile* const gf=
+    (GadgetFile*) PyCapsule_GetPointer(py_gf, "_GadgetFile");
+  py_assert_ptr(gf);
+
+  try {
+    gf->open();
+  }
+  catch(FileNotFoundError) {
+    PyErr_SetString(PyExc_FileNotFoundError, "File not found");
+    return NULL;
+  }    
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_gadget_file_close(PyObject* self, PyObject* args)
+{
+  PyObject *py_gf;
+
+  if(!PyArg_ParseTuple(args, "O", &py_gf)) {
+    return NULL;
+  }
+
+  GadgetFile* const gf=
+    (GadgetFile*) PyCapsule_GetPointer(py_gf, "_GadgetFile");
+  py_assert_ptr(gf);
+
+  gf->close();
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_gadget_file_read(PyObject* self, PyObject* args)
+{
+  //
+  // _gadget_file_read(_gf, component, ibegin, iend, a)
+  // Args:
+  //     _gf (_GadgetFile): _GadgetFile pointer
+  //     component (str): one-character string 'x' or 'v'
+  //     ibegin - iend: index range of reading particles
+  //     a (array): output array of components
+  PyObject *py_gf, *py_array;
+  char* component;
+  int ibegin, iend;
+
+  if(!PyArg_ParseTuple(args, "OsiiO", &py_gf, &component,
+		       &ibegin, &iend,  &py_array)) {
+    return NULL;
+  }
+
+  GadgetFile* const gf=
+    (GadgetFile*) PyCapsule_GetPointer(py_gf, "_GadgetFile");
+  py_assert_ptr(gf);
+
+  Py_buffer a;
+  if(PyObject_GetBuffer(py_array, &a, PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS | PyBUF_FULL_RO) == -1)
+    return NULL;
+
+  if(a.ndim != 2) {
+    PyErr_SetString(PyExc_TypeError, "Expected a 2-dimensional array for _gadget_file_read");
+    return NULL;
+  }
+
+  if(strcmp(a.format, "f") != 0) {
+    PyErr_SetString(PyExc_TypeError, "Expected a float array for _gadget_file_read");
+    return NULL;
+  }
+
+  gf->read(component[0], ibegin, iend, a.strides[0], (float*) a.buf);
+
+  Py_RETURN_NONE;
 }

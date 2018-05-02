@@ -9,6 +9,8 @@ class AssertionError: RuntimeError{};
 
 class IOError: RuntimeError {};
 
+class FileNotFoundError: IOError {};
+
 class MemoryError: RuntimeError {};
 
 class ValError: RuntimeError {}; // check Python error name
