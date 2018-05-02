@@ -9,7 +9,10 @@ class Grid:
     Methods:
         grid[:]: return grid data as an array
         clear(): reset all data to 0
-        fft():   Fast Fourier Transform to Fourier space
+        fft():   Fast Fourier Transform (FFT) to Fourier space
+        fft_inverse(): Inverse FFT from Fourier space to real space
+        compute_fluctuation(grid_rand=None)
+        assign_density(xyz, *, weight=None, nbar=None, mas='CIC')
 
     Properties:
         grid.boxsize:
@@ -153,7 +156,7 @@ class Grid:
 
         f.close()
 
-    def assign_density(self, xyz=None, *,
+    def assign_density(self, xyz, *,
                        weight=None, nbar=None,
                        mas='CIC', parallel='default'):
         """Assign density to this grid
@@ -172,26 +175,21 @@ class Grid:
 
         mas = mas.upper()
         
-        if xyz is not None:
-            if parallel == 'default':
-                c._mass_assignment_from_array(xyz, weight, nbar,
-                                        lssps._mass_assignment_scheme[mas],
-                                        self._grid)
-            elif parallel == 'serial' or parallel == 'atomic':
-                c._mass_assignment_variations(parallel,
-                                        xyz, weight, nbar,
-                                        lssps._mass_assignment_scheme[mas],
-                                        self._grid)
-            else:
-                raise TypeError('Unknown parallel = %s in Grid.assign_mass()' %
-                                parallel)
-
-                                              
+        if parallel == 'default':
+            c._mass_assignment_from_array(xyz, weight, nbar,
+                                          lssps._mass_assignment_scheme[mas],
+                                          self._grid)
+        elif parallel == 'serial' or parallel == 'atomic':
+            c._mass_assignment_variations(parallel,
+                                          xyz, weight, nbar,
+                                          lssps._mass_assignment_scheme[mas],
+                                          self._grid)
         else:
-            RuntimeError('xyz not provided')
-            
+            raise TypeError('Unknown parallel = %s in Grid.assign_mass()' %
+                            parallel)
+
         if self.shifted is not None:
-            self.shifted.assign_density(cat=cat, xyz=xyz, weight=weight,
+            self.shifted.assign_density(xyz=xyz, weight=weight,
                                         nbar=nbar, mas=mas, parallel=parallel)
 
 
