@@ -1,3 +1,15 @@
+"""
+Module for cosmological functions.
+
+D(omega_m, *, a=None, z=None): linear growth factor
+f(omega_m, *, a=None, z=None): linear growth rate
+H_factor(omega_m, *, a=None, z=None): Hubble parameter / 100 h
+
+compute_comoving_distance(z): compute comoving distance from redshift
+compute_redshift(d): compute redshift from comoving distance
+
+"""
+
 import lssps._lssps as c
 import numpy as np
 import math
@@ -5,10 +17,10 @@ import math
 def init(omega_m, z_max, n=1001):
     c._cosmology_init(omega_m, z_max, n)
 
-def redshift(d):
+def compute_redshift(d, *, d_min=None, d_max=None, n_iterp=1001):
     """
     Args:
-       d (array): array of comoving distance
+       d (array): array of comoving distances
 
     Returns:
        z (array): redshifts that correspond to d
@@ -19,8 +31,10 @@ def redshift(d):
 
     return z
 
-def compute_comoving_distance(z):
+def compute_comoving_distance(z, *, z_min=None, z_max=None, n_iterp=1001):
     """
+    TODO: change interface, do _init automatically
+
     Args:
        z (float): redshift
     Returns:
@@ -30,6 +44,7 @@ def compute_comoving_distance(z):
     return c._cosmology_compute_comoving_distance(z)
 
 def _get_a(a, z):
+    # return scale factor a from either a or redshift z
     if a is None and z is None:
         raise ValueError('Need to give either a or z')
 
@@ -48,6 +63,8 @@ def D(omega_m, *, a=None, z=None):
        omega_m (float): Omega_m0
        a (float): scale factor
        z (float): redshift
+
+    Provide either a or z.
     """
 
     a = _get_a(a, z)
@@ -62,7 +79,9 @@ def f(omega_m, *, a=None, z=None):
     Args:
        omega_m (float): Omega_m0
        a (float): scale factor
-       z (float): redshift    
+       z (float): redshift
+
+    Provide either a or z.
     """
 
     a = _get_a(a, z)
@@ -71,9 +90,17 @@ def f(omega_m, *, a=None, z=None):
 
 def H_factor(omega_m, *, a=None, z=None):
     """
-    Compute redshift-dependent factor in Hubble parameter
-    sqrt(omega_m*a**-3 + (1.0 - omega_m))
-    H(a) = 100 h H_factor [km/s/Mpc]
+    Compute redshift-dependent factor in Hubble parameter,
+      H(a) = 100 h H_factor [km/s/Mpc],
+    which is,
+      sqrt(omega_m*a**-3 + (1.0 - omega_m)).
+
+    Args:
+       omega_m (float): Omega_m0
+       a (float): scale factor
+       z (float): redshift
+
+    Provide either a or z.
     """
 
     a = _get_a(a, z)

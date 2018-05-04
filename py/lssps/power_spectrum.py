@@ -1,3 +1,21 @@
+"""
+Module for computing power spectrum.
+
+PowerSpectrum: class for the estimated power spectrum
+
+compute_plane_parallel(grid_delta, *,
+                       k_min=0.0, k_max=1.0, dk=0.01,
+                       subtract_shotnoise=True,
+                       correct_mas= True, line_of_sight=2)
+
+def compute_yamamoto(grid_delta, kind, *,
+                     k_min=0.0, k_max=1.0, dk=0.01,
+                     subtract_shotnoise=True,
+                     correct_mas=True,
+                     grid_moment=None, grid2=None, grid4=None)
+kind = 'scoccimarro' or 'bianchi'
+"""
+
 import lssps._lssps as c
 import lssps.yamamoto
 import numbers
@@ -12,9 +30,6 @@ class PowerSpectrum:
         P2 (numpy.array): P2 quadrupole
         P4 (numpy.array): P4 hexadecapole
         nmodes (numpy.array): number of independent k modes in bins
-
-        P2D (numpy.array): 2D power spectrum P(k, mu)
-        nomodes2D (numpy.array): number of k modes in 2D bins
     """
     def __init__(self, _ps):
         """

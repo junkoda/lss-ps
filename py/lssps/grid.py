@@ -1,3 +1,13 @@
+"""
+Grid: class for discritised field in real or Fourier space.
+
+zeros(nc, boxsize, x0=None, offset=0.0, *, interlacing=True)
+zeros_like(grid)
+
+empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=True)
+empty_like(grid)
+"""
+
 import lssps
 import lssps._lssps as c
 from numbers import Number
@@ -11,20 +21,21 @@ class Grid:
         clear(): reset all data to 0
         fft():   Fast Fourier Transform (FFT) to Fourier space
         fft_inverse(): Inverse FFT from Fourier space to real space
-        compute_fluctuation(grid_rand=None)
         assign_density(xyz, *, weight=None, nbar=None, mas='CIC')
+        compute_fluctuation(grid_rand=None)
 
     Properties:
         grid.boxsize:
         grid.x0:
-        grid.offset:
-        grid.shifted: A grid shifted by half grid spacing (for interlacing)
+        grid.offset: Position of grid points in cell in units of grid spacing
+                     (0 <= offset < 1)
+        grid.shifted: A grid shifted by half grid spacing for interlacing
         grid.interlaced: True if interlace() has been called. 
                          Reset to None by clear()
     """
 
     def __init__(self, nc, boxsize, x0=None, offset=None):
-        # _grid is the pointer to a C++ Grid object
+        # _grid is the pointer to a C++ Grid object wrapped to _Grid for Python
         self._grid = c._grid_alloc(nc)
         self.shifted = None
         self.boxsize = boxsize

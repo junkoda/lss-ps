@@ -10,10 +10,12 @@ lssps
    :maxdepth: 2
    :caption: Class:
 
-   msg.rst
-   power_spectrum.rst
-   grid.rst
-   
+..   msg.rst
+..   power_spectrum.rst
+..   grid.rst
+
+.. automodule:: ../lssps/grid
+   :members:
 
 Indices and tables
 ==================
@@ -21,3 +23,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

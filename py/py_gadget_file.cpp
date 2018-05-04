@@ -212,7 +212,7 @@ PyObject* py_gadget_file_read(PyObject* self, PyObject* args)
   py_assert_ptr(gf);
 
   Py_buffer a;
-  if(PyObject_GetBuffer(py_array, &a, PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS | PyBUF_FULL_RO) == -1)
+  if(PyObject_GetBuffer(py_array, &a, PyBUF_FORMAT | PyBUF_FULL_RO) == -1)
     return NULL;
 
   if(a.ndim != 2) {

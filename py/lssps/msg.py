@@ -1,3 +1,9 @@
+"""
+msg module: controles log messages.
+
+msg.loglevel = 'debug'
+choose from 'debug', 'verbose', 'info', 'warn', 'error', 'fatal', 'silent'
+"""
 import numbers
 import lssps._lssps as c
 

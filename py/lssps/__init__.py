@@ -1,3 +1,19 @@
+"""
+lssps: Tool kit for large-scale structure clustering power spectrum
+
+Modules:
+  grid: discrete grid for Fourier transform
+  power_spectrum: power spectrum estimation and the result
+  cosmology: functions for homogeneous universe and perturbation theory, e.g.,
+             distance, growth factor
+  msg: 
+  mean_density
+  gadget_file
+
+Classes:
+  Grid
+  PowerSpectrum
+"""
 from lssps.grid import Grid
 from lssps.power_spectrum import PowerSpectrum
 

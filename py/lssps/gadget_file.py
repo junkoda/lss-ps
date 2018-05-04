@@ -85,7 +85,14 @@ class GadgetFile:
                 a[:, ncol_x:(ncol_x + 3)] *= vfac
 
         return a
-        
+
+    def open(self):
+        c._gadget_file_open(self._gf)
+        return self
+
+    def close(self):
+        c._gadget_file_close(self._gf)
+
     
 def open(filename, *, rescale_velocity=True):
     gf = GadgetFile(filename)
