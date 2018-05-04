@@ -1,0 +1,748 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>lssps package &#8212; lssps  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to lssps’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="lssps-package">
+<h1>lssps package<a class="headerlink" href="#lssps-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-lssps.compute">
+<span id="lssps-compute-module"></span><h2>lssps.compute module<a class="headerlink" href="#module-lssps.compute" title="Permalink to this headline">¶</a></h2>
+<p>High-level functions</p>
+</div>
+<div class="section" id="module-lssps.cosmology">
+<span id="lssps-cosmology-module"></span><h2>lssps.cosmology module<a class="headerlink" href="#module-lssps.cosmology" title="Permalink to this headline">¶</a></h2>
+<p>Module for cosmological functions.</p>
+<p>D(omega_m, <a href="#id1"><span class="problematic" id="id2">*</span></a>, a=None, z=None): linear growth factor
+f(omega_m, <a href="#id3"><span class="problematic" id="id4">*</span></a>, a=None, z=None): linear growth rate
+H_factor(omega_m, <a href="#id5"><span class="problematic" id="id6">*</span></a>, a=None, z=None): Hubble parameter / 100 h</p>
+<p>compute_comoving_distance(z): compute comoving distance from redshift
+compute_redshift(d): compute redshift from comoving distance</p>
+<dl class="function">
+<dt id="lssps.cosmology.D">
+<code class="descclassname">lssps.cosmology.</code><code class="descname">D</code><span class="sig-paren">(</span><em>omega_m</em>, <em>*</em>, <em>a=None</em>, <em>z=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/cosmology.html#D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.cosmology.D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute linear growth factor D(z)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>omega_m (float): Omega_m0
+a (float): scale factor
+z (float): redshift</dd>
+</dl>
+<p>Provide either a or z.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.cosmology.H_factor">
+<code class="descclassname">lssps.cosmology.</code><code class="descname">H_factor</code><span class="sig-paren">(</span><em>omega_m</em>, <em>*</em>, <em>a=None</em>, <em>z=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/cosmology.html#H_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.cosmology.H_factor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Compute redshift-dependent factor in Hubble parameter,</dt>
+<dd>H(a) = 100 h H_factor [km/s/Mpc],</dd>
+<dt>which is,</dt>
+<dd>sqrt(omega_m*a**-3 + (1.0 - omega_m)).</dd>
+<dt>Args:</dt>
+<dd>omega_m (float): Omega_m0
+a (float): scale factor
+z (float): redshift</dd>
+</dl>
+<p>Provide either a or z.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.cosmology.compute_comoving_distance">
+<code class="descclassname">lssps.cosmology.</code><code class="descname">compute_comoving_distance</code><span class="sig-paren">(</span><em>z</em>, <em>*</em>, <em>z_min=None</em>, <em>z_max=None</em>, <em>n_iterp=1001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/cosmology.html#compute_comoving_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.cosmology.compute_comoving_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: change interface, do _init automatically</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>z (float): redshift</dd>
+<dt>Returns:</dt>
+<dd>d (float): comoving distance</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.cosmology.compute_redshift">
+<code class="descclassname">lssps.cosmology.</code><code class="descname">compute_redshift</code><span class="sig-paren">(</span><em>d</em>, <em>*</em>, <em>d_min=None</em>, <em>d_max=None</em>, <em>n_iterp=1001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/cosmology.html#compute_redshift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.cosmology.compute_redshift" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>d (array): array of comoving distances</dd>
+<dt>Returns:</dt>
+<dd>z (array): redshifts that correspond to d</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.cosmology.f">
+<code class="descclassname">lssps.cosmology.</code><code class="descname">f</code><span class="sig-paren">(</span><em>omega_m</em>, <em>*</em>, <em>a=None</em>, <em>z=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/cosmology.html#f"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.cosmology.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute linear growth rate f(z)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>omega_m (float): Omega_m0
+a (float): scale factor
+z (float): redshift</dd>
+</dl>
+<p>Provide either a or z.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.cosmology.init">
+<code class="descclassname">lssps.cosmology.</code><code class="descname">init</code><span class="sig-paren">(</span><em>omega_m</em>, <em>z_max</em>, <em>n=1001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/cosmology.html#init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.cosmology.init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-lssps.etc">
+<span id="lssps-etc-module"></span><h2>lssps.etc module<a class="headerlink" href="#module-lssps.etc" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="lssps.etc.gaussian_smoothing">
+<code class="descclassname">lssps.etc.</code><code class="descname">gaussian_smoothing</code><span class="sig-paren">(</span><em>grid</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/etc.html#gaussian_smoothing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.etc.gaussian_smoothing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Gaussian smoothing (
+Args:</p>
+<blockquote>
+<div>grid (Grid): grid of white noise
+sigma (float): smoothing length</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps.gadget_file">
+<span id="lssps-gadget-file-module"></span><h2>lssps.gadget_file module<a class="headerlink" href="#module-lssps.gadget_file" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lssps.gadget_file.GadgetFile">
+<em class="property">class </em><code class="descclassname">lssps.gadget_file.</code><code class="descname">GadgetFile</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/gadget_file.html#GadgetFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.gadget_file.GadgetFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="lssps.gadget_file.GadgetFile.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/gadget_file.html#GadgetFile.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.gadget_file.GadgetFile.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lssps.gadget_file.GadgetFile.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/gadget_file.html#GadgetFile.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.gadget_file.GadgetFile.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.gadget_file.open">
+<code class="descclassname">lssps.gadget_file.</code><code class="descname">open</code><span class="sig-paren">(</span><em>filename</em>, <em>*</em>, <em>rescale_velocity=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/gadget_file.html#open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.gadget_file.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lssps.gadget_file.read_header">
+<code class="descclassname">lssps.gadget_file.</code><code class="descname">read_header</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/gadget_file.html#read_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.gadget_file.read_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read header in Gadget binary file</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>filename (str): file name</dd>
+<dt>Returns:</dt>
+<dd>dictionary of parameters
+np: number of particles in this file
+np_total: number of total particles in the simulation
+nfiles: number of files that one snapshot is split into
+m: mass of a particle [1/h Solar mass]
+a: scale factor of the snapshot
+redshift: redshift of the snapshot
+omega_m: Omega matter at present
+omega_lambda: Omega Lambda at present
+h: Hubble constant H0 in units of 100 km/s/Mpc</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.gadget_file.read_np">
+<code class="descclassname">lssps.gadget_file.</code><code class="descname">read_np</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/gadget_file.html#read_np"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.gadget_file.read_np" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-lssps.grid">
+<span id="lssps-grid-module"></span><h2>lssps.grid module<a class="headerlink" href="#module-lssps.grid" title="Permalink to this headline">¶</a></h2>
+<p>Grid: class for discritised field in real or Fourier space.</p>
+<p>zeros(nc, boxsize, x0=None, offset=0.0, <a href="#id7"><span class="problematic" id="id8">*</span></a>, interlacing=True)
+zeros_like(grid)</p>
+<p>empty(nc, boxsize, x0=None, offset=0.0, <a href="#id9"><span class="problematic" id="id10">*</span></a>, interlacing=True)
+empty_like(grid)</p>
+<dl class="class">
+<dt id="lssps.grid.Grid">
+<em class="property">class </em><code class="descclassname">lssps.grid.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>nc</em>, <em>boxsize</em>, <em>x0=None</em>, <em>offset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Grid is a 3-dimensional cubic grid with nc points per dimension</p>
+<dl class="docutils">
+<dt>Methods:</dt>
+<dd>grid[:]: return grid data as an array
+clear(): reset all data to 0
+fft():   Fast Fourier Transform (FFT) to Fourier space
+fft_inverse(): Inverse FFT from Fourier space to real space
+assign_density(xyz, <a href="#id11"><span class="problematic" id="id12">*</span></a>, weight=None, nbar=None, mas=’CIC’)
+compute_fluctuation(grid_rand=None)</dd>
+<dt>Properties:</dt>
+<dd><p class="first">grid.boxsize:
+grid.x0:
+grid.offset: Position of grid points in cell in units of grid spacing</p>
+<blockquote>
+<div>(0 &lt;= offset &lt; 1)</div></blockquote>
+<p>grid.shifted: A grid shifted by half grid spacing for interlacing
+grid.interlaced: True if interlace() has been called.</p>
+<blockquote class="last">
+<div>Reset to None by clear()</div></blockquote>
+</dd>
+</dl>
+<dl class="method">
+<dt id="lssps.grid.Grid.assign_density">
+<code class="descname">assign_density</code><span class="sig-paren">(</span><em>xyz</em>, <em>*</em>, <em>weight=None</em>, <em>nbar=None</em>, <em>mas='CIC'</em>, <em>parallel='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.assign_density"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.assign_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign density to this grid
+Args:</p>
+<blockquote>
+<div>xyz    (array[n, 3]): position of particles in cartisian coodinate
+weight (array[n]):
+nbar:  (array[n]):    mean density without clustering
+mas:  The mass assignment scheme ‘NGP’, ‘CIC’, or ‘TSC’</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.boxsize">
+<code class="descname">boxsize</code><a class="headerlink" href="#lssps.grid.Grid.boxsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length of the cubic box on a side</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the grid with zeros</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.compute_fluctuation">
+<code class="descname">compute_fluctuation</code><span class="sig-paren">(</span><em>grid_rand=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.compute_fluctuation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.compute_fluctuation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute density fluctuation data -= rand</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>grid_rand: the grid of randoms  (may be None)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.correct_mas">
+<code class="descname">correct_mas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.correct_mas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.correct_mas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.fft">
+<code class="descname">fft</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.fft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast Fourier Transform from real space to Fourier space</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.fft_inverse">
+<code class="descname">fft_inverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.fft_inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.fft_inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse Fast Fourier Transform from Fourier space to real space</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.interlace">
+<code class="descname">interlace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.interlace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.interlace" title="Permalink to this definition">¶</a></dt>
+<dd><p>perform interlacing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.mode">
+<code class="descname">mode</code><a class="headerlink" href="#lssps.grid.Grid.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current mode of the grid:
+‘real-space’ or ‘fourier-space’</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.n_mas">
+<code class="descname">n_mas</code><a class="headerlink" href="#lssps.grid.Grid.n_mas" title="Permalink to this definition">¶</a></dt>
+<dd><p>degree of mass assignment scheme 1 for NGP, 2 for CIC, 3 for TSC</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.nc">
+<code class="descname">nc</code><a class="headerlink" href="#lssps.grid.Grid.nc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of grid points per dimension</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.nw2_sum">
+<code class="descname">nw2_sum</code><a class="headerlink" href="#lssps.grid.Grid.nw2_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>sum_i nbar w_i^2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.offset">
+<code class="descname">offset</code><a class="headerlink" href="#lssps.grid.Grid.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>offset of the grid with respect to the box
+in units of grid spacing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.pk_normalisation">
+<code class="descname">pk_normalisation</code><a class="headerlink" href="#lssps.grid.Grid.pk_normalisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalisation factor for power spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.grid.Grid.save_h5">
+<code class="descname">save_h5</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#Grid.save_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.Grid.save_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save grid to an HDF5 file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.shot_noise">
+<code class="descname">shot_noise</code><a class="headerlink" href="#lssps.grid.Grid.shot_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of shot noise</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.sums">
+<code class="descname">sums</code><a class="headerlink" href="#lssps.grid.Grid.sums" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns (w_sum, w2_sum, nw2_sum)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.w2_sum">
+<code class="descname">w2_sum</code><a class="headerlink" href="#lssps.grid.Grid.w2_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>sum_i w_i^2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.w_sum">
+<code class="descname">w_sum</code><a class="headerlink" href="#lssps.grid.Grid.w_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>sum_i w_i</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.grid.Grid.x0">
+<code class="descname">x0</code><a class="headerlink" href="#lssps.grid.Grid.x0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coordinate of the box corner</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.grid.empty">
+<code class="descclassname">lssps.grid.</code><code class="descname">empty</code><span class="sig-paren">(</span><em>nc</em>, <em>boxsize</em>, <em>x0=None</em>, <em>offset=0.0</em>, <em>*</em>, <em>interlacing=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new empty grid (uninitialised).
+Args:</p>
+<blockquote>
+<div><p>nc (int): number of grids per dimension
+boxsize: length of the box on a side
+x0: corner of the box
+offset: offset of the grid points from the box corner</p>
+<blockquote>
+<div>give a tuple of 2 floats to set both offsets for
+the main and shifted grid</div></blockquote>
+<p>interlacing: attach shifted grid which is shifted by half gridspacing</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.grid.empty_like">
+<code class="descclassname">lssps.grid.</code><code class="descname">empty_like</code><span class="sig-paren">(</span><em>grid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#empty_like"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.empty_like" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lssps.grid.load_h5">
+<code class="descclassname">lssps.grid.</code><code class="descname">load_h5</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#load_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.load_h5" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>filename (str): file name of an HDF file</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.grid.resize_fourier">
+<code class="descclassname">lssps.grid.</code><code class="descname">resize_fourier</code><span class="sig-paren">(</span><em>grid</em>, <em>nc_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#resize_fourier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.resize_fourier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lssps.grid.zeros">
+<code class="descclassname">lssps.grid.</code><code class="descname">zeros</code><span class="sig-paren">(</span><em>nc</em>, <em>boxsize</em>, <em>x0=None</em>, <em>offset=0.0</em>, <em>*</em>, <em>interlacing=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new grid initialised with zeros.
+Args:</p>
+<blockquote>
+<div><p>nc (int): number of grids per dimension
+boxsize: length of the box on a side
+x0: corner of the box
+offset: offset of the grid points from the box corner</p>
+<blockquote>
+<div>give a tuple of 2 floats to set both offsets for
+the main and shifted grid</div></blockquote>
+<p>interlacing: attach shifted grid which is shifted by half gridspacing</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.grid.zeros_like">
+<code class="descclassname">lssps.grid.</code><code class="descname">zeros_like</code><span class="sig-paren">(</span><em>grid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/grid.html#zeros_like"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.grid.zeros_like" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-lssps.interlacing">
+<span id="lssps-interlacing-module"></span><h2>lssps.interlacing module<a class="headerlink" href="#module-lssps.interlacing" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="lssps.interlacing.interlacing">
+<code class="descclassname">lssps.interlacing.</code><code class="descname">interlacing</code><span class="sig-paren">(</span><em>grid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/interlacing.html#interlacing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.interlacing.interlacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arg:
+grid (lssps.grid.Grid) A grid with shifted grid, grid.shifted.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps.mean_density">
+<span id="lssps-mean-density-module"></span><h2>lssps.mean_density module<a class="headerlink" href="#module-lssps.mean_density" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lssps.mean_density.KDTree">
+<em class="property">class </em><code class="descclassname">lssps.mean_density.</code><code class="descname">KDTree</code><span class="sig-paren">(</span><em>points</em>, <em>knbr</em>, <em>*</em>, <em>quota=16</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/mean_density.html#KDTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.mean_density.KDTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="lssps.mean_density.KDTree.estimate_density_adaptive">
+<code class="descname">estimate_density_adaptive</code><span class="sig-paren">(</span><em>xyz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/mean_density.html#KDTree.estimate_density_adaptive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.mean_density.KDTree.estimate_density_adaptive" title="Permalink to this definition">¶</a></dt>
+<dd><p>xyz (array [n, 3]): positions for density estiamtion</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.mean_density.KDTree.estimate_density_averaged">
+<code class="descname">estimate_density_averaged</code><span class="sig-paren">(</span><em>xyz</em>, <em>knbr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/mean_density.html#KDTree.estimate_density_averaged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.mean_density.KDTree.estimate_density_averaged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the average of approximately k neighbors around points xyz</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>xyz (array): array of positions shape (n_particles, 3)
+knbar (int): number of particles avraging over</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lssps.mean_density.Points">
+<em class="property">class </em><code class="descclassname">lssps.mean_density.</code><code class="descname">Points</code><span class="sig-paren">(</span><em>xyz</em>, <em>w=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/mean_density.html#Points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.mean_density.Points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="lssps.mean_density.Points.density">
+<code class="descname">density</code><a class="headerlink" href="#lssps.mean_density.Points.density" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lssps.mean_density.Points.density_averaged">
+<code class="descname">density_averaged</code><a class="headerlink" href="#lssps.mean_density.Points.density_averaged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.mean_density.from_grid">
+<code class="descclassname">lssps.mean_density.</code><code class="descname">from_grid</code><span class="sig-paren">(</span><em>grid</em>, <em>xyz</em>, <em>factor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/mean_density.html#from_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.mean_density.from_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute nbar at position xyz from given grid
+nbar[i] = factor*grid(x[i])</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>grid (Grid): Grid object of mean number density
+xyz (array): Array of positions; 3 columns for x, y, z
+factor (float): nbar = factor*grid(x)</dd>
+<dt>Returns:</dt>
+<dd>nbar (array): Array of nbar at position x</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps.model">
+<span id="lssps-model-module"></span><h2>lssps.model module<a class="headerlink" href="#module-lssps.model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lssps.model.Model">
+<em class="property">class </em><code class="descclassname">lssps.model.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>_model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.model.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="lssps.model.Model.apply_window_3d">
+<code class="descname">apply_window_3d</code><span class="sig-paren">(</span><em>grid_window</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/model.html#Model.apply_window_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.model.Model.apply_window_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply 3D window function grid to the model</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>k (float):</dd>
+<dt>Returns:</dt>
+<dd>convoluted power spectrum
+P~(k) = int d3k’/(2pi)^3 <a href="#id13"><span class="problematic" id="id14">|</span></a>W(k - k’)|^2 P(k’)
+for k=(k, 0, 0)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.model.Model.compute_multipoles_discrete">
+<code class="descname">compute_multipoles_discrete</code><span class="sig-paren">(</span><em>nc</em>, <em>boxsize</em>, <em>*</em>, <em>k_min=0.0</em>, <em>k_max=1.0</em>, <em>dk=0.01</em>, <em>mas_window_nc=0</em>, <em>mas_window_deg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/model.html#Model.compute_multipoles_discrete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.model.Model.compute_multipoles_discrete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute PowerSpectrum on descrete k grid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lssps.model.Model.grid">
+<code class="descname">grid</code><span class="sig-paren">(</span><em>nc</em>, <em>boxsize</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/model.html#Model.grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.model.Model.grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.model.linear">
+<code class="descclassname">lssps.model.</code><code class="descname">linear</code><span class="sig-paren">(</span><em>filename</em>, <em>omega_m</em>, <em>z=0.0</em>, <em>*</em>, <em>b=1.0</em>, <em>redshift_space=True</em>, <em>sigma_v=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/model.html#linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.model.linear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-lssps.msg">
+<span id="lssps-msg-module"></span><h2>lssps.msg module<a class="headerlink" href="#module-lssps.msg" title="Permalink to this headline">¶</a></h2>
+<p>msg module: controles log messages.</p>
+<p>msg.loglevel = ‘debug’
+choose from ‘debug’, ‘verbose’, ‘info’, ‘warn’, ‘error’, ‘fatal’, ‘silent’</p>
+<dl class="class">
+<dt id="lssps.msg.LogLevel">
+<em class="property">class </em><code class="descclassname">lssps.msg.</code><code class="descname">LogLevel</code><a class="reference internal" href="_modules/lssps/msg.html#LogLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.msg.LogLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="lssps.msg.LogLevel.loglevel">
+<code class="descname">loglevel</code><a class="headerlink" href="#lssps.msg.LogLevel.loglevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps.performance">
+<span id="lssps-performance-module"></span><h2>lssps.performance module<a class="headerlink" href="#module-lssps.performance" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="lssps.performance.xyz_sum">
+<code class="descclassname">lssps.performance.</code><code class="descname">xyz_sum</code><span class="sig-paren">(</span><em>xyz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/performance.html#xyz_sum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.performance.xyz_sum" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>array with 3 columns</dd>
+<dt>Returns:</dt>
+<dd>sums (Tuple) of xyz
+None if the length of the array is zero</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps.power_spectrum">
+<span id="lssps-power-spectrum-module"></span><h2>lssps.power_spectrum module<a class="headerlink" href="#module-lssps.power_spectrum" title="Permalink to this headline">¶</a></h2>
+<p>Module for computing power spectrum.</p>
+<p>PowerSpectrum: class for the estimated power spectrum</p>
+<dl class="docutils">
+<dt>compute_plane_parallel(grid_delta, <a href="#id15"><span class="problematic" id="id16">*</span></a>,</dt>
+<dd>k_min=0.0, k_max=1.0, dk=0.01,
+subtract_shotnoise=True,
+correct_mas= True, line_of_sight=2)</dd>
+<dt>def compute_yamamoto(grid_delta, kind, <a href="#id17"><span class="problematic" id="id18">*</span></a>,</dt>
+<dd>k_min=0.0, k_max=1.0, dk=0.01,
+subtract_shotnoise=True,
+correct_mas=True,
+grid_moment=None, grid2=None, grid4=None)</dd>
+</dl>
+<p>kind = ‘scoccimarro’ or ‘bianchi’</p>
+<dl class="class">
+<dt id="lssps.power_spectrum.PowerSpectrum">
+<em class="property">class </em><code class="descclassname">lssps.power_spectrum.</code><code class="descname">PowerSpectrum</code><span class="sig-paren">(</span><em>_ps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/power_spectrum.html#PowerSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.power_spectrum.PowerSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Power spectrum computed in bins
+Attributes:</p>
+<blockquote>
+<div>k (numpy.array): mean wave number in bins [h/Mpc]
+P0 (numpy.array): P0 monopole [(1/h Mpc)^3]
+P2 (numpy.array): P2 quadrupole
+P4 (numpy.array): P4 hexadecapole
+nmodes (numpy.array): number of independent k modes in bins</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.power_spectrum.compute_plane_parallel">
+<code class="descclassname">lssps.power_spectrum.</code><code class="descname">compute_plane_parallel</code><span class="sig-paren">(</span><em>grid_delta</em>, <em>*</em>, <em>k_min=0.0</em>, <em>k_max=1.0</em>, <em>dk=0.01</em>, <em>subtract_shotnoise=True</em>, <em>correct_mas=True</em>, <em>line_of_sight=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/power_spectrum.html#compute_plane_parallel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.power_spectrum.compute_plane_parallel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">delta_grid (Grid): Grid object for delta(k)
+k_min (float): lower bound of k binning [h/Mpc]
+k_max (float): upper bound of k binning [h/Mpc]
+dk (float):    bin width [h/Mpc]
+subtract_shotnoise (bool)
+correct_mas (bool)
+line_of_sight (int): line of sight direction for multipoles</p>
+<blockquote class="last">
+<div>0,1,2 for x,y,z, respectively</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>PowerSpectrum object</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps.yamamoto">
+<span id="lssps-yamamoto-module"></span><h2>lssps.yamamoto module<a class="headerlink" href="#module-lssps.yamamoto" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="lssps.yamamoto.compute_delta2">
+<code class="descclassname">lssps.yamamoto.</code><code class="descname">compute_delta2</code><span class="sig-paren">(</span><em>grid</em>, <em>*</em>, <em>grid_moment=None</em>, <em>grid2=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/yamamoto.html#compute_delta2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.yamamoto.compute_delta2" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Compute delta_2 = (3/2) [ (k_x/k)^2 Q_xx + cyc.</dt>
+<dd><ul class="first last simple">
+<li>2 (k_x/k)(k_y/k) Q_xy + cyc. ]</li>
+</ul>
+</dd>
+<dt>Args:</dt>
+<dd>grid (Grid): input grid of delta_k
+grid2 (Grid): output grid of delta2_k
+grid_moment (Grid): temporaty grid for moment computation</dd>
+</dl>
+<p>grid2, grid_moment can be None</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>grid2</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.yamamoto.compute_delta4">
+<code class="descclassname">lssps.yamamoto.</code><code class="descname">compute_delta4</code><span class="sig-paren">(</span><em>grid</em>, <em>*</em>, <em>grid_moment=None</em>, <em>grid4=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/yamamoto.html#compute_delta4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.yamamoto.compute_delta4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute delta_4</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>grid (Grid)       : input grid of delta_k
+grid4 (Grid)      : output grid of delta4_k
+grid_moment (Grid): temporaty grid for moment computation</dd>
+<dt>Returns:</dt>
+<dd>grid4</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lssps.yamamoto.compute_yamamoto">
+<code class="descclassname">lssps.yamamoto.</code><code class="descname">compute_yamamoto</code><span class="sig-paren">(</span><em>grid_delta</em>, <em>kind</em>, <em>*</em>, <em>k_min=0.0</em>, <em>k_max=1.0</em>, <em>dk=0.01</em>, <em>subtract_shotnoise=True</em>, <em>correct_mas=True</em>, <em>grid_moment=None</em>, <em>grid2=None</em>, <em>grid4=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lssps/yamamoto.html#compute_yamamoto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lssps.yamamoto.compute_yamamoto" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">grid_delta (Grid)
+kind (str): ‘scoccimarro’ or ‘bianchi’</p>
+<p class="last">grid_moment (Grid): temporary grid for moment grid
+grid2 (Grid): temporary grid for grid2
+grid4 (Grid): temporary grid for grid4</p>
+</dd>
+<dt>Note:</dt>
+<dd>The content of the temporary grids grid_moment, grid2, grid4, are
+arbitrary; they will be overwritten.</dd>
+<dt>Returns:</dt>
+<dd>PowerSpectrum object with multipoles</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lssps">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-lssps" title="Permalink to this headline">¶</a></h2>
+<p>lssps: Tool kit for large-scale structure clustering power spectrum</p>
+<dl class="docutils">
+<dt>Modules:</dt>
+<dd><p class="first">grid: discrete grid for Fourier transform
+power_spectrum: power spectrum estimation and the result
+cosmology: functions for homogeneous universe and perturbation theory, e.g.,</p>
+<blockquote>
+<div>distance, growth factor</div></blockquote>
+<p class="last">msg: 
+mean_density
+gadget_file</p>
+</dd>
+<dt>Classes:</dt>
+<dd>Grid
+PowerSpectrum</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">lssps package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lssps.compute">lssps.compute module</a></li>
+<li><a class="reference internal" href="#module-lssps.cosmology">lssps.cosmology module</a></li>
+<li><a class="reference internal" href="#module-lssps.etc">lssps.etc module</a></li>
+<li><a class="reference internal" href="#module-lssps.gadget_file">lssps.gadget_file module</a></li>
+<li><a class="reference internal" href="#module-lssps.grid">lssps.grid module</a></li>
+<li><a class="reference internal" href="#module-lssps.interlacing">lssps.interlacing module</a></li>
+<li><a class="reference internal" href="#module-lssps.mean_density">lssps.mean_density module</a></li>
+<li><a class="reference internal" href="#module-lssps.model">lssps.model module</a></li>
+<li><a class="reference internal" href="#module-lssps.msg">lssps.msg module</a></li>
+<li><a class="reference internal" href="#module-lssps.performance">lssps.performance module</a></li>
+<li><a class="reference internal" href="#module-lssps.power_spectrum">lssps.power_spectrum module</a></li>
+<li><a class="reference internal" href="#module-lssps.yamamoto">lssps.yamamoto module</a></li>
+<li><a class="reference internal" href="#module-lssps">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to lssps’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/lssps.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/lssps.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,186 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>lssps.cosmology &#8212; lssps  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for lssps.cosmology</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for cosmological functions.</span>
+
+<span class="sd">D(omega_m, *, a=None, z=None): linear growth factor</span>
+<span class="sd">f(omega_m, *, a=None, z=None): linear growth rate</span>
+<span class="sd">H_factor(omega_m, *, a=None, z=None): Hubble parameter / 100 h</span>
+
+<span class="sd">compute_comoving_distance(z): compute comoving distance from redshift</span>
+<span class="sd">compute_redshift(d): compute redshift from comoving distance</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">lssps._lssps</span> <span class="k">as</span> <span class="nn">c</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../lssps.html#lssps.cosmology.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">omega_m</span><span class="p">,</span> <span class="n">z_max</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1001</span><span class="p">):</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">_cosmology_init</span><span class="p">(</span><span class="n">omega_m</span><span class="p">,</span> <span class="n">z_max</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="compute_redshift"><a class="viewcode-back" href="../../lssps.html#lssps.cosmology.compute_redshift">[docs]</a><span class="k">def</span> <span class="nf">compute_redshift</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">d_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iterp</span><span class="o">=</span><span class="mi">1001</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">       d (array): array of comoving distances</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       z (array): redshifts that correspond to d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">_cosmology_distance_redshift</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">z</span></div>
+
+<div class="viewcode-block" id="compute_comoving_distance"><a class="viewcode-back" href="../../lssps.html#lssps.cosmology.compute_comoving_distance">[docs]</a><span class="k">def</span> <span class="nf">compute_comoving_distance</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">z_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iterp</span><span class="o">=</span><span class="mi">1001</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TODO: change interface, do _init automatically</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       z (float): redshift</span>
+<span class="sd">    Returns:</span>
+<span class="sd">       d (float): comoving distance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">_cosmology_compute_comoving_distance</span><span class="p">(</span><span class="n">z</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_get_a</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="c1"># return scale factor a from either a or redshift z</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need to give either a or z&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot set both a and z&#39;</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">a</span>
+
+<div class="viewcode-block" id="D"><a class="viewcode-back" href="../../lssps.html#lssps.cosmology.D">[docs]</a><span class="k">def</span> <span class="nf">D</span><span class="p">(</span><span class="n">omega_m</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute linear growth factor D(z)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       omega_m (float): Omega_m0</span>
+<span class="sd">       a (float): scale factor</span>
+<span class="sd">       z (float): redshift</span>
+
+<span class="sd">    Provide either a or z.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">_get_a</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">_cosmology_growth_D</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">omega_m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="f"><a class="viewcode-back" href="../../lssps.html#lssps.cosmology.f">[docs]</a><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">omega_m</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute linear growth rate f(z)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       omega_m (float): Omega_m0</span>
+<span class="sd">       a (float): scale factor</span>
+<span class="sd">       z (float): redshift</span>
+
+<span class="sd">    Provide either a or z.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">_get_a</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">_cosmology_growth_f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">omega_m</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="H_factor"><a class="viewcode-back" href="../../lssps.html#lssps.cosmology.H_factor">[docs]</a><span class="k">def</span> <span class="nf">H_factor</span><span class="p">(</span><span class="n">omega_m</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute redshift-dependent factor in Hubble parameter,</span>
+<span class="sd">      H(a) = 100 h H_factor [km/s/Mpc],</span>
+<span class="sd">    which is,</span>
+<span class="sd">      sqrt(omega_m*a**-3 + (1.0 - omega_m)).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       omega_m (float): Omega_m0</span>
+<span class="sd">       a (float): scale factor</span>
+<span class="sd">       z (float): redshift</span>
+
+<span class="sd">    Provide either a or z.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">_get_a</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">omega_l</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">omega_m</span>
+    
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omega_m</span><span class="o">*</span><span class="n">a</span><span class="o">**-</span><span class="mi">3</span> <span class="o">+</span> <span class="n">omega_l</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

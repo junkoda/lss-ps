@@ -1,0 +1,190 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>lssps.power_spectrum &#8212; lssps  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for lssps.power_spectrum</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for computing power spectrum.</span>
+
+<span class="sd">PowerSpectrum: class for the estimated power spectrum</span>
+
+<span class="sd">compute_plane_parallel(grid_delta, *,</span>
+<span class="sd">                       k_min=0.0, k_max=1.0, dk=0.01,</span>
+<span class="sd">                       subtract_shotnoise=True,</span>
+<span class="sd">                       correct_mas= True, line_of_sight=2)</span>
+
+<span class="sd">def compute_yamamoto(grid_delta, kind, *,</span>
+<span class="sd">                     k_min=0.0, k_max=1.0, dk=0.01,</span>
+<span class="sd">                     subtract_shotnoise=True,</span>
+<span class="sd">                     correct_mas=True,</span>
+<span class="sd">                     grid_moment=None, grid2=None, grid4=None)</span>
+<span class="sd">kind = &#39;scoccimarro&#39; or &#39;bianchi&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">lssps._lssps</span> <span class="k">as</span> <span class="nn">c</span>
+<span class="kn">import</span> <span class="nn">lssps.yamamoto</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="PowerSpectrum"><a class="viewcode-back" href="../../lssps.html#lssps.power_spectrum.PowerSpectrum">[docs]</a><span class="k">class</span> <span class="nc">PowerSpectrum</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Power spectrum computed in bins</span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        k (numpy.array): mean wave number in bins [h/Mpc]</span>
+<span class="sd">        P0 (numpy.array): P0 monopole [(1/h Mpc)^3]</span>
+<span class="sd">        P2 (numpy.array): P2 quadrupole</span>
+<span class="sd">        P4 (numpy.array): P4 hexadecapole</span>
+<span class="sd">        nmodes (numpy.array): number of independent k modes in bins</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_ps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Arg:</span>
+<span class="sd">            _ps: _PowerSpectrum pointer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ps</span> <span class="o">=</span> <span class="n">_ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_k_asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_nmodes_asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">P0</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_P0_asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_P2_asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P4</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_P4_asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shot_noise</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_shotnoise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of bins&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">a</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">a</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">a</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P4</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">a</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">a</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">):</span>
+            <span class="n">i</span><span class="o">=</span><span class="n">index</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">P2</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">P4</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Index must be an integer&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="compute_plane_parallel"><a class="viewcode-back" href="../../lssps.html#lssps.power_spectrum.compute_plane_parallel">[docs]</a><span class="k">def</span> <span class="nf">compute_plane_parallel</span><span class="p">(</span><span class="n">grid_delta</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">k_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k_max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dk</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                           <span class="n">subtract_shotnoise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">correct_mas</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">line_of_sight</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        delta_grid (Grid): Grid object for delta(k)</span>
+<span class="sd">        k_min (float): lower bound of k binning [h/Mpc]</span>
+<span class="sd">        k_max (float): upper bound of k binning [h/Mpc]</span>
+<span class="sd">        dk (float):    bin width [h/Mpc]</span>
+<span class="sd">        subtract_shotnoise (bool)</span>
+<span class="sd">        correct_mas (bool)</span>
+<span class="sd">        line_of_sight (int): line of sight direction for multipoles</span>
+<span class="sd">                             0,1,2 for x,y,z, respectively</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        PowerSpectrum object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">grid_delta</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;fourier-space&#39;</span><span class="p">:</span>
+        <span class="n">grid_delta</span><span class="o">.</span><span class="n">fft</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">grid_delta</span><span class="o">.</span><span class="n">shifted</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">grid_delta</span><span class="o">.</span><span class="n">interlaced</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">grid_delta</span><span class="o">.</span><span class="n">interlace</span><span class="p">()</span>
+
+    <span class="n">correct_mas</span> <span class="o">=</span> <span class="n">correct_mas</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">grid_delta</span><span class="o">.</span><span class="n">mas_corrected</span><span class="p">)</span>
+
+    <span class="n">_ps</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_power_spectrum_compute_plane_parallel</span><span class="p">(</span><span class="n">k_min</span><span class="p">,</span> <span class="n">k_max</span><span class="p">,</span> <span class="n">dk</span><span class="p">,</span>
+                              <span class="n">grid_delta</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
+                              <span class="n">subtract_shotnoise</span><span class="p">,</span> <span class="n">correct_mas</span><span class="p">,</span>
+                              <span class="n">line_of_sight</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">PowerSpectrum</span><span class="p">(</span><span class="n">_ps</span><span class="p">)</span></div>
+
+    
+<span class="n">compute_yamamoto</span> <span class="o">=</span> <span class="n">lssps</span><span class="o">.</span><span class="n">yamamoto</span><span class="o">.</span><span class="n">compute_yamamoto</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

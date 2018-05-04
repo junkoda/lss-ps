@@ -1,0 +1,151 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>lssps.mean_density &#8212; lssps  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for lssps.mean_density</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">lssps._lssps</span> <span class="k">as</span> <span class="nn">c</span>
+
+<div class="viewcode-block" id="from_grid"><a class="viewcode-back" href="../../lssps.html#lssps.mean_density.from_grid">[docs]</a><span class="k">def</span> <span class="nf">from_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute nbar at position xyz from given grid</span>
+<span class="sd">    nbar[i] = factor*grid(x[i]) </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      grid (Grid): Grid object of mean number density</span>
+<span class="sd">      xyz (array): Array of positions; 3 columns for x, y, z</span>
+<span class="sd">      factor (float): nbar = factor*grid(x)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      nbar (array): Array of nbar at position x</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="n">c</span><span class="o">.</span><span class="n">_mean_density_from_grid</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">nbar</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">nbar</span></div>
+
+<div class="viewcode-block" id="Points"><a class="viewcode-back" href="../../lssps.html#lssps.mean_density.Points">[docs]</a><span class="k">class</span> <span class="nc">Points</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_kdpoints_alloc</span><span class="p">();</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_kdpoints_from_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">_kdpoints_len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_kdpoints_density_as_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">density_averaged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="KDTree"><a class="viewcode-back" href="../../lssps.html#lssps.mean_density.KDTree">[docs]</a><span class="k">class</span> <span class="nc">KDTree</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">knbr</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">quota</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">knbr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ValError</span><span class="p">(</span><span class="s1">&#39;knbr must be positive; knbr= </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">knbr</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kdtree</span><span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_kdtree_alloc</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">_points</span><span class="p">,</span> <span class="n">quota</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_kdtree_compute_rk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kdtree</span><span class="p">,</span> <span class="n">knbr</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_kdtree_update_node_statistics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kdtree</span><span class="p">)</span>
+
+<div class="viewcode-block" id="KDTree.estimate_density_adaptive"><a class="viewcode-back" href="../../lssps.html#lssps.mean_density.KDTree.estimate_density_adaptive">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_density_adaptive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        xyz (array [n, 3]): positions for density estiamtion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_mean_density_adaptive_estimate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kdtree</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">a</span></div>
+
+<div class="viewcode-block" id="KDTree.estimate_density_averaged"><a class="viewcode-back" href="../../lssps.html#lssps.mean_density.KDTree.estimate_density_averaged">[docs]</a>    <span class="k">def</span> <span class="nf">estimate_density_averaged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">knbr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the average of approximately k neighbors around points xyz</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          xyz (array): array of positions shape (n_particles, 3)</span>
+<span class="sd">          knbar (int): number of particles avraging over</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">knbr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ValError</span><span class="p">(</span><span class="s1">&#39;knbr must be positive; knbr= </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">knbr</span><span class="p">)</span>
+        
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_mean_density_average_estimate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kdtree</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">knbr</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">a</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
