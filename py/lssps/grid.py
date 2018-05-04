@@ -98,7 +98,7 @@ class Grid:
         """perform interlacing"""
 
         if self.shifted is None:
-            raise TypeError('grid.shifted is required for interlacing')
+            raise RuntimeError('grid.shifted is required for interlacing')
         if self.mode != 'fourier-space':
             raise RuntimeError('grid must be in Fourier space for interlacing')
 
