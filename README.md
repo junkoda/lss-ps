@@ -3,6 +3,12 @@
 A flexible toolkit to compute power spectrum for large-scale structure
 cosmology with Python
 
+* Compute power spectrum multipoles from galaxy and random catalogues;
+
+    - with fixed line-of-sight (plane-parallel approximation)
+    - Yamamoto estimator with FFT (Bianchi et al, Scoccimarro algorithms)
+* Compute power spectrum in a periodic box
+    - read particles from GADGET binary format
 
 ## Setup
 
@@ -88,6 +94,9 @@ for i in range(len(ps)):
          print('%e %e %d' % (ps.k[i], ps.P0[i], ps.nmodes[i]))
 ```
 
+### More examples and documents
+
+[https://junkoda.github.io/lss-ps/](https://junkoda.github.io/lss-ps/)
 
 ## References
 
