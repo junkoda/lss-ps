@@ -1,6 +1,5 @@
 
 TESTS := test_config.py
-TESTS += test_catalogue.py
 
 .PHONY: test
 

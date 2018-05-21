@@ -18,14 +18,16 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
   //     _grid: a _Grid pointer
   //     xyz:    The array of xyz
   //     fac:    nbar = fac*grid(x)
+  //     n_interp: degree of interpolation 0 (NGP) or 2 (TSC)
   //     nbar:   The array of nbar, can be None
 
   PyObject *py_xyz, *py_nbar;
   PyObject *py_grid;
+  int n_interp;
   double fac;
 
-  if(!PyArg_ParseTuple(args, "OOdO",
-		       &py_grid, &py_xyz, &fac, &py_nbar))
+  if(!PyArg_ParseTuple(args, "OOdiO",
+		       &py_grid, &py_xyz, &fac, &n_interp, &py_nbar))
     return NULL;
 
   Grid* const grid=
@@ -76,13 +78,35 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
       return NULL;
     }
 
-    mean_density_from_grid<double>(grid,
-				   fac,
-				   xyz.shape[0],
-				   (double*) xyz.buf,
-				   xyz.strides[0],
-				   (double*) nbar.buf,
-				   nbar.strides[0]);
+    if(n_interp == 0) {
+      mean_density_from_grid_ngp<double>(grid,
+					 fac,
+					 xyz.shape[0],
+					 (double*) xyz.buf,
+					 xyz.strides[0],
+					 (double*) nbar.buf,
+					 nbar.strides[0]);
+    }
+    if(n_interp == 1) {
+      mean_density_from_grid_cic<double>(grid,
+					 fac,
+					 xyz.shape[0],
+					 (double*) xyz.buf,
+					 xyz.strides[0],
+					 (double*) nbar.buf,
+					 nbar.strides[0]);
+    }
+    else if(n_interp == 2) {
+      mean_density_from_grid_tsc<double>(grid,
+					 fac,
+					 xyz.shape[0],
+					 (double*) xyz.buf,
+					 xyz.strides[0],
+					 (double*) nbar.buf,
+					 nbar.strides[0]);
+    }
+    else
+      py_assert_ptr(false);
   }
   else if(strcmp(xyz.format, "f") == 0) {
     if(xyz.strides[1] != sizeof(float)) {
@@ -91,20 +115,40 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
       return NULL;
     }
 
-    mean_density_from_grid<float>(grid,
-				  fac,
-				  xyz.shape[0],
-				  (float*) xyz.buf,
-				  xyz.strides[0],
-				  (float*) nbar.buf,
-				  nbar.strides[0]);
+    if(n_interp == 0) {
+      mean_density_from_grid_ngp<float>(grid,
+					fac,
+					xyz.shape[0],
+					(float*) xyz.buf,
+					xyz.strides[0],
+					(float*) nbar.buf,
+					nbar.strides[0]);
+    }
+    if(n_interp == 1) {
+      mean_density_from_grid_cic<float>(grid,
+					fac,
+					xyz.shape[0],
+					(float*) xyz.buf,
+					xyz.strides[0],
+					(float*) nbar.buf,
+					nbar.strides[0]);
+    }
+    if(n_interp == 2) {
+      mean_density_from_grid_tsc<float>(grid,
+					fac,
+					xyz.shape[0],
+					(float*) xyz.buf,
+					xyz.strides[0],
+					(float*) nbar.buf,
+					nbar.strides[0]);
+    }
+    else
+      py_assert_ptr(false);
   }
-
   else {
-    PyErr_SetString(PyExc_TypeError, "Expected an array of doubles");
+    PyErr_SetString(PyExc_TypeError, "Expected an array of floats or doubles");
     return NULL;
   }
-
 
   PyBuffer_Release(&xyz);
   PyBuffer_Release(&nbar);

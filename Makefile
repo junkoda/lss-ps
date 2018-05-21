@@ -12,7 +12,7 @@ default: py
 OPENMP  := #-fopenmp
 
 CXXOPENMP ?= c++
-CXX     := g++-7 $(OPENMP) -std=c++11
+CXX     := $(CXXOPENMP) $(OPENMP) -std=c++11
 CC      := $(CXX)
 
 # Extra compile options

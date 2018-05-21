@@ -1,7 +1,7 @@
 import numpy as np
 import lssps._lssps as c
 
-def from_grid(grid, xyz, factor):
+def from_grid(grid, xyz, factor, *, kind='NGP'):
     """
     Compute nbar at position xyz from given grid
     nbar[i] = factor*grid(x[i]) 
@@ -10,14 +10,25 @@ def from_grid(grid, xyz, factor):
       grid (Grid): Grid object of mean number density
       xyz (array): Array of positions; 3 columns for x, y, z
       factor (float): nbar = factor*grid(x)
+    
+      kind='TSC' (str): interpolation scheme 'NGP' or 'TSC'
 
     Returns:
       nbar (array): Array of nbar at position x
     """
 
     nbar = np.empty(xyz.shape[0])
+
+    if kind.upper() == 'NGP':
+        n_interp = 0
+    elif kind.upper() == 'CIC':
+        n_interp = 1
+    elif kind.upper() == 'TSC':
+        n_interp = 2
+    else:
+        raise ValueError('Unknown `kind` for mean_density.from_grid: %s. Must be NGP, CIC or TSC.' % kind)
     
-    c._mean_density_from_grid(grid._grid, xyz, factor, nbar)
+    c._mean_density_from_grid(grid._grid, xyz, factor, n_interp, nbar)
 
     return nbar
 
