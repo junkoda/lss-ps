@@ -87,7 +87,7 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
 					 (double*) nbar.buf,
 					 nbar.strides[0]);
     }
-    if(n_interp == 1) {
+    else if(n_interp == 1) {
       mean_density_from_grid_cic<double>(grid,
 					 fac,
 					 xyz.shape[0],
@@ -105,8 +105,11 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
 					 (double*) nbar.buf,
 					 nbar.strides[0]);
     }
-    else
-      py_assert_ptr(false);
+    else {
+      PyErr_SetString(PyExc_ValueError,
+		      "unknown n_interp in _mean_density_from_grid");
+      return NULL;
+    }
   }
   else if(strcmp(xyz.format, "f") == 0) {
     if(xyz.strides[1] != sizeof(float)) {
@@ -124,7 +127,7 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
 					(float*) nbar.buf,
 					nbar.strides[0]);
     }
-    if(n_interp == 1) {
+    else if(n_interp == 1) {
       mean_density_from_grid_cic<float>(grid,
 					fac,
 					xyz.shape[0],
@@ -133,7 +136,7 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
 					(float*) nbar.buf,
 					nbar.strides[0]);
     }
-    if(n_interp == 2) {
+    else if(n_interp == 2) {
       mean_density_from_grid_tsc<float>(grid,
 					fac,
 					xyz.shape[0],
@@ -142,8 +145,11 @@ PyObject* py_mean_density_from_grid(PyObject* self, PyObject* args)
 					(float*) nbar.buf,
 					nbar.strides[0]);
     }
-    else
-      py_assert_ptr(false);
+    else {
+      PyErr_SetString(PyExc_ValueError,
+		      "unknown n_interp in _mean_density_from_grid");
+      return NULL;
+    }
   }
   else {
     PyErr_SetString(PyExc_TypeError, "Expected an array of floats or doubles");
