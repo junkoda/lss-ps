@@ -17,7 +17,8 @@ void GadgetFile::open()
 {
   fp= fopen(filename.c_str(), "r");
   if(fp == 0) {
-    msg_printf(msg_error, "Error: Gadget file not found: %s", filename);
+    msg_printf(msg_error, "Error: Gadget file not found: %s",
+	       filename.c_str());
     throw FileNotFoundError();
   }
 
@@ -25,7 +26,7 @@ void GadgetFile::open()
   int ret= fread(&sep_begin, sizeof(int), 1, fp); assert(ret == 1);
   if(sep_begin != size_header) {
     msg_printf(msg_error, "Error: Unexpeced format for Gadget binary file: %s",
-	       filename);
+	       filename.c_str());
     throw IOError();
   }
 
