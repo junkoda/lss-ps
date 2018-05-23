@@ -176,7 +176,10 @@ void grid_compute_fluctuation(Grid& grid_data, Grid& grid_rand)
     }
   }
 
-  grid_data.shot_noise = (1.0 + alpha)*grid_rand.w2_sum / grid_rand.nw2_sum;
+  // Since shot noise is w_i^2, better to use grid.w2_sum than
+  // only grid_rand.w2_sum
+  //grid_data.shot_noise = (1.0 + alpha)*grid_rand.w2_sum / grid_rand.nw2_sum;
+  grid_data.shot_noise = (grid.w2_sum/alpha + alpha*grid_rand.w2_sum) / grid_rand.nw2_sum;
   grid_rand.shot_noise = 0.0;
 
   grid_data.pk_normalisation= 1.0/(grid_rand.nw2_sum*alpha);
