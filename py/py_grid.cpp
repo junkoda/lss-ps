@@ -638,3 +638,84 @@ PyObject* py_grid_resize_fourier(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+PyObject* py_grid_create_k(PyObject* self, PyObject* args)
+{
+  // Create a grid of k_i
+  PyObject *py_grid;
+  Float boxsize;
+  int nc, axis;
+  
+  if(!PyArg_ParseTuple(args, "Oidi", &py_grid, &nc, &boxsize, &axis)) {
+    return NULL;
+  }
+  py_assert_ptr(nc > 0);
+  py_assert_ptr(boxsize > 0.0);
+  py_assert_ptr(0 <= axis && axis < 3);
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+
+  py_assert_ptr(grid);
+
+  grid->boxsize= boxsize;
+  grid->mode= GridMode::fourier_space;
+
+  const int nckz= nc/2 + 1;
+  const Float fac= 2.0*M_PI/boxsize;
+  complex<Float>* const d= grid->fk;
+
+  Float k[3];
+  for(int ix=0; ix<nc; ++ix) {
+    k[0]= ix < nc/2 ? fac*ix : fac*(ix - nc);
+    for(int iy=0; iy<nc; ++iy) {
+      k[1]= iy < nc/2 ? fac*iy : fac*(iy - nc);
+      for(int iz=0; iz<nckz; ++iz) {
+	k[2]= fac*iz;
+	
+	size_t index= (ix + iy*nc)*nckz + iz;
+	d[index] = k[axis];
+      }
+    }
+  }
+  Py_RETURN_NONE;
+}
+
+PyObject* py_grid_create_kmag(PyObject* self, PyObject* args)
+{
+  // Create a grid of |k|
+  PyObject *py_grid;
+  double boxsize;
+  int nc;
+  
+  if(!PyArg_ParseTuple(args, "Oidi", &py_grid, &boxsize, &nc)) {
+    return NULL;
+  }
+  py_assert_ptr(nc > 0);
+  py_assert_ptr(boxsize > 0.0);
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+
+  py_assert_ptr(grid);
+
+  grid->boxsize= boxsize;
+  grid->mode= GridMode::fourier_space;
+
+  const int nckz= nc/2 + 1;
+  const Float fac= 2.0*M_PI/boxsize;
+  complex<Float>* d= grid->fk;
+
+  for(int ix=0; ix<nc; ++ix) {
+    Float kx= ix < nc/2 ? fac*ix : fac*(ix - nc);
+    for(int iy=0; iy<nc; ++iy) {
+      Float ky= iy < nc/2 ? fac*iy : fac*(iy - nc);
+      for(int iz=0; iz<nckz; ++iz) {
+	Float kz= fac*iz;
+	
+	size_t index= (ix + iy*nc)*nckz + iz;
+	d[index] = sqrt(kx*kx + ky*ky + kz*kz);
+      }
+    }
+  }
+  Py_RETURN_NONE;
+}

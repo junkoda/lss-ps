@@ -40,4 +40,7 @@ PyObject* py_grid_get_param(PyObject* self, PyObject* args);
 PyObject* py_grid_set_param_double(PyObject* self, PyObject* args);
 
 PyObject* py_grid_resize_fourier(PyObject* self, PyObject* args);
+
+PyObject* py_grid_create_k(PyObject* self, PyObject* args);
+PyObject* py_grid_create_kmag(PyObject* self, PyObject* args);
 #endif

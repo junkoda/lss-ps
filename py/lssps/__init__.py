@@ -24,6 +24,7 @@ import lssps.mean_density
 import lssps.etc
 import lssps.yamamoto
 import lssps.gadget_file
+import lssps.cola_binary
 import lssps.model
 
 

@@ -17,6 +17,7 @@
 #include "py_mean_density_adaptive.h"
 #include "py_etc.h"
 #include "py_gadget_file.h"
+#include "py_cola_binary.h"
 #include "py_model.h"
 
 using namespace std;
@@ -85,6 +86,11 @@ static PyMethodDef methods[] = {
   {"_grid_compute_fluctuation_homogeneous",
    py_grid_compute_fluctuation_homogeneous, METH_VARARGS,
    "_grid_compute_fluctuation_homogeneous(_grid_data)"},
+
+  {"_grid_create_k", py_grid_create_k, METH_VARARGS,
+   "_grid_create_k(_grid, nc, boxsize, axis)"},
+  {"_grid_create_kmag", py_grid_create_kmag, METH_VARARGS,
+   "_grid_create_kmag(_grid, nc, boxsize)"},   
 
   {"_mass_assignment_from_array", py_mass_assignment_from_array, METH_VARARGS,
    "assign mass to a grid from an array"},
@@ -175,6 +181,13 @@ static PyMethodDef methods[] = {
    "_gadget_file_close(_gf)"},
   {"_gadget_file_read", py_gadget_file_read, METH_VARARGS,
    "_gadget_file_read(_gf, components, ibegin, iend, a)"},
+
+  {"_cola_binary_load_particles_header",
+   py_cola_binary_load_particles_header, METH_VARARGS,
+   "_cola_binary_load_particles_header(filename)"},
+  {"_cola_binary_load_particles",
+   py_cola_binary_load_particles, METH_VARARGS,
+   "_cola_binary_load_particles(filename, a)"},
   
   {NULL, NULL, 0, NULL}
 };

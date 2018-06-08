@@ -439,3 +439,18 @@ def resize_fourier(grid, nc_new):
     c._grid_resize_fourier(grid._grid, grid_new._grid)
 
     return grid_new
+
+
+def k(kind, nc, boxsize):
+    grid = empty(nc, boxsize)
+    grid.mode = 'fourier-space'
+    
+    if kind == 'mag':
+        c._grid_create_kmag(grid._grid, nc, boxsize)
+    else:
+        if isinstance(kind, int) and 0 <= kind < 3:
+            c._grid_create_kmag(grid._grid, nc, boxsize, kind)
+        else:
+            raise ValueError('kind is not 0, 1, 2, or mag')
+
+    return grid
