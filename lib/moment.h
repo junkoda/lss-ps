@@ -3,11 +3,24 @@
 
 #include <complex>
 #include <cassert>
+#include <cmath>
 #include "grid.h"
 
 //
 // Moment function objects
 //
+
+// (x_i/r)
+struct Moment1 {
+  Moment1(const int i_) : i(i_) {}
+
+  double operator()(const double x[]) const {
+    double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+
+    return r > 0.0 ? x[i]/r : 0.0;
+  }
+  const int i;
+};
 
 // (x_i/r) (x_j/r)
 struct Moment2 {
@@ -19,6 +32,19 @@ struct Moment2 {
     return r2 > 0.0 ? x[i]*x[j]/r2 : 0.0;
   }
   const int i, j;
+};
+
+// (x_i/r) (x_j/r) (x_k/r)
+struct Moment3 {
+  Moment3(const int i_, const int j_, const int k_) : i(i_), j(j_), k(k_) {}
+
+  double operator()(const double x[]) const {
+    double r2= x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
+    double r= sqrt(r);
+
+    return r2 > 0.0 ? x[i]*x[j]*x[k]/(r*r2) : 0.0;
+  }
+  const int i, j, k;
 };
 
 

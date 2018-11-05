@@ -22,7 +22,7 @@ LIBS      += $(foreach dir, $(DIR_PATH), -L$(dir)/lib)
 LIBS += -lgsl -lgslcblas
 
 OBJS := msg.o config.o catalogue.o grid.o mass_assignment.o power_spectrum.o
-OBJS += interlacing.o multipole.o
+OBJS += interlacing.o multipole.o rr.o
 
 
 ifeq (,$(findstring -DDOUBLEPRECISION, $(OPT)))

@@ -26,7 +26,7 @@ import lssps.yamamoto
 import lssps.gadget_file
 import lssps.cola_binary
 import lssps.model
-
+import lssps.rr
 
 msg = lssps.msg.LogLevel()
 

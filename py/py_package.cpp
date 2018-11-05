@@ -19,6 +19,7 @@
 #include "py_gadget_file.h"
 #include "py_cola_binary.h"
 #include "py_model.h"
+#include "py_rr.h"
 
 using namespace std;
 
@@ -188,6 +189,12 @@ static PyMethodDef methods[] = {
   {"_cola_binary_load_particles",
    py_cola_binary_load_particles, METH_VARARGS,
    "_cola_binary_load_particles(filename, a)"},
+
+  {"_rr_compute_multipoles", py_rr_compute_multipoles, METH_VARARGS,
+   "compute RR multipoles for window function convolution"},
+  {"_rr_asarray", py_rr_asarray, METH_VARARGS,
+   "_rr_asarray(_rr, l); get rr[l] as an array"},
+
   
   {NULL, NULL, 0, NULL}
 };
@@ -205,6 +212,7 @@ PyMODINIT_FUNC
 PyInit__lssps(void) {
   py_grid_module_init();
   py_power_spectrum_module_init();
+  py_rr_module_init();
   //py_gadget_file_module_init();
   //py_mean_density_adaptive_module_init();
   
