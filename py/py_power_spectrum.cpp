@@ -163,6 +163,39 @@ PyObject* py_power_spectrum_P4_asarray(PyObject* self, PyObject* args)
   return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p4[0]);
 }
 
+PyObject* py_power_spectrum_Pl_asarray(PyObject* self, PyObject* args)
+{
+  PyObject *py_ps;
+  int l;
+
+  if(!PyArg_ParseTuple(args, "Oi", &py_ps, &l)) {
+    return NULL;
+  }
+
+  PowerSpectrum* const ps=
+    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
+  py_assert_ptr(ps);
+
+  const int nd=1;
+  npy_intp dims[]= {ps->n};
+
+  switch(l) {
+  case 0:
+    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p0[0]);
+  case 1:
+    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p1[0]);
+  case 2:
+    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p2[0]);
+  case 3:
+    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p3[0]);
+  case 4:
+    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, &ps->p4[0]);
+  }
+
+  PyErr_SetString(PyExc_ValueError, "Unknow multipole moment");
+  return NULL;
+}
+
 PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
 						   PyObject* args)
 {
@@ -261,4 +294,68 @@ PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
 				     grid, grid2, grid4,
 				     subtract_shotnoise, correct_mas);
   return PyCapsule_New(psb, "_PowerSpectrum", py_power_spectrum_free);
+}
+
+PyObject* py_power_spectrum_compute_yamamoto_odd(PyObject* self,
+						 PyObject* args)
+{
+  // compute dipole using Yamamoto estimator
+  // _power_spectrum_compute_yamamoto_1(k_min, k_max, dk,
+  //  _grid, _grid2, _grid4, subtract_shotnoise, correct_mas)
+  //
+
+  PyObject *py_ps;
+  double k_min, k_max, dk;
+  PyObject *py_grid, *py_grid1, *py_grid3;
+  int subtract_shotnoise, correct_mas;
+
+  
+  if(!PyArg_ParseTuple(args, "OdddOOOii", &py_ps,
+		       &k_min, &k_max, &dk,
+		       &py_grid, &py_grid1, &py_grid3, 
+		       &subtract_shotnoise, &correct_mas)) {
+    return NULL;
+  }
+
+  PowerSpectrum* const ps=
+    (PowerSpectrum*) PyCapsule_GetPointer(py_ps, "_PowerSpectrum");
+  py_assert_ptr(ps);
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  Grid const * const grid1=
+    (Grid const *) PyCapsule_GetPointer(py_grid1, "_Grid");
+  py_assert_ptr(grid1);
+
+  if(py_grid3 == Py_None) { // Dipole only
+    PowerSpectrum* ps1=
+      multipole_compute_yamamoto_odd_multipoles(k_min, k_max, dk,
+						grid, grid1, 0,
+						subtract_shotnoise,
+						correct_mas);
+
+    py_assert_ptr(ps->p1.size() == ps1->p1.size());
+    ps->p1= ps1->p1;
+
+    delete ps1;
+  }
+  else { // Dipole and tripole
+    Grid const * const grid3=
+      (Grid const *) PyCapsule_GetPointer(py_grid1, "_Grid");
+    py_assert_ptr(grid1);
+
+    PowerSpectrum* ps3=
+      multipole_compute_yamamoto_odd_multipoles(k_min, k_max, dk,
+						grid, grid1, grid3,
+						subtract_shotnoise,
+						correct_mas);
+
+    py_assert_ptr(ps->p1.size() == ps3->p1.size());
+    ps->p1= ps3->p1;
+    ps->p3= ps3->p3;
+  }
+
+  Py_RETURN_NONE;
 }

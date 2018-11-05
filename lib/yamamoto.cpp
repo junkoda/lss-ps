@@ -68,3 +68,4 @@ class MultipoleScoccimarro {
   Grid const * const delta2;
 };
 
+

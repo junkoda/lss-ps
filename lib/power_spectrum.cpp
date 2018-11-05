@@ -21,7 +21,7 @@ PowerSpectrum::PowerSpectrum()
 
 PowerSpectrum::PowerSpectrum(const int n_) :
   n(n_), nmodes(0.0, n),
-  k(0.0, n), p0(0.0, n), p2(0.0, n), p4(0.0, n)
+  k(0.0, n), p0(0.0, n), p1(0.0, n), p2(0.0, n), p3(0.0, n), p4(0.0, n)
 {
 
 }
@@ -32,7 +32,9 @@ PowerSpectrum& PowerSpectrum::operator+=(const PowerSpectrum& ps)
   
   k += ps.k;
   p0 += ps.p0;
+  p1 += ps.p1;
   p2 += ps.p2;
+  p3 += ps.p3;
   p4 += ps.p4;
 
   return *this;

@@ -65,7 +65,30 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
 
     return grid_delta_l
 
-    
+
+
+def compute_delta1(grid, *, grid_moment=None, grid1=None):
+    """
+    Compute delta_1 = [ (k_x/k) Q_x + cyc. ]
+
+    Args:
+      grid (Grid): input grid of delta_k
+      grid1 (Grid): output grid of delta2_k
+      grid_moment (Grid): temporaty grid for moment computation
+
+    grid1, grid_moment can be None
+
+    Returns:
+      grid1
+    """
+
+    # Pairs of inddecies (xx, yy, zz, xy, yz, zx) and prefactors
+    indices = [('0', 1.0), ('1', 1.0), ('2', 1.0)]
+
+    return _compute_delta_l(grid, indices,
+                            grid_moment=grid_moment, grid_delta_l=grid2)
+
+
 def compute_delta2(grid, *, grid_moment=None, grid2=None):
     """
     Compute delta_2 = (3/2) [ (k_x/k)^2 Q_xx + cyc.
@@ -90,6 +113,41 @@ def compute_delta2(grid, *, grid_moment=None, grid2=None):
 
     return _compute_delta_l(grid, indices,
                             grid_moment=grid_moment, grid_delta_l=grid2)
+
+def compute_delta3(grid, *, grid_moment=None, grid3=None):
+    """
+    Compute delta_3 = 
+                      
+
+    Args:
+      grid (Grid): input grid of delta_k
+      grid3 (Grid): output grid of delta2_k
+      grid_moment (Grid): temporaty grid for moment computation
+
+    grid3, grid_moment can be None
+
+    Returns:
+      grid3
+    """
+
+    # Pairs of inddecies (xxx, yyy, zzz, ...) prefactors
+    indices = []
+
+    # (5/2) Q_xxx + cyc.
+    fac = 2.5
+    indices.extend([('000', fac), ('111', fac), ('222', fac)]) # Q_xxx + cyc.
+
+    # (5/2) 3 Q_xxy + cyc. + Q_xxz + cyc.
+    fac = 2.5*3
+    indices.extend([('001', fac), ('112', fac), ('220', fac),  # Q_xxy + cyc.
+                    ('002', fac), ('110', fac), ('221', fac)]) # Q_xxz + cyc.
+
+    # (5/2) 6 Q_xyz
+    fac = 2.5*6
+    indices.extend([('123', fac),])
+
+    return _compute_delta_l(grid, indices,
+                            grid_moment=grid_moment, grid_delta_l=grid3)
 
 
 def compute_delta4(grid, *, grid_moment=None, grid4=None):
@@ -134,12 +192,14 @@ def compute_delta4(grid, *, grid_moment=None, grid4=None):
 def compute_yamamoto(grid_delta, kind, *,
                      k_min=0.0, k_max=1.0, dk=0.01,
                      subtract_shotnoise=True,
-                     correct_mas=True,
-                     grid_moment=None, grid2=None, grid4=None):
+                     correct_mas=True):
     """
     Args:
       grid_delta (Grid)
-      kind (str): 'scoccimarro' or 'bianchi'
+      kind (str): 's' for Scoccimaro hexadecapole
+                  'b' or '4' for Bianchi hexiadecapole
+                  '1' for dipole, '3' for tripole
+                  monopole and quadrupole are always calculated
 
       grid_moment (Grid): temporary grid for moment grid
       grid2 (Grid): temporary grid for grid2
@@ -156,11 +216,20 @@ def compute_yamamoto(grid_delta, kind, *,
     if grid_delta.mode != 'real-space':
         raise ValueError('grid is not in real space')
 
-    grid2 = compute_delta2(grid_delta, grid_moment=grid_moment, grid2=grid2)
+    kind = kind.lower()
+    if 's' in kind and 'b' in kind:
+        raise ValueError('scoccimarro (s) and bianchi (b) cannot specified simultaneously in kind %s' % kind)
 
-    if kind.lower() == 'bianchi':
-        grid4 = compute_delta4(grid_delta, grid_moment=grid_moment,
-                               grid4=grid4)
+    grid2 = compute_delta2(grid_delta)
+
+    if '1' in kind:
+        grid1 = compute_delta1(grid_delta)
+
+    if '3' in kind:
+        grid3 = compute_delta1(grid_delta)
+    
+    if 'b' in kind or '4' in kind:
+        grid4 = compute_delta4(grid_delta)
 
     # Fourier transform delta
     grid_delta.fft()
@@ -168,21 +237,20 @@ def compute_yamamoto(grid_delta, kind, *,
     if grid_delta.shifted is not None:
         grid_delta.interlace()
 
-
-    if kind.lower() == 'scoccimarro':
+    if 'b' in kind or '4' in kind:
+        _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
+                                                 grid_delta._grid,
+                                                 grid2._grid, grid4._grid,
+                                                 subtract_shotnoise,
+                                                 correct_mas)        
+    else:
         _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
                                                  grid_delta._grid,
                                                  grid2._grid, None,
                                                  subtract_shotnoise,
                                                  correct_mas)
-    elif kind.lower() == 'bianchi':
-        _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
-                                                 grid_delta._grid,
-                                                 grid2._grid, grid4._grid,
-                                                 subtract_shotnoise,
-                                                 correct_mas)
-    else:
-        raise ValError('Unknown Yamamoto estimator; must be scoccimarro or bianchi: %s' % kind)
+
+
 
     return lssps.PowerSpectrum(_ps)
 

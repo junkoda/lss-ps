@@ -35,8 +35,14 @@ PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
   vector<Float> x0;
   sequence_to_vector<Float>(py_x0, x0);
 
-  if(v.size() == 2) {
+  if(v.size() == 1) {
+    moment_compute_x(delta, x0.data(), Moment1(v[0]), moment);
+  }
+  else if(v.size() == 2) {
     moment_compute_x(delta, x0.data(), Moment2(v[0], v[1]), moment);
+  }
+  else if(v.size() == 3) {
+    moment_compute_x(delta, x0.data(), Moment3(v[0], v[1], v[2]), moment);
   }
   else if(v.size() == 4) {
     moment_compute_x(delta, x0.data(), Moment4(v[0], v[1], v[2], v[3]), moment);
@@ -74,8 +80,14 @@ PyObject* py_yamamoto_compute_moment_k(PyObject* self, PyObject* args)
   vector<int> v;
   sequence_to_vector<int>(py_list, v);
 
-  if(v.size() == 2) {
+  if(v.size() == 1) {
+    moment_compute_k(delta, Moment1(v[0]), coef, moment);
+  }
+  else if(v.size() == 2) {
     moment_compute_k(delta, Moment2(v[0], v[1]), coef, moment);
+  }
+  else if(v.size() == 3) {
+    moment_compute_k(delta, Moment3(v[0], v[1], v[2]), coef, moment);
   }
   else if(v.size() == 4) {
     moment_compute_k(delta, Moment4(v[0], v[1], v[2], v[3]), coef, moment);

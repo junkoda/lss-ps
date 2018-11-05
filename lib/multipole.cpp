@@ -285,6 +285,60 @@ class MultipoleScoccimarro {
   Grid const * const grid2;
 };
 
+//
+// Multipole1 (dipole) function object for compute_multipoles() algorithm
+//
+class Multipole1 {
+ public:
+  Multipole1(Grid const * const grid0_,
+	     Grid const * const grid1_) :
+    grid(grid0_), grid1(grid1_) {
+  }
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
+    std::complex<double> delta0_k = grid->fk[index];
+    std::complex<double> delta1_k = grid1->fk[index];
+    
+    double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
+		         + delta1_k.imag()*delta0_k.imag())*corr;
+
+    P.p1[ik] += P1_hat;
+  }
+  Grid const * const grid;
+  Grid const * const grid1;
+};
+
+//
+// Multipole3 (dipole and tripole) function object for
+// compute_multipoles() algorithm
+//
+class Multipole3 {
+ public:
+  Multipole3(Grid const * const grid0_,
+	     Grid const * const grid1_,
+	     Grid const * const grid3_) :
+    grid(grid0_), grid1(grid1_), grid3(grid3_) {
+  }
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
+    std::complex<double> delta0_k = grid->fk[index];
+    std::complex<double> delta1_k = grid1->fk[index];
+    std::complex<double> delta3_k = grid3->fk[index] - 1.5*grid1->fk[index] ;
+
+    double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
+			 + delta1_k.imag()*delta0_k.imag())*corr;
+
+    double P3_hat = 3.0*(  delta3_k.real()*delta0_k.real() 
+		         + delta3_k.imag()*delta0_k.imag())*corr;
+
+    P.p1[ik] += P1_hat;
+    P.p3[ik] += P3_hat;
+  }
+  Grid const * const grid;
+  Grid const * const grid1;
+  Grid const * const grid3;
+};
+
 
 
 
@@ -339,6 +393,26 @@ multipole_compute_yamamoto_bianchi(const double k_min, const double k_max, const
 {
   return compute_multipoles_template(k_min, k_max, dk,
 				     MultipoleBianchi(grid, grid2, grid4),
+				     subtract_shotnoise, correct_mas);
+}
+
+PowerSpectrum*
+multipole_compute_yamamoto_odd_multipoles(const double k_min,
+					  const double k_max, const double dk, 
+					  Grid const * const grid,
+					  Grid const * const grid1,
+					  Grid const * const grid3,
+					  const bool subtract_shotnoise,
+					  const bool correct_mas)
+{
+  if(grid3 == nullptr) {
+    return compute_multipoles_template(k_min, k_max, dk,
+				       Multipole1(grid, grid1),
+				       subtract_shotnoise, correct_mas);
+  }
+
+  return compute_multipoles_template(k_min, k_max, dk,
+				     Multipole3(grid, grid1, grid3),
 				     subtract_shotnoise, correct_mas);
 }
 

@@ -115,6 +115,8 @@ static PyMethodDef methods[] = {
    "P2 array"},   
   {"_power_spectrum_P4_asarray", py_power_spectrum_P4_asarray, METH_VARARGS,
    "P4 array"},
+  {"_power_spectrum_Pl_asarray", py_power_spectrum_Pl_asarray, METH_VARARGS,
+   "_power_spectrum_Pl_asarray(_ps, l) P[l] as array"},
   {"_power_spectrum_compute_plane_parallel",
    py_power_spectrum_compute_plane_parallel, METH_VARARGS,
    "_power_spectrum_compute_plane_parallel(k_min, k_max, dk, _grid_delta, subtract_shotnoise, correct_mas)"},
