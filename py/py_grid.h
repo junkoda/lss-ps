@@ -43,4 +43,8 @@ PyObject* py_grid_resize_fourier(PyObject* self, PyObject* args);
 
 PyObject* py_grid_create_k(PyObject* self, PyObject* args);
 PyObject* py_grid_create_kmag(PyObject* self, PyObject* args);
+
+//PyObject* py_grid_set_k(PyObject* self, PyObject* args);
+PyObject* py_grid_set_mu2(PyObject* self, PyObject* args);
+
 #endif

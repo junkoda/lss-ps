@@ -454,3 +454,17 @@ def k(kind, nc, boxsize):
             raise ValueError('kind is not 0, 1, 2, or mag')
 
     return grid
+
+def mu2(axis, nc, boxsize):
+    """
+    Returns:
+      new grid of mu2 = (k[axis]/k)^2
+    """
+    grid = empty(nc, boxsize)
+
+    if isinstance(axis, int) and 0 <= axis < 3:
+        c._grid_set_mu2(grid._grid, axis)
+    else:
+        raise ValueError('axis must be an integer 0, 1, or 2: {}'.format(axis))
+
+    return grid

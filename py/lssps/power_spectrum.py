@@ -45,6 +45,9 @@ class PowerSpectrum:
         self.P2 = c._power_spectrum_P2_asarray(self._ps)
         self.P4 = c._power_spectrum_P4_asarray(self._ps)
 
+        self.P1 = c._power_spectrum_Pl_asarray(self._ps, 1)
+        self.P3 = c._power_spectrum_Pl_asarray(self._ps, 3)
+
         self.n = c._power_spectrum_len(self._ps)
         self.shot_noise = c._power_spectrum_shotnoise(self._ps)
 
@@ -111,3 +114,35 @@ def compute_plane_parallel(grid_delta, *,
 
     
 compute_yamamoto = lssps.yamamoto.compute_yamamoto
+
+def compute_power_multipoles(grid, *,
+                             k_min=0.0, k_max=1.0, dk=0.01,
+                             subtract_shotnoise=False,
+                             correct_mas= False, line_of_sight=2):
+    """
+    Compute multipoles of 3D power spectrum P(kvec)
+    Args:
+        grid (Grid):   Grid object for P(k)
+        k_min (float): lower bound of k binning [h/Mpc]
+        k_max (float): upper bound of k binning [h/Mpc]
+        dk (float):    bin width [h/Mpc]
+        subtract_shotnoise (bool)
+        correct_mas (bool)
+        line_of_sight (int): line of sight direction for multipoles
+                             0,1,2 for x,y,z, respectively
+    Returns:
+        PowerSpectrum object
+    """
+    
+    if grid.mode != 'fourier-space':
+        raise ValueError('grid.mode must be fourier-space: %s' % grid.mode)
+
+    correct_mas = correct_mas and (not grid.mas_corrected)
+
+    _ps = c._power_spectrum_compute_power_multipoles(k_min, k_max, dk,
+                              grid._grid,
+                              subtract_shotnoise, correct_mas,
+                              line_of_sight)
+
+    return PowerSpectrum(_ps)
+

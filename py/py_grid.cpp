@@ -7,6 +7,7 @@
 #include "py_grid.h"
 #include "py_assert.h"
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -220,9 +221,8 @@ PyObject* py_grid_get_x0(PyObject* self, PyObject* args)
   // _grid_get_x0(_grid, x0)
   // Return x0_box
   PyObject *py_grid;
-  double x0[3];
 
-  if(!PyArg_ParseTuple(args, "O", &py_grid, x0, x0+1, x0+2)) {
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
     return NULL;
   }
 
@@ -712,10 +712,99 @@ PyObject* py_grid_create_kmag(PyObject* self, PyObject* args)
       for(int iz=0; iz<nckz; ++iz) {
 	Float kz= fac*iz;
 	
-	size_t index= (ix + iy*nc)*nckz + iz;
+	size_t index= (ix + iy*static_cast<size_t>(nc))*nckz + iz;
 	d[index] = sqrt(kx*kx + ky*ky + kz*kz);
       }
     }
   }
   Py_RETURN_NONE;
 }
+
+/*
+PyObject* py_grid_set_k(PyObject* self, PyObject* args)
+{
+  // _grid_set_k(_grid)
+  // Set k to the grid
+  PyObject *py_grid;
+
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->mode= GridMode::fourier_space;
+
+  const Float fac= 2.0*M_PI/grid->boxsize;
+  const int nc= static_cast<int>(grid->nc);
+  const size_t nc_size= grid->nc;
+  const size_t nckz= nc_size/2 + 1;
+  
+  const int iknq= nc/2;
+  const int nkz= nc/2 + 1;
+
+  complex<Float>* fk= grid->fk;
+  
+  for(int ix=0; ix<nc; ++ix) {
+    int ikx= ix <= iknq ? ix : ix - nc;
+    for(int iy=0; iy<nc; ++iy) {
+      int iky= iy <= iknq ? iy : iy - nc;
+      for(int iz=0; iz<nkz; ++iz) {
+	int ikz= iz;
+	size_t index= (ix*nc_size + iy)*nckz + iz;
+	fk[index]= fac*sqrt(static_cast<double>(ikx*ikx + iky*iky + ikz*ikz));
+      }
+    }
+  }
+
+  Py_RETURN_NONE;
+}
+*/
+
+PyObject* py_grid_set_mu2(PyObject* self, PyObject* args)
+{
+  // _grid_set_mu2(_grid, axis)
+  // Set k to the grid
+  PyObject *py_grid;
+  int axis;
+  
+  if(!PyArg_ParseTuple(args, "Oi", &py_grid, &axis)) {
+    return NULL;
+  }
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  grid->mode= GridMode::fourier_space;
+
+  const int nc= static_cast<int>(grid->nc);
+  const size_t nc_size= grid->nc;
+  const size_t nckz= nc_size/2 + 1;
+  
+  const int iknq= nc/2;
+  const int nkz= nc/2 + 1;
+
+  complex<Float>* fk= grid->fk;
+
+  int ik[3];
+  
+  for(int ix=0; ix<nc; ++ix) {
+    ik[0]= ix <= iknq ? ix : ix - nc;
+    for(int iy=0; iy<nc; ++iy) {
+      ik[1]= iy <= iknq ? iy : iy - nc;
+      for(int iz=0; iz<nkz; ++iz) {
+	ik[2]= iz;
+	Float k2= static_cast<Float>(ik[0]*ik[0] + ik[1]*ik[1] + ik[2]*ik[2]);
+	Float mu2= static_cast<Float>(ik[axis]*ik[axis])/k2;
+	size_t index= (ix*nc_size + iy)*nckz + iz;
+	fk[index]= mu2;
+      }
+    }
+  }
+
+  Py_RETURN_NONE;
+}
+

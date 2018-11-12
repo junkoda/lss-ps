@@ -86,7 +86,7 @@ def compute_delta1(grid, *, grid_moment=None, grid1=None):
     indices = [('0', 1.0), ('1', 1.0), ('2', 1.0)]
 
     return _compute_delta_l(grid, indices,
-                            grid_moment=grid_moment, grid_delta_l=grid2)
+                            grid_moment=grid_moment, grid_delta_l=grid1)
 
 
 def compute_delta2(grid, *, grid_moment=None, grid2=None):
@@ -226,7 +226,7 @@ def compute_yamamoto(grid_delta, kind, *,
         grid1 = compute_delta1(grid_delta)
 
     if '3' in kind:
-        grid3 = compute_delta1(grid_delta)
+        grid3 = compute_delta3(grid_delta)
     
     if 'b' in kind or '4' in kind:
         grid4 = compute_delta4(grid_delta)
@@ -238,19 +238,35 @@ def compute_yamamoto(grid_delta, kind, *,
         grid_delta.interlace()
 
     if 'b' in kind or '4' in kind:
+        # quadrupole and Bianchi hexaxecapole
         _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
                                                  grid_delta._grid,
                                                  grid2._grid, grid4._grid,
                                                  subtract_shotnoise,
                                                  correct_mas)        
     else:
+        # quadrupole and Scoccimarro hexadecapole
         _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
                                                  grid_delta._grid,
                                                  grid2._grid, None,
                                                  subtract_shotnoise,
                                                  correct_mas)
 
-
+    if ('1' in kind) and ('3' in kind):
+        # dipole and tripole
+        c._power_spectrum_compute_yamamoto_odd(_ps, k_min, k_max, dk,
+                                               grid_delta._grid,
+                                               grid1._grid,
+                                               grid3._grid,
+                                               subtract_shotnoise,
+                                               correct_mas)
+    elif '1' in kind:
+        # dipole
+        c._power_spectrum_compute_yamamoto_odd(_ps, k_min, k_max, dk,
+                                               grid_delta._grid,
+                                               grid1._grid, None,
+                                               subtract_shotnoise,
+                                               correct_mas)
 
     return lssps.PowerSpectrum(_ps)
 

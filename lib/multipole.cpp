@@ -176,7 +176,9 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
       
       double fac = pk_fac/P.nmodes[i];
       P.p0[i] = fac*P.p0[i] - shot_noise;
+      P.p1[i] = fac*P.p1[i];
       P.p2[i] = fac*P.p2[i];
+      P.p3[i] = fac*P.p3[i];
       P.p4[i] = fac*P.p4[i];
     }
   }
@@ -217,6 +219,24 @@ public:
     // (2l + 1) P_l = (2 l + 1)/2*int_0^1 P(k) P_l(mu) dmu
     // (2l + 1) P_2 = 5*(3 mu^2 - 1)/2
     // (2l + 1) P_4 = 9*(35 mu^4 - 30 mu^2 + 3)/8
+    double l2= 7.5*mu2 - 2.5;
+    double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
+    double delta2= norm(grid->fk[index])*corr;
+    P.p0[ik] += delta2;
+    P.p2[ik] += l2*delta2;
+    P.p4[ik] += l4*delta2;
+  }
+  Grid const * const grid;
+};
+
+// Multipole of P(k) grid, not delta(k) grid
+class PowerMultipole {
+public:
+  explicit PowerMultipole(Grid const * const grid_) :
+    grid(grid_) { }
+
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
     double delta2= norm(grid->fk[index])*corr;
@@ -328,7 +348,7 @@ class Multipole3 {
     double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
 			 + delta1_k.imag()*delta0_k.imag())*corr;
 
-    double P3_hat = 3.0*(  delta3_k.real()*delta0_k.real() 
+    double P3_hat = 5.0*(  delta3_k.real()*delta0_k.real() 
 		         + delta3_k.imag()*delta0_k.imag())*corr;
 
     P.p1[ik] += P1_hat;
@@ -366,6 +386,20 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
 {
   return compute_multipoles_template(k_min, k_max, dk, 
   				     Multipole(grid),
+				     subtract_shotnoise, correct_mas,
+				     line_of_sight);
+}
+
+PowerSpectrum*
+multipole_compute_power_multipoles(const double k_min, const double k_max,
+				   const double dk, 
+				   Grid const * const grid,
+				   const bool subtract_shotnoise,
+				   const bool correct_mas,
+				   const int line_of_sight)
+{
+  return compute_multipoles_template(k_min, k_max, dk, 
+  				     PowerMultipole(grid),
 				     subtract_shotnoise, correct_mas,
 				     line_of_sight);
 }

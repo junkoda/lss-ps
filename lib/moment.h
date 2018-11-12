@@ -40,7 +40,7 @@ struct Moment3 {
 
   double operator()(const double x[]) const {
     double r2= x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
-    double r= sqrt(r);
+    double r= sqrt(r2);
 
     return r2 > 0.0 ? x[i]*x[j]*x[k]/(r*r2) : 0.0;
   }
