@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include "config.h"
@@ -5,11 +6,7 @@
 
 using namespace std;
 
-struct DiscruteLegendre {
-  vector<Float> coef;
-};
-
-void discrete_multipole_compute_legendre(const Float k_min, const Float k_max, const Float dk, const Float boxsize, vector<Float>& coef)
+void discrete_multipole_compute_legendre(const double k_min, const double k_max, const double dk, const Float boxsize, vector<Float>& coef)
 {
   // Compute coefficients of discrete legendre polynomials
   // k_min   (Float): [h/Mpc]
@@ -41,7 +38,7 @@ void discrete_multipole_compute_legendre(const Float k_min, const Float k_max, c
       int iz0 = !(ikx > 0 || (ikx == 0 && iky > 0));
       for(int ikz=iz0; ikz<=ik_max; ++ikz) {
 	Float ik2= static_cast<Float>(ikx*ikx + iky*iky + ikz*ikz);
-	Float m2= ikz/ik2;
+	Float m2= ikz*ikz/ik2;
 	Float ik= sqrt(ik2);
 
 	int ibin= floor((fac*ik - k_min)/dk);
@@ -65,22 +62,23 @@ void discrete_multipole_compute_legendre(const Float k_min, const Float k_max, c
       mu6[ibin] /= nmodes[ibin];
       mu8[ibin] /= nmodes[ibin];
       
-      Float a2= 1.0/mu2[ibin];
-      Float norm= sqrt(5.0*(1.0 + 2.0*a2*mu2[ibin] + mu4[ibin]));
+      Float a0= -mu2[ibin];
+      Float norm= sqrt(5.0*(a0*a0 + 2.0*a0*mu2[ibin] + mu4[ibin]));
 
-      coef[5*ibin    ]= -1.0/norm;    // a_0(2)
-      coef[5*ibin + 1]=  a2/norm;      // a_2(2)
+      coef[5*ibin    ]= a0/norm;   // a_0(2)
+      coef[5*ibin + 1]= 1.0/norm;  // a_2(2)
 
-      Float det= mu2[ibin]*mu6[ibin] - mu4[ibin]*mu4[ibin];
-      a2= (mu6[ibin] - mu4[ibin])/det;
-      Float a4= (mu2[ibin] - mu4[ibin])/det;
-      norm = sqrt(1.0 + a2*a2*mu4[ibin] + a4*a4*mu8[ibin]
-	          + 2.0*(a2*mu2[ibin] + a4*mu4[ibin] + a2*a4*mu6[ibin]));
-      Float sign= a4 > 0 ? 1.0 : -1.0;
-      coef[5*ibin + 2]= sign/norm;     // a_0(4)
-      coef[5*ibin + 3]= sign*a2/norm;  // a_2(4)
-      coef[5*ibin + 4]= sign*a4/norm;  // a_4(4)
+      //cerr << mu2[ibin] << " " << mu4[ibin] << " "
+      //	   << coef[5*ibin + 1] << " " << coef[5*ibin] << endl;
+      
+      Float det= mu2[ibin]*mu2[ibin] - mu4[ibin];
+      Float a2= (mu6[ibin] - mu2[ibin]*mu4[ibin])/det;
+      a0= (mu4[ibin]*mu4[ibin] - mu2[ibin]*mu6[ibin])/det;
+      norm = 3.0*sqrt(a0*a0 + a2*a2*mu4[ibin] + mu8[ibin]
+		      + 2.0*(a0*a2*mu2[ibin] + a0*mu4[ibin] + a2*mu6[ibin]));
+      coef[5*ibin + 2]= a0/norm;   // a_0(4)
+      coef[5*ibin + 3]= a2/norm;   // a_2(4)
+      coef[5*ibin + 4]= 1.0/norm;  // a_4(4)
     }
   }
-
 }

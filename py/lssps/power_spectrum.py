@@ -146,3 +146,71 @@ def compute_power_multipoles(grid, *,
 
     return PowerSpectrum(_ps)
 
+
+def compute_discrete_multipoles(grid, *,
+                                k_min=0.0, k_max=1.0, dk=0.01,
+                                subtract_shotnoise=True,
+                                correct_mas= True, line_of_sight=2):
+    """
+    Args:
+        grid (Grid): Grid object for delta(k)
+        k_min (float): lower bound of k binning [h/Mpc]
+        k_max (float): upper bound of k binning [h/Mpc]
+        dk (float):    bin width [h/Mpc]
+        subtract_shotnoise (bool)
+        correct_mas (bool)
+        line_of_sight (int): line of sight direction for multipoles
+                             0,1,2 for x,y,z, respectively
+    Returns:
+        PowerSpectrum object
+    """
+
+    correct_mas = correct_mas and (not grid.mas_corrected)
+    
+    if grid.mode != 'fourier-space':
+        grid.fft()
+
+    if grid.shifted is not None:
+        if grid.interlaced == False:
+            grid.interlace()
+
+    _ps = c._power_spectrum_compute_discrete_multipoles(1,
+                              k_min, k_max, dk,
+                              grid_delta._grid,
+                              subtract_shotnoise, correct_mas,
+                              line_of_sight)
+        
+    return PowerSpectrum(_ps)
+
+
+def compute_discrete_power_multipoles(grid, *,
+                                k_min=0.0, k_max=1.0, dk=0.01,
+                                subtract_shotnoise=False,
+                                correct_mas=False, line_of_sight=2):
+    """
+    Args:
+        grid (Grid): Grid object of delta(k) or P(k)
+        kind (str): The content of grid 'delta' or 'power' 
+        k_min (float): lower bound of k binning [h/Mpc]
+        k_max (float): upper bound of k binning [h/Mpc]
+        dk (float):    bin width [h/Mpc]
+        subtract_shotnoise (bool)
+        correct_mas (bool)
+        line_of_sight (int): line of sight direction for multipoles
+                             0,1,2 for x,y,z, respectively
+    Returns:
+        PowerSpectrum object
+    """
+
+    correct_mas = correct_mas and (not grid.mas_corrected)
+
+    if grid.mode != 'fourier-space':
+        raise ValueError('grid.mode must be fourier-space: %s' % grid.mode)
+
+    _ps = c._power_spectrum_compute_discrete_multipoles(0,
+                              k_min, k_max, dk,
+                              grid._grid,
+                              subtract_shotnoise, correct_mas,
+                              line_of_sight)
+        
+    return PowerSpectrum(_ps)

@@ -258,6 +258,40 @@ PyObject* py_power_spectrum_compute_power_multipoles(PyObject* self,
   return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
 }
 
+PyObject* py_power_spectrum_compute_discrete_multipoles(PyObject* self,
+							PyObject* args)
+{
+  // _power_spectrum_compute_power_multipoles(is_delta, k_min, k_max, dk,
+  //  grid, subtract_shotnoise, correct_mas)
+
+  int is_delta;
+  double k_min, k_max, dk;
+  PyObject *py_grid;
+  int subtract_shotnoise, correct_mas;
+  int line_of_sight;
+
+  if(!PyArg_ParseTuple(args, "idddOiii",
+		       &is_delta,
+		       &k_min, &k_max, &dk,
+		       &py_grid,
+		       &subtract_shotnoise, &correct_mas, &line_of_sight)) {
+    return NULL;
+  }
+
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  PowerSpectrum* const ps=
+    multipole_compute_discrete_multipoles(is_delta,
+					  k_min, k_max, dk,
+					  grid,
+					  subtract_shotnoise, correct_mas,
+					  line_of_sight);
+  
+  return PyCapsule_New(ps, "_PowerSpectrum", py_power_spectrum_free);
+}
+
 PyObject* py_power_spectrum_shotnoise(PyObject* self, PyObject* args)
 {
   PyObject *py_ps;

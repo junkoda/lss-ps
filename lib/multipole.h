@@ -20,6 +20,23 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
 				 const int line_of_sight);
 
 PowerSpectrum*
+multipole_compute_discrete_multipoles(const bool is_delta,
+				      const double k_min, const double k_max,
+				      const double dk, 
+				      Grid const * const grid,
+				      const bool subtract_shotnoise,
+				      const bool correct_mas,
+				      const int line_of_sight);
+
+PowerSpectrum*
+multipole_compute_power_multipoles(const double k_min, const double k_max,
+				   const double dk, 
+				   Grid const * const grid,
+				   const bool subtract_shotnoise,
+				   const bool correct_mas,
+				   const int line_of_sight);
+
+PowerSpectrum*
 multipole_compute_yamamoto_scoccimarro(const double k_min, const double k_max,
 			   const double dk,
 			   Grid const * const grid,
@@ -44,15 +61,5 @@ multipole_compute_yamamoto_odd_multipoles(const double k_min,
 					  Grid const * const grid3,
 					  const bool subtract_shotnoise,
 					  const bool correct_mas);
-
-PowerSpectrum*
-multipole_compute_power_multipoles(const double k_min, const double k_max,
-				   const double dk, 
-				   Grid const * const grid,
-				   const bool subtract_shotnoise,
-				   const bool correct_mas,
-				   const int line_of_sight);
-
-
 
 #endif

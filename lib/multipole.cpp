@@ -13,6 +13,7 @@
 #include "msg.h"
 #include "multipole.h"
 #include "power_spectrum.h"
+#include "discrete_multipole.h"
 
 using namespace std;
 
@@ -229,6 +230,29 @@ public:
   Grid const * const grid;
 };
 
+class DiscreteMultipole {
+public:
+  explicit DiscreteMultipole(Grid const * const grid_,
+			     const vector<Float>& discrete_legendre_coef) :
+    grid(grid_), coef(discrete_legendre_coef) { }
+
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
+    // Legendre polynomial
+    // (2l + 1) P_l = (2 l + 1)/2*int_0^1 P(k) P_l(mu) dmu
+    // (2l + 1) P_2 = 5*(3 mu^2 - 1)/2
+    // (2l + 1) P_4 = 9*(35 mu^4 - 30 mu^2 + 3)/8
+    double l2= coef[5*ik] + coef[5*ik + 1]*mu2 - 2.5;
+    double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
+    double delta2= norm(grid->fk[index])*corr;
+    P.p0[ik] += delta2;
+    P.p2[ik] += l2*delta2;
+    P.p4[ik] += l4*delta2;
+  }
+  Grid const * const grid;
+  const vector<Float>& coef;
+};
+
 // Multipole of P(k) grid, not delta(k) grid
 class PowerMultipole {
 public:
@@ -245,6 +269,31 @@ public:
     P.p4[ik] += l4*pk;
   }
   Grid const * const grid;
+};
+
+// Discrete Legendre Multipole of P(k) grid, not delta(k) grid
+class PowerDiscreteMultipole {
+public:
+  explicit PowerDiscreteMultipole(Grid const * const grid_,
+			  const vector<Float>& discrete_legendre_coef) :
+    grid(grid_), coef(discrete_legendre_coef) { }
+
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
+    //DEBUG!!!
+    //double l2_usual= 7.5*mu2 - 2.5;
+    //double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
+
+    double l2= coef[5*ik] + coef[5*ik + 1]*mu2;
+    //cerr << l2_usual << " " << l2 << endl;
+    double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
+    double pk= real(grid->fk[index])*corr;
+    P.p0[ik] += pk;
+    P.p2[ik] += l2*pk;
+    P.p4[ik] += l4*pk;
+  }
+  Grid const * const grid;
+  const vector<Float>& coef;
 };
 
 
@@ -391,6 +440,34 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
 }
 
 PowerSpectrum*
+multipole_compute_discrete_multipoles(const bool is_delta,
+				      const double k_min, const double k_max,
+				      const double dk, 
+				      Grid const * const grid,
+				      const bool subtract_shotnoise,
+				      const bool correct_mas,
+				      const int line_of_sight)
+{
+  // is_delta = true:  grid is delta(k)
+  //            false: grid is P(k)
+  vector<double> coef;
+  discrete_multipole_compute_legendre(k_min, k_max, dk, grid->boxsize,
+				      coef);
+
+  if(is_delta)
+    return compute_multipoles_template(k_min, k_max, dk, 
+				       DiscreteMultipole(grid, coef),
+				       subtract_shotnoise, correct_mas,
+				       line_of_sight);
+
+  return compute_multipoles_template(k_min, k_max, dk, 
+				     PowerDiscreteMultipole(grid, coef),
+				     subtract_shotnoise, correct_mas,
+				     line_of_sight);
+
+}
+
+PowerSpectrum*
 multipole_compute_power_multipoles(const double k_min, const double k_max,
 				   const double dk, 
 				   Grid const * const grid,
@@ -399,7 +476,7 @@ multipole_compute_power_multipoles(const double k_min, const double k_max,
 				   const int line_of_sight)
 {
   return compute_multipoles_template(k_min, k_max, dk, 
-  				     PowerMultipole(grid),
+				     PowerMultipole(grid),
 				     subtract_shotnoise, correct_mas,
 				     line_of_sight);
 }
