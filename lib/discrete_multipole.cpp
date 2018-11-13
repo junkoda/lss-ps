@@ -31,7 +31,7 @@ void discrete_multipole_compute_legendre(const double k_min, const double k_max,
 
   vector<int> nmodes(nbin);
   vector<Float> mu2(nbin), mu4(nbin), mu6(nbin), mu8(nbin);
-  
+
   for(int ikx=-ik_max; ikx<=ik_max; ++ikx) {
     for(int iky=-ik_max; iky<=ik_max; ++iky) {
       // skip half of the ikz=0 plane
@@ -53,6 +53,7 @@ void discrete_multipole_compute_legendre(const double k_min, const double k_max,
     }
   }
 
+
   coef.resize(5*nbin, 0.0);
   
   for(int ibin=0; ibin<nbin; ++ibin) {
@@ -61,7 +62,22 @@ void discrete_multipole_compute_legendre(const double k_min, const double k_max,
       mu4[ibin] /= nmodes[ibin];
       mu6[ibin] /= nmodes[ibin];
       mu8[ibin] /= nmodes[ibin];
-      
+
+      Float a0= -mu2[ibin];
+      Float norm= 7.5*(a0*mu2[ibin] + mu4[ibin]);
+
+      coef[5*ibin    ]= a0/norm;   // a_0(2)
+      coef[5*ibin + 1]= 1.0/norm;  // a_2(2)
+
+      Float det= mu2[ibin]*mu2[ibin] - mu4[ibin];
+      Float a2= (mu6[ibin] - mu2[ibin]*mu4[ibin])/det;
+      a0= (mu4[ibin]*mu4[ibin] - mu2[ibin]*mu6[ibin])/det;
+      norm = 315.0/8.0*(a0*mu4[ibin] + a2*mu6[ibin] + mu8[ibin]);
+      coef[5*ibin + 2]= a0/norm;   // a_0(4)
+      coef[5*ibin + 3]= a2/norm;   // a_2(4)
+      coef[5*ibin + 4]= 1.0/norm;  // a_4(4)
+
+      /* Pl(mu)^2 -> 2/(2l + 1) normalisation
       Float a0= -mu2[ibin];
       Float norm= sqrt(5.0*(a0*a0 + 2.0*a0*mu2[ibin] + mu4[ibin]));
 
@@ -79,6 +95,7 @@ void discrete_multipole_compute_legendre(const double k_min, const double k_max,
       coef[5*ibin + 2]= a0/norm;   // a_0(4)
       coef[5*ibin + 3]= a2/norm;   // a_2(4)
       coef[5*ibin + 4]= 1.0/norm;  // a_4(4)
+      */
     }
   }
 }

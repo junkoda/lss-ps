@@ -280,14 +280,10 @@ public:
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
-    //DEBUG!!!
-    //double l2_usual= 7.5*mu2 - 2.5;
-    //double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-
     double l2= coef[5*ik] + coef[5*ik + 1]*mu2;
-    //cerr << l2_usual << " " << l2 << endl;
     double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
     double pk= real(grid->fk[index])*corr;
+    
     P.p0[ik] += pk;
     P.p2[ik] += l2*pk;
     P.p4[ik] += l4*pk;
