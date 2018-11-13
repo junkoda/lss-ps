@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "config.h" // Float
-#include "moment.h" // Moment2, Moment4
+#include "moment.h" // Moment1, Moment2, ...
 #include "yamamoto.h"
 #include "py_yamamoto.h"
 #include "py_util.h"

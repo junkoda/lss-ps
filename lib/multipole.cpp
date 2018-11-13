@@ -239,10 +239,10 @@ public:
 		  const int ik, PowerSpectrum& P) const {
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-    double delta2= norm(grid->fk[index])*corr;
-    P.p0[ik] += delta2;
-    P.p2[ik] += l2*delta2;
-    P.p4[ik] += l4*delta2;
+    double pk= real(grid->fk[index])*corr;
+    P.p0[ik] += pk;
+    P.p2[ik] += l2*pk;
+    P.p4[ik] += l4*pk;
   }
   Grid const * const grid;
 };

@@ -455,12 +455,12 @@ def k(kind, nc, boxsize):
 
     return grid
 
-def mu2(axis, nc, boxsize):
+def mu2(nc, boxsize, *, axis=2):
     """
     Returns:
       new grid of mu2 = (k[axis]/k)^2
     """
-    grid = empty(nc, boxsize)
+    grid = empty(nc, boxsize, interlacing=False)
 
     if isinstance(axis, int) and 0 <= axis < 3:
         c._grid_set_mu2(grid._grid, axis)
