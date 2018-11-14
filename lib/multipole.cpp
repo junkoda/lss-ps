@@ -238,10 +238,8 @@ public:
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
-    // Legendre polynomial
-    // (2l + 1) P_l = (2 l + 1)/2*int_0^1 P(k) P_l(mu) dmu
-    // (2l + 1) P_2 = 5*(3 mu^2 - 1)/2
-    // (2l + 1) P_4 = 9*(35 mu^4 - 30 mu^2 + 3)/8
+    // Discrete Legendre polynomial
+    // computed in discrete_multipole.cpp
     double l2= coef[5*ik] + coef[5*ik + 1]*mu2 - 2.5;
     double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
     double delta2= norm(grid->fk[index])*corr;
@@ -280,9 +278,11 @@ public:
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
+    // Discrete Legendre polynomial
+    // computed in discrete_multipole.cpp
     double l2= coef[5*ik] + coef[5*ik + 1]*mu2;
     double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
-    double pk= real(grid->fk[index])*corr;
+    double pk= real(grid->fk[index])*corr; // grid of P(k)
     
     P.p0[ik] += pk;
     P.p2[ik] += l2*pk;

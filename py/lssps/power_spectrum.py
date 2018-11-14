@@ -176,7 +176,7 @@ def compute_discrete_multipoles(grid, *,
 
     _ps = c._power_spectrum_compute_discrete_multipoles(1,
                               k_min, k_max, dk,
-                              grid_delta._grid,
+                              grid._grid,
                               subtract_shotnoise, correct_mas,
                               line_of_sight)
         
