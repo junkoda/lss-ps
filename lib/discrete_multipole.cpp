@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include <vector>
 #include <cmath>
 #include "config.h"
@@ -15,12 +16,12 @@ void discrete_multipole_compute_legendre(const double k_min, const double k_max,
   // boxsize (Float): Periodic box length on a side
   //
   // Result
-  //   coef[5*ibin + iparam] a0(2) a2(2) a0(4) a2(4) a4(4)
+  //   coef[5*ibin + iparam] for (2l + 1) P_l(x): a0(2) a2(2) a0(4) a2(4) a4(4)
   //
   // Discrete Legendre polynomials
   // P0(x) = 1
-  // P2(x) = a_0(2) + a_2(2) x^2
-  // P4(x) = a_0(4) + a_2(2) x^2 + a_4(4) x^4
+  // (2l + 1) P2(x) = a_0(2) + a_2(2) x^2
+  // (2l + 1) P4(x) = a_0(4) + a_2(2) x^2 + a_4(4) x^4
 
   
   const Float fac= 2*M_PI/boxsize;
@@ -66,16 +67,25 @@ void discrete_multipole_compute_legendre(const double k_min, const double k_max,
       Float a0= -mu2[ibin];
       Float norm= 7.5*(a0*mu2[ibin] + mu4[ibin]);
 
-      coef[5*ibin    ]= a0/norm;   // a_0(2)
-      coef[5*ibin + 1]= 1.0/norm;  // a_2(2)
+      // 2l + 1 = 5.0
+      coef[5*ibin    ]= 5.0*a0/norm;   // a_0(2)
+      coef[5*ibin + 1]= 5.0/norm;  // a_2(2)
 
       Float det= mu2[ibin]*mu2[ibin] - mu4[ibin];
+      if(det == 0.0 || nmodes[ibin] < 7) {
+	fprintf(stderr,
+		"Error: Determinant is zero for bin %d, nmodes %d, %e\n",
+		ibin, nmodes[ibin], det);
+	abort();
+      }
+
       Float a2= (mu6[ibin] - mu2[ibin]*mu4[ibin])/det;
       a0= (mu4[ibin]*mu4[ibin] - mu2[ibin]*mu6[ibin])/det;
       norm = 315.0/8.0*(a0*mu4[ibin] + a2*mu6[ibin] + mu8[ibin]);
-      coef[5*ibin + 2]= a0/norm;   // a_0(4)
-      coef[5*ibin + 3]= a2/norm;   // a_2(4)
-      coef[5*ibin + 4]= 1.0/norm;  // a_4(4)
+      // 2l + 1 = 9.0
+      coef[5*ibin + 2]= 9.0*a0/norm;   // a_0(4)
+      coef[5*ibin + 3]= 9.0*a2/norm;   // a_2(4)
+      coef[5*ibin + 4]= 9.0/norm;  // a_4(4)
 
       /* Pl(mu)^2 -> 2/(2l + 1) normalisation
       Float a0= -mu2[ibin];
