@@ -240,9 +240,10 @@ public:
 		  const int ik, PowerSpectrum& P) const {
     // Discrete Legendre polynomial
     // computed in discrete_multipole.cpp
-    double l2= coef[5*ik] + coef[5*ik + 1]*mu2 - 2.5;
+    double l2= coef[5*ik] + coef[5*ik + 1]*mu2;
     double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
     double delta2= norm(grid->fk[index])*corr;
+
     P.p0[ik] += delta2;
     P.p2[ik] += l2*delta2;
     P.p4[ik] += l4*delta2;

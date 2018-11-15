@@ -166,7 +166,7 @@ def compute_discrete_multipoles(grid, *,
     """
 
     correct_mas = correct_mas and (not grid.mas_corrected)
-    
+
     if grid.mode != 'fourier-space':
         grid.fft()
 
