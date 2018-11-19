@@ -367,8 +367,11 @@ class Multipole1 {
     std::complex<double> delta0_k = grid->fk[index];
     std::complex<double> delta1_k = grid1->fk[index];
     
-    double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
-		         + delta1_k.imag()*delta0_k.imag())*corr;
+    //double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
+    //+ delta1_k.imag()*delta0_k.imag())*corr;
+    // Imaginary part of delta1 delta0^*
+    double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
+			   - delta1_k.real()*delta0_k.imag())*corr;
 
     P.p1[ik] += P1_hat;
   }
@@ -393,11 +396,16 @@ class Multipole3 {
     std::complex<double> delta1_k = grid1->fk[index];
     std::complex<double> delta3_k = grid3->fk[index] - 1.5*grid1->fk[index] ;
 
-    double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
-			 + delta1_k.imag()*delta0_k.imag())*corr;
+    double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
+			   - delta1_k.real()*delta0_k.imag())*corr;
 
-    double P3_hat = 5.0*(  delta3_k.real()*delta0_k.real() 
-		         + delta3_k.imag()*delta0_k.imag())*corr;
+    //double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
+    //+ delta1_k.imag()*delta0_k.imag())*corr;
+
+    //double P3_hat = 5.0*(  delta3_k.real()*delta0_k.real() 
+    //+ delta3_k.imag()*delta0_k.imag())*corr;
+    double P3_hat = 5.0*(  delta3_k.imag()*delta0_k.real() 
+			 - delta3_k.real()*delta0_k.imag())*corr;
 
     P.p1[ik] += P1_hat;
     P.p3[ik] += P3_hat;
