@@ -1,6 +1,7 @@
 #ifndef MOMENT_H
 #define MOMENT_H 1
 
+#include <iostream> // DEBUG!!!
 #include <complex>
 #include <cassert>
 #include <cmath>
@@ -17,6 +18,7 @@ struct Moment1 {
   double operator()(const double x[]) const {
     double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
 
+    //std::cerr << x[i]/r << std::endl;
     return r > 0.0 ? x[i]/r : 0.0;
   }
   const int i;
@@ -102,6 +104,11 @@ void moment_compute_x(Grid const * const grid,
 	x[2]= x0[2] + dx*iz;
 	size_t index= (ix*nc + iy)*ncz + iz;
 
+	// DEBUG!!!
+	//if(d[index] > 0.0) {
+	//  std::cerr << "grid positions " << x[0] << std::endl;
+	//}
+
 	m[index] = moment(x)*d[index];
       }
     }
@@ -146,6 +153,8 @@ void moment_compute_k(Grid const * const grid,
 	k[2]= iz;
 	size_t index= nckz*(nc*ix + iy) + iz;
 	const double m= coef*moment(k);
+	
+	///std::cerr << k[0] << " " << k[1] << std::endl; // DEBUG!!!!!
 	
 	m_k[index] += m*d_k[index];	
       }

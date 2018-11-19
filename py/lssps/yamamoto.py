@@ -1,5 +1,6 @@
 import lssps._lssps as c
 import numpy as np
+import h5py # DEBUG!!!
 
 import lssps
 
@@ -84,6 +85,7 @@ def compute_delta1(grid, *, grid_moment=None, grid1=None):
 
     # Pairs of inddecies (xx, yy, zz, xy, yz, zx) and prefactors
     indices = [('0', 1.0), ('1', 1.0), ('2', 1.0)]
+    # OK setting this coef to zero makes delta1 = 0 # DEBUG!!!!
 
     return _compute_delta_l(grid, indices,
                             grid_moment=grid_moment, grid_delta_l=grid1)
@@ -220,10 +222,21 @@ def compute_yamamoto(grid_delta, kind, *,
     if 's' in kind and 'b' in kind:
         raise ValueError('scoccimarro (s) and bianchi (b) cannot specified simultaneously in kind %s' % kind)
 
+    #grid1 = compute_delta1(grid_delta)
+
+    #with h5py.File('debug3.h5', 'w') as f:
+    #    f['delta1'] = grid1[:]
+    #raise RuntimeError('debug3.h5 written')
+
     grid2 = compute_delta2(grid_delta)
 
-    if '1' in kind:
+    if '1' in kind or '3' in kind:
         grid1 = compute_delta1(grid_delta)
+
+    #with h5py.File('debug2.h5', 'w') as f:
+    #    f['delta1'] = grid1[:]
+    #raise RuntimeError('debug2.h5 written')
+
 
     if '3' in kind:
         grid3 = compute_delta3(grid_delta)
@@ -268,5 +281,6 @@ def compute_yamamoto(grid_delta, kind, *,
                                                subtract_shotnoise,
                                                correct_mas)
 
+        
     return lssps.PowerSpectrum(_ps)
 

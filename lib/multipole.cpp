@@ -21,6 +21,7 @@ using namespace std;
 static int mas_correction_nc= 0;
 static int mas_correction_n= -1;
 static vector<Float> mas_correction_array;
+// TODO Not very good to have this global, let's make it local
 
 static void mas_correction_init(const int nc, const int n_mas);
 
@@ -59,6 +60,9 @@ void mas_correction_init(const int nc, const int n_mas)
 }
 
 
+//
+// The main algorithm of this file
+//
 template <typename F>
 PowerSpectrum* compute_multipoles_template(const double k_min,
 					   const double k_max,
@@ -367,12 +371,15 @@ class Multipole1 {
     std::complex<double> delta0_k = grid->fk[index];
     std::complex<double> delta1_k = grid1->fk[index];
     
-    //double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
-    //+ delta1_k.imag()*delta0_k.imag())*corr;
     // Imaginary part of delta1 delta0^*
+    // (2l + 1) = 3.0 is multiplied here
     double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
-			   - delta1_k.real()*delta0_k.imag())*corr;
+			 - delta1_k.real()*delta0_k.imag())*corr;
 
+    //cerr << ik << " " << delta1_k.imag() << endl; // DEBUG!!!!
+    //cerr << ik << " " << delta0_k.real() << endl; // DEBUG!!!!
+    //cerr << ik << " " << P1_hat << endl;//DEBUG!!!
+    
     P.p1[ik] += P1_hat;
   }
   Grid const * const grid;
@@ -396,15 +403,16 @@ class Multipole3 {
     std::complex<double> delta1_k = grid1->fk[index];
     std::complex<double> delta3_k = grid3->fk[index] - 1.5*grid1->fk[index] ;
 
-    double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
-			   - delta1_k.real()*delta0_k.imag())*corr;
+    // 2l + 1 = 3 for l = 1
+    double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real()
+			 - delta1_k.real()*delta0_k.imag())*corr;
 
-    //double P1_hat = 3.0*(  delta1_k.real()*delta0_k.real() 
-    //+ delta1_k.imag()*delta0_k.imag())*corr;
+    //cerr << ik << " " << P1_hat << endl;//DEBUG!!!
+    //double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
+    //- delta1_k.real()*delta0_k.imag())*corr;
 
-    //double P3_hat = 5.0*(  delta3_k.real()*delta0_k.real() 
-    //+ delta3_k.imag()*delta0_k.imag())*corr;
-    double P3_hat = 5.0*(  delta3_k.imag()*delta0_k.real() 
+    // 2l + 1 = 2*3 + 1 = 7
+    double P3_hat = 7.0*(  delta3_k.imag()*delta0_k.real() 
 			 - delta3_k.real()*delta0_k.imag())*corr;
 
     P.p1[ik] += P1_hat;

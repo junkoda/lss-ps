@@ -395,7 +395,7 @@ PyObject* py_power_spectrum_compute_yamamoto_odd(PyObject* self,
   py_assert_ptr(grid1);
 
   if(py_grid3 == Py_None) { // Dipole only
-    PowerSpectrum* ps1=
+    PowerSpectrum* const ps1=
       multipole_compute_yamamoto_odd_multipoles(k_min, k_max, dk,
 						grid, grid1, 0,
 						subtract_shotnoise,
@@ -411,15 +411,18 @@ PyObject* py_power_spectrum_compute_yamamoto_odd(PyObject* self,
       (Grid const *) PyCapsule_GetPointer(py_grid3, "_Grid");
     py_assert_ptr(grid3);
 
-    PowerSpectrum* ps3=
+    PowerSpectrum* const ps3=
       multipole_compute_yamamoto_odd_multipoles(k_min, k_max, dk,
 						grid, grid1, grid3,
 						subtract_shotnoise,
 						correct_mas);
 
     py_assert_ptr(ps->p1.size() == ps3->p1.size());
+    py_assert_ptr(ps->p3.size() == ps3->p3.size());
     ps->p1= ps3->p1;
     ps->p3= ps3->p3;
+
+    delete ps3;
   }
 
   Py_RETURN_NONE;

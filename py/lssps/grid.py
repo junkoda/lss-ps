@@ -41,9 +41,8 @@ class Grid:
         self.boxsize = boxsize
         self.interlaced = False
 
-        # DEBUG!!! x0 not used?
         if x0 is not None:
-            self.x0 = x0
+            self.x0 = x0   # activates x0.setter
 
         if offset is not None:
             self.offset = offset

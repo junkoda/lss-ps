@@ -1,3 +1,4 @@
+#include <iostream> // DEBUG!!!
 #include <vector>
 
 #include "config.h" // Float
@@ -36,6 +37,7 @@ PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
   sequence_to_vector<Float>(py_x0, x0);
 
   if(v.size() == 1) {
+    //cerr << "moment_compute_x 1 " << v[0] <<  endl; //DEBUG!!!
     moment_compute_x(delta, x0.data(), Moment1(v[0]), moment);
   }
   else if(v.size() == 2) {
