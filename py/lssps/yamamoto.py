@@ -111,8 +111,6 @@ def compute_delta2(grid, *, grid_moment=None, grid2=None):
     indices = [('00', 1.5), ('11', 1.5), ('22', 1.5), # Q_xx + cyc.
                ('01', 3.0), ('12', 3.0), ('20', 3.0), # Q_xy + cyc.
               ]
-    #assert(len(indices) == 6)
-
     return _compute_delta_l(grid, indices,
                             grid_moment=grid_moment, grid_delta_l=grid2)
 

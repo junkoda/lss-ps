@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include <vector>
 #include <algorithm> // min()
 #include <complex>
@@ -376,10 +376,6 @@ class Multipole1 {
     double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
 			 - delta1_k.real()*delta0_k.imag())*corr;
 
-    //cerr << ik << " " << delta1_k.imag() << endl; // DEBUG!!!!
-    //cerr << ik << " " << delta0_k.real() << endl; // DEBUG!!!!
-    //cerr << ik << " " << P1_hat << endl;//DEBUG!!!
-    
     P.p1[ik] += P1_hat;
   }
   Grid const * const grid;
@@ -406,10 +402,6 @@ class Multipole3 {
     // 2l + 1 = 3 for l = 1
     double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real()
 			 - delta1_k.real()*delta0_k.imag())*corr;
-
-    //cerr << ik << " " << P1_hat << endl;//DEBUG!!!
-    //double P1_hat = 3.0*(  delta1_k.imag()*delta0_k.real() 
-    //- delta1_k.real()*delta0_k.imag())*corr;
 
     // 2l + 1 = 2*3 + 1 = 7
     double P3_hat = 7.0*(  delta3_k.imag()*delta0_k.real() 
