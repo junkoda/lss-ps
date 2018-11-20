@@ -62,6 +62,62 @@ struct Moment4 {
 
 
 //
+// Moment function objects for window function Qnl
+//
+
+// (x_i/r) r^-n
+struct WindowMoment1 {
+  WindowMoment1(const int i_, const int n_) : i(i_), n(n_) {}
+
+  double operator()(const double x[]) const {
+    double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+
+    return r > 0.0 ? x[i]/pow(r, n + 1) : 0.0;
+  }
+  const int i, n;
+};
+
+// (x_i/r) (x_j/r) r^-n
+struct WindowMoment2 {
+  WindowMoment2(const int i_, const int j_, const int n_) :
+    i(i_), j(j_), n(n_) {}
+
+  double operator()(const double x[]) const {
+    double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+
+    return r > 0.0 ? x[i]*x[j]/pow(r, n + 2) : 0.0;
+  }
+  const int i, j, n;
+};
+
+// (x_i/r) (x_j/r) (x_k/r) r^-n
+struct WindowMoment3 {
+  WindowMoment3(const int i_, const int j_, const int k_, const int n_) :
+    i(i_), j(j_), k(k_), n(n_) {}
+
+  double operator()(const double x[]) const {
+    double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+
+    return r > 0.0 ? x[i]*x[j]*x[k]/pow(r, n + 3) : 0.0;
+  }
+  const int i, j, k, n;
+};
+
+
+// (x_i/r) (x_j/r) (x_k/r) (x_l/r) r^-n
+struct WindowMoment4 {
+  WindowMoment4(const int i_, const int j_, const int k_, const int l_,
+		const int n_): i(i_), j(j_), k(k_), l(l_), n(n_) {}
+
+  double operator()(const double x[]) const {
+    double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+    return r > 0.0 ? x[i]*x[j]*x[k]*x[l]/pow(r, n + 4) : 0.0;
+  }
+  const int i, j, k, l, n;
+};
+
+
+//
 // Compute moment
 // Q_ij...(x) = x_i/r x_j/r ... delta(x)
 // for Yamamoto FFT estimator

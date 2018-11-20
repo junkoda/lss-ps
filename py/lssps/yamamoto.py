@@ -4,7 +4,8 @@ import h5py # DEBUG!!!
 
 import lssps
 
-def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
+def _compute_delta_l(grid, indices, *, n=0,
+                     grid_moment=None, grid_delta_l=None):
     """
     Compute delta_l (l = 2 or 4)
     common operation for compute_delta2() and compute_delta4()
@@ -13,6 +14,8 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
       grid (Grid): input grid of delta_k
       indices (List): list of (moment_index, prefactor) pairs
                       e.g. [(0000, 3.0/2.0),] for (3/2) Q_xxxx
+
+      n (int): compute x^{-n} weighted delta_l for window function
       grid_moment: temporaty grid for moments Q_index
       grid_delta_l (Grid): output grid of delta_l
 
@@ -45,7 +48,7 @@ def _compute_delta_l(grid, indices, *, grid_moment=None, grid_delta_l=None):
 
         # assign Q_index(x)
         c._yamamoto_compute_moment_x(grid._grid, x0, idx_array,
-                                     grid_moment._grid)
+                                     grid_moment._grid, n)
 
         if grid.shifted is not None:
             c._yamamoto_compute_moment_x(grid.shifted._grid, x0,
