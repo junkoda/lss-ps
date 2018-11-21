@@ -808,13 +808,13 @@ PyObject* py_grid_set_mu2(PyObject* self, PyObject* args)
   const int nkz= nc/2 + 1;
 
   complex<Float>* fk= grid->fk;
-
   int ik[3];
   
   for(int ix=0; ix<nc; ++ix) {
     ik[0]= ix <= iknq ? ix : ix - nc;
     for(int iy=0; iy<nc; ++iy) {
       ik[1]= iy <= iknq ? iy : iy - nc;
+
       for(int iz=0; iz<nkz; ++iz) {
 	ik[2]= iz;
 	Float k2= static_cast<Float>(ik[0]*ik[0] + ik[1]*ik[1] + ik[2]*ik[2]);
@@ -824,6 +824,8 @@ PyObject* py_grid_set_mu2(PyObject* self, PyObject* args)
       }
     }
   }
+
+  fk[0]= 0.0;
 
   Py_RETURN_NONE;
 }
