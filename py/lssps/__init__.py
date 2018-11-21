@@ -27,6 +27,7 @@ import lssps.gadget_file
 import lssps.cola_binary
 import lssps.model
 import lssps.rr
+import lssps.lognormal
 
 msg = lssps.msg.LogLevel()
 

@@ -37,6 +37,22 @@ py_grid_module_init()
 
 static void py_grid_free(PyObject *obj);
 
+template<typename T>
+static void write_float_to_binary(FILE* fp, Float const * p, const size_t nc)
+{
+  const size_t ncz= 2*(nc/2+1);
+  vector<T> v;
+  v.reserve(nc);
+
+  for(size_t i=0; i<nc*nc; ++i) {
+    v.clear();
+    for(size_t j=0; j<nc; ++j)
+      v.push_back(static_cast<T>(p[j]));
+    int ret= fwrite(v.data(), sizeof(T), nc, fp);
+    assert(ret == static_cast<int>(nc));
+    p += ncz;
+  }  
+}
 
 //
 // class Grid
@@ -868,6 +884,132 @@ PyObject* py_grid_set_power3d(PyObject* self, PyObject* args)
 
   grid->mode= GridMode::fourier_space;
 
+  Py_RETURN_NONE;
+}
+
+
+
+PyObject* py_grid_write_binary_real(PyObject* self, PyObject* args)
+{
+  // _grid_write_binary_real(_grid, filename)
+  // Write the grid to a binary file
+  //
+  // float_size: 4 write float
+  // float_size: 8 write double
+  // float_size: 0 write Float
+  PyObject *py_grid, *bytes;
+  char* filename;
+  int float_size;
+  Py_ssize_t len;
+
+  if(!PyArg_ParseTuple(args, "OO&i", &py_grid, PyUnicode_FSConverter, &bytes,
+		       &float_size)) {
+    return NULL;
+  }
+
+  assert(float_size == 0 || float_size == 4 || float_size == 8);
+
+  
+  PyBytes_AsStringAndSize(bytes, &filename, &len);
+
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+  py_assert_ptr(grid->mode == GridMode::real_space);
+  
+  FILE* fp= fopen(filename, "w");
+  if(fp == 0) {
+    char msg[256];
+    sprintf(msg, "Unable to write binary file: %.200s", filename);
+    PyErr_SetString(PyExc_FileNotFoundError, msg);
+  }
+
+  const size_t nc= grid->nc;
+  const size_t ncz= 2*(nc/2+1);
+  Float const* p= grid->fx;
+
+  if(float_size == 0) {
+    for(size_t i=0; i<nc*nc; ++i) {
+      // write binary skipping the buffer region
+      int ret= fwrite(p, sizeof(Float), nc, fp);
+      assert(ret == static_cast<int>(nc));
+      p += ncz;
+    }
+  }
+  else if(float_size == 4)
+    write_float_to_binary<float>(fp, p, nc);
+  else if(float_size == 8)
+    write_float_to_binary<double>(fp, p, nc);
+  else
+    assert(false);
+
+  int ret= fclose(fp); py_assert_ptr(ret == 0);
+
+  Py_DECREF(bytes);
+  Py_RETURN_NONE;
+}
+
+PyObject* py_grid_write_vector_binary_real(PyObject* self, PyObject* args)
+{
+  // _grid_write_binary_vector_real(filename, _grid_x, _grid_y, grid_y)
+  // Write the grid to a binary file
+  //
+  PyObject *bytes;
+  char* filename;
+  PyObject *py_grid_x, *py_grid_y, *py_grid_z;
+
+  if(!PyArg_ParseTuple(args, "O&OOO", PyUnicode_FSConverter, &bytes,
+		       &py_grid_x, &py_grid_y, &py_grid_z)) {
+    return NULL;
+  }
+
+  Py_ssize_t len;
+  PyBytes_AsStringAndSize(bytes, &filename, &len);
+
+  Grid* const grid_x= (Grid*) PyCapsule_GetPointer(py_grid_x, "_Grid");
+  Grid* const grid_y= (Grid*) PyCapsule_GetPointer(py_grid_y, "_Grid");
+  Grid* const grid_z= (Grid*) PyCapsule_GetPointer(py_grid_z, "_Grid");
+  py_assert_ptr(grid_x);
+  py_assert_ptr(grid_y);
+  py_assert_ptr(grid_z);
+  py_assert_ptr(grid_x->mode == GridMode::real_space);
+  py_assert_ptr(grid_y->mode == GridMode::real_space);
+  py_assert_ptr(grid_z->mode == GridMode::real_space);
+  
+  FILE* fp= fopen(filename, "w");
+  if(fp == 0) {
+    char msg[256];
+    sprintf(msg, "Unable to write binary file: %.200s", filename);
+    PyErr_SetString(PyExc_FileNotFoundError, msg);
+  }
+
+  const size_t nc= grid_x->nc;
+  const size_t ncz= 2*(nc/2+1);
+  Float const* p_x= grid_x->fx;
+  Float const* p_y= grid_y->fx;
+  Float const* p_z= grid_z->fx;
+
+  vector<float> v;
+  v.reserve(3*nc);
+
+  for(size_t i=0; i<nc*nc; ++i) {
+    v.clear();
+    for(size_t j=0; j<nc; ++j) {
+      v.push_back(static_cast<float>(p_x[j]));
+      v.push_back(static_cast<float>(p_y[j]));
+      v.push_back(static_cast<float>(p_z[j]));
+    }
+    int ret= fwrite(v.data(), sizeof(float), 3*nc, fp);
+    assert(ret == 3*static_cast<int>(nc));
+    p_x += ncz;
+    p_y += ncz;
+    p_z += ncz;
+  }  
+
+  int ret= fclose(fp);
+py_assert_ptr(ret == 0);
+
+  Py_DECREF(bytes);
   Py_RETURN_NONE;
 }
 

@@ -97,7 +97,13 @@ static PyMethodDef methods[] = {
    "_grid_set_mu2(_grid, axis); set mu2 = (k[axis]/|k|)^2"},
   {"_grid_set_power3d", py_grid_set_power3d, METH_VARARGS,
    "_grid_set_power3d(k, P, _grid)"},
-
+  
+  {"_grid_write_binary_real", py_grid_write_binary_real, METH_VARARGS,
+   "_grid_write_binary_real(_grid, filename, float_size)"},
+  {"_grid_write_vector_binary_real",
+   py_grid_write_vector_binary_real, METH_VARARGS,
+   "_grid_write_vector_binary_real(filename, _grid_x, _grid_y, grid_z)"},
+  
   {"_mass_assignment_from_array", py_mass_assignment_from_array, METH_VARARGS,
    "assign mass to a grid from an array"},
   {"_mass_assignment_variations", py_mass_assignment_variations, METH_VARARGS,
@@ -215,7 +221,8 @@ static PyMethodDef methods[] = {
   {"_lognormal_convert_P_to_delta_k",
    py_lognormal_convert_P_to_delta_k, METH_VARARGS,
    "_logrnomal_convert_P_to_delta_k(_grid, seed, fix_amplitude"},
-  
+
+
   {NULL, NULL, 0, NULL}
 };
 

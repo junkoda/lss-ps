@@ -46,4 +46,6 @@ PyObject* py_grid_create_kmag(PyObject* self, PyObject* args);
 PyObject* py_grid_set_mu2(PyObject* self, PyObject* args);
 PyObject* py_grid_set_power3d(PyObject* self, PyObject* args);
 
+PyObject* py_grid_write_binary_real(PyObject* self, PyObject* args);
+PyObject* py_grid_write_vector_binary_real(PyObject* self, PyObject* args);
 #endif

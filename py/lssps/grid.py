@@ -122,14 +122,24 @@ class Grid:
 
         return self
 
-    def fft_inverse(self):
-        """Inverse Fast Fourier Transform from Fourier space to real space"""
+    def fft_inverse(self, *, normalise=False):
+        """
+        Inverse Fast Fourier Transform from Fourier space to real space
+
+        Args:
+          normalise (bool): 1/V sum e^ikx so that it is same as
+                            \int d3k/(2pi) f(k) e^ikx
+                            sum e^ikx if normalise = False
+        """
         if self.mode != 'fourier-space':
             raise RuntimeError('grid is not in Fourier space')
         
         c._grid_fft_inverse(self._grid)
         if self.shifted is not None:
-            self.shifted.fft_inverse()
+            self.shifted.fft_inverse(normalise)
+
+        if normalise:
+            self[:] *= 1.0/self.boxsize**3
 
         return self
 
@@ -166,6 +176,32 @@ class Grid:
                 g['fk'] = self.shifted[:]
 
         f.close()
+
+    def dump_binary(self, filename, *, dtype='float'):
+        """
+        Save grid to an binary file
+
+        Args:
+          dtype (str): 'float', 'double', or 'native'
+                       'native' uses Float specified at compile time
+        """
+
+        if self.mode == 'fourier-space':
+            raise TypeError('dump_binary not implemented for fourier-space')
+
+        assert(self.mode == 'real-space')
+
+        if dtype == 'float':
+            float_size = 4
+        elif dtype == 'double':
+            float_size = 8
+        elif dtype == 'native':
+            float_size = 0
+        else:
+            raise ValueError('Unknown dtype to write: {}'.format(dtype))
+
+        c._grid_write_binary_real(self._grid, filename, float_size);
+
 
     def assign_density(self, xyz, *,
                        weight=None, nbar=None,
@@ -470,8 +506,32 @@ def mu2(nc, boxsize, *, axis=2):
     return grid
 
 def power_spectrum3D(nc, boxsize, k, P):
+    """
+    Create a 3D grid of P(k)
+
+    Args:
+      nc (int): number of grids per dimension
+      boxsize (float): length of the grid box on a side
+      k (array): array of k
+      P (array): array of P(k)
+    """
+
+    if k.ndim != 1 or P.ndim != 1:
+        raise TypeError('Expected a 1-dimensional array for k and P: {} {}'.format(k.shape, P.shape))
+
+    if k.shape[0] != P.shape[0]:
+        raise TypeError('Expected arrays of same size for k and P: {} {}'.format(k.shape, P.shape))
+        
+    
     grid = zeros(nc, boxsize, interlacing=False)
     
-    c._grid_set_power3D(k, P, grid._grid)
+    c._grid_set_power3d(k, P, grid._grid)
 
     return grid
+
+def write_vector_binary(filename, grid_x, grid_y, grid_z):
+    c._grid_write_vector_binary_real(filename,
+                                     grid_x._grid,
+                                     grid_y._grid,
+                                     grid_z._grid)
+

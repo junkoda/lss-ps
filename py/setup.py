@@ -66,7 +66,7 @@ setup(name='lssps',
                      'py_mean_density.cpp', 'py_mean_density_adaptive.cpp',
                      'py_etc.cpp', 'py_gadget_file.cpp',
                      'py_cola_binary.cpp',
-                     'py_model.cpp', 'py_rr.cpp'
+                     'py_model.cpp', 'py_rr.cpp', 'py_lognormal.cpp',
                     ],
                     include_dirs = idirs,
                     extra_compile_args = [os.environ['OPT']],
