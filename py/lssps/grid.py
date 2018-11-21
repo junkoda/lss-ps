@@ -122,14 +122,26 @@ class Grid:
 
         return self
 
-    def fft(self):
-        """Fast Fourier Transform from real space to Fourier space"""
+    def fft(self, *, normalise=False):
+        """
+        Fast Fourier Transform from real space to Fourier space
+        
+          sum f(x) exp(-ikx)
+        
+        When normalise=True,
+          sum f(x) exp(-ikx) dV
+        which is similar to Fourier integral
+        """
         if self.mode != 'real-space':
             raise RuntimeError('grid is not in real space: %s' % self.mode)
 
         c._grid_fft(self._grid)
         if self.shifted is not None:
-            self.shifted.fft()
+            self.shifted.fft(normalise=normalise)
+
+        if normalise:
+            dV = (self.boxsize/self.nc)**3
+            self[:] *= dV
 
         return self
 

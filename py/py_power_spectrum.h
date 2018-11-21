@@ -34,5 +34,6 @@ PyObject* py_power_spectrum_compute_power_multipoles(PyObject* self,
 PyObject* py_power_spectrum_compute_discrete_multipoles(PyObject* self,
 							PyObject* args);
 
+PyObject* py_power_spectrum_compute_2d_average(PyObject* self, PyObject* args);
 
 #endif

@@ -18,7 +18,7 @@ class PowerSpectrum {
   
   std::valarray<double> nmodes, nmodes2d;
   std::valarray<double> k, p0, p1, p2, p3, p4;
-  std::valarray<double> p2d;
+  //std::valarray<double> p2d;
  private:
   PowerSpectrum(const PowerSpectrum&);
 };

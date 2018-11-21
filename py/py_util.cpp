@@ -90,3 +90,31 @@ void py_util_array_as_vector(const char name[],
 }
 	
     
+void py_util_vector_as_array(const char name[], const vector<double>& v,
+			     PyObject* py_array)
+{
+  // copy vector v content to array py_array
+  // The length of the array must be the same as that of the vector
+  Py_buffer buf;
+
+  decode_array(name, py_array, &buf, 0, 0, false);
+
+  double * x= (double *) buf.buf;
+  const size_t n= buf.shape[0];
+  const size_t stride= buf.strides[0];
+
+  char msg[128];
+  if(v.size() != (size_t) buf.shape[0]) {
+    sprintf(msg, "Expected the length of arrays of %d for %s: %d",
+	    (int) v.size(), name, (int) buf.shape[0]);
+    PyErr_SetString(PyExc_TypeError, msg);
+    throw TypeError();
+  }
+  
+  for(size_t i=0; i<n; ++i) {
+    *x = v[i];
+    x = (double *) ((char const *) x + stride);
+  }
+
+  PyBuffer_Release(&buf);
+}

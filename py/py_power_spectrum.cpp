@@ -1,9 +1,12 @@
-#include "msg.h"
 #include <string>
+#include <cmath>
+#include <cassert>
+#include "msg.h"
 #include "power_spectrum.h"
 #include "grid.h"
 #include "multipole.h"
 #include "py_assert.h"
+#include "py_util.h"
 
 using namespace std;
 
@@ -428,3 +431,85 @@ PyObject* py_power_spectrum_compute_yamamoto_odd(PyObject* self,
   Py_RETURN_NONE;
 }
 
+PyObject* py_power_spectrum_compute_2d_average(PyObject* self, PyObject* args)
+{
+  // Average to get 2D (k, mu)
+  // _power_spectrum_compute_2d(k_min, k_max, dk, grid,
+  //                            subtract_shotnoise, correct_mas)
+
+  double k_min, dk;
+  int nk, nmu;
+  PyObject *py_grid, *py_nmodes, *py_k, *py_mu, *py_P;
+
+  if(!PyArg_ParseTuple(args, "ddiiOOOOO",
+		       &k_min, &dk, &nk, &nmu,
+		       &py_grid, &py_nmodes, &py_k, &py_mu, &py_P)) {
+    return NULL;
+  }
+
+  py_assert_ptr(nmu > 0);
+  
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  const int nc= static_cast<int>(grid->nc);
+  const size_t nc_size= grid->nc;
+  const size_t nckz_size= nc_size/2 + 1;
+  const int nckz= nc/2 + 1;
+  const int iknq= nc/2;
+  const Float boxsize= grid->boxsize; py_assert_ptr(boxsize > 0.0);
+  const double fac= 2.0*M_PI/boxsize;
+
+  int nbin= nk*nmu;
+  vector<double> v_P(nbin, 0.0), v_k(nbin, 0.0), v_mu(nbin, 0.0),
+                 v_nmodes(nbin, 0.0);
+
+  complex<Float> const * const fk= grid->fk;
+  
+  for(int ix=0; ix<nc; ++ix) {
+    int ikx= ix <= iknq ? ix : ix - nc;
+    for(int iy=0; iy<nc; ++iy) {
+      int iky=iy <= iknq ? iy : iy - nc;
+      int iz0= !(ikx > 0 || (ikx == 0 && iky > 0));
+      for(int ikz=iz0; ikz<nckz; ++ikz) {
+	double ik2= static_cast<double>(ikx*ikx + iky*iky + ikz*ikz);
+	double ik= sqrt(ik2);
+	double k= fac*ik;
+	int ikbin= floor((k - k_min)/dk);
+
+
+	if(0 <= ikbin and ikbin < nk) {
+	  double mu= static_cast<double>(ikz)/ik;
+	  int imu= floor(mu*nmu);
+	  if(imu == nmu) imu= nmu - 1;
+	  assert(0 <= imu && imu < nmu);
+
+	  size_t index= (ix*nc_size + iy)*nckz_size + ikz;
+	  int ibin= ikbin*nmu + imu;
+	  v_nmodes[ibin] += 1.0;
+	  v_k[ibin] += k;
+	  v_mu[ibin] += mu;
+	  v_P[ibin] += real(fk[index]);
+	}
+      }
+    }
+  }
+
+  for(int i=0; i<nbin; ++i) {
+    if(v_nmodes[i] > 0.0) {
+      v_k[i]  /= v_nmodes[i];
+      v_mu[i] /= v_nmodes[i];
+      v_P[i]  /= v_nmodes[i];
+    }
+  }
+
+  py_util_vector_as_array("nmodes", v_nmodes, py_nmodes);
+  py_util_vector_as_array("k",      v_k,      py_k);
+  py_util_vector_as_array("mu",     v_mu,     py_mu);
+  py_util_vector_as_array("P",      v_P,      py_P);
+
+
+  
+  Py_RETURN_NONE;
+}

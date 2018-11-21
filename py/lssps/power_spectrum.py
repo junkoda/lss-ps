@@ -214,3 +214,40 @@ def compute_discrete_power_multipoles(grid, *,
                               line_of_sight)
         
     return PowerSpectrum(_ps)
+
+
+def compute_2d_average(grid, *, k_min=0.0, k_max=1.0, dk=0.01, nmu=10):
+    """
+    compute 2D average (k, mu) of the 3D grid
+    """
+    nk= round((k_max - k_min)/dk)
+
+    if nk <= 0:
+        raise ValueError('No k bin in k range %e %e with dk=%e' %
+                         (k_min, k_max, dk))
+
+    if nmu <= 0:
+        raise ValueError('nmu must be positive: %d' % nmu)
+
+    nbin= nk*nmu;
+    k = np.empty(nbin)
+    mu = np.empty_like(k)
+    P = np.empty_like(k)
+    nmodes = np.empty_like(k)
+    
+    c._power_spectrum_compute_2d_average(k_min, dk, nk, nmu, grid._grid,
+                                         nmodes, k, mu, P)
+
+    k = k.reshape((nk, nmu))
+    mu = mu.reshape((nk, nmu))
+    P = P.reshape((nk, nmu))
+    nmodes = nmodes.reshape((nk, nmu))
+
+    d = {}
+    d['k'] = k
+    d['mu'] = mu
+    d['P'] = P
+    d['nmodes'] = nmodes
+
+    return d
+    

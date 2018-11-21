@@ -149,6 +149,9 @@ static PyMethodDef methods[] = {
   {"_power_spectrum_compute_discrete_multipoles",
    py_power_spectrum_compute_discrete_multipoles, METH_VARARGS,
    "compute discrete legendre multipoles of delta(k) or P(k)"},
+
+  {"_power_spectrum_compute_2d_average", py_power_spectrum_compute_2d_average,
+   METH_VARARGS, "compute 2d average of a give 3D grid"},
   
   {"_yamamoto_compute_moment_x", py_yamamoto_compute_moment_x, METH_VARARGS,
    "_yamamoto_compute_moment_x"},  
