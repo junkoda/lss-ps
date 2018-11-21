@@ -20,6 +20,7 @@
 #include "py_cola_binary.h"
 #include "py_model.h"
 #include "py_rr.h"
+#include "py_lognormal.h"
 
 using namespace std;
 
@@ -211,6 +212,9 @@ static PyMethodDef methods[] = {
   {"_rr_asarray", py_rr_asarray, METH_VARARGS,
    "_rr_asarray(_rr, l); get rr[l] as an array"},
 
+  {"_lognormal_convert_P_to_delta_k",
+   py_lognormal_convert_P_to_delta_k, METH_VARARGS,
+   "_logrnomal_convert_P_to_delta_k(_grid, seed, fix_amplitude"},
   
   {NULL, NULL, 0, NULL}
 };

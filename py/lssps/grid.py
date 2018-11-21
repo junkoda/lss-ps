@@ -468,3 +468,10 @@ def mu2(nc, boxsize, *, axis=2):
         raise ValueError('axis must be an integer 0, 1, or 2: {}'.format(axis))
 
     return grid
+
+def power_spectrum3D(nc, boxsize, k, P):
+    grid = zeros(nc, boxsize, interlacing=False)
+    
+    c._grid_set_power3D(k, P, grid._grid)
+
+    return grid

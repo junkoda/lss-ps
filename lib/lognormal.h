@@ -3,8 +3,8 @@
 
 #include "grid.h"
 
-void generate_delta_k(Grid* const grid,
-		      const unsigned long seed,
-		      const bool fix_amplitude=false);
+void convert_P_to_delta_k(Grid* const grid,
+			  const unsigned long seed,
+			  const bool fix_amplitude=false);
 
 #endif

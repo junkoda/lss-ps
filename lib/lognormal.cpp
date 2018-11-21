@@ -5,9 +5,9 @@
 #include "config.h"
 #include "lognormal.h"
 
-void generate_delta_k(Grid* const grid,
-		      const unsigned long seed,
-		      const bool fix_amplitude)
+void convert_P_to_delta_k(Grid* const grid,
+			  const unsigned long seed,
+			  const bool fix_amplitude)
 {
   // Convert P(k) grid to random delta(k) grid such that
   // <|delta(k)|^2> = P(k)

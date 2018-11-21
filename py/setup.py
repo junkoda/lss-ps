@@ -40,7 +40,7 @@ setup(name='lssps',
                   'lssps.grid',
                   'lssps.power_spectrum',
                   'lssps.interlacing',
-                  'lssps.compute', 'lssps.model',
+                  'lssps.compute', 'lssps.model', 'lssps.lognormal',
       ],
       ext_modules=[
           Extension('lssps._lssps',
