@@ -15,6 +15,6 @@ def convert_P_to_delta_k(grid, seed, *, fix_amplitude=False):
     if not isinstance(seed, int):
         raise TypeError('seed must be an integer: {}'.format(type(seed)))
     
-    c._lognormal_convert_P_to_delta_k(grid, seed, int(fix_amplitude))
+    c._lognormal_convert_P_to_delta_k(grid._grid, seed, int(fix_amplitude))
 
     return grid

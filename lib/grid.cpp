@@ -277,3 +277,27 @@ void grid_resize_fourier(Grid const * const grid, Grid* const grid_new)
   grid_new->boxsize= grid->boxsize;
 }
 
+void Grid::copy(Grid* grid) const
+{
+  // copy this to grid
+  assert(grid->nc == nc);
+
+  size_t n= nc*nc*ncz;
+  for(size_t i=0; i<n; ++i)
+    grid->fx[i]= fx[i];
+  
+  grid->mode= mode;
+  grid->boxsize= boxsize;
+  for(int k=0; k<3; ++k)
+    grid->x0_box[k]= x0_box[k];
+
+  grid->shot_noise= shot_noise;
+  grid->pk_normalisation= pk_normalisation;
+
+  grid->total_weight= total_weight;
+  grid->w2_sum= w2_sum;
+  grid->nw2_sum= nw2_sum;
+  grid->np= np;
+  grid->n_mas= n_mas;
+}
+  

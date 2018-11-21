@@ -663,22 +663,22 @@ PyObject* py_grid_create_k(PyObject* self, PyObject* args)
 {
   // Create a grid of k_i
   PyObject *py_grid;
-  Float boxsize;
-  int nc, axis;
+  int axis;
   
-  if(!PyArg_ParseTuple(args, "Oidi", &py_grid, &nc, &boxsize, &axis)) {
+  if(!PyArg_ParseTuple(args, "Oi", &py_grid, &axis)) {
     return NULL;
   }
-  py_assert_ptr(nc > 0);
-  py_assert_ptr(boxsize > 0.0);
   py_assert_ptr(0 <= axis && axis < 3);
 
   Grid* const grid=
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
-
   py_assert_ptr(grid);
+  
+  const int nc= static_cast<int>(grid->nc);
+  const Float boxsize= grid->boxsize;
+  py_assert_ptr(nc > 0);
+  py_assert_ptr(boxsize > 0.0);
 
-  grid->boxsize= boxsize;
   grid->mode= GridMode::fourier_space;
 
   const int nckz= nc/2 + 1;
@@ -705,21 +705,20 @@ PyObject* py_grid_create_kmag(PyObject* self, PyObject* args)
 {
   // Create a grid of |k|
   PyObject *py_grid;
-  double boxsize;
-  int nc;
   
-  if(!PyArg_ParseTuple(args, "Oidi", &py_grid, &boxsize, &nc)) {
+  if(!PyArg_ParseTuple(args, "O", &py_grid)) {
     return NULL;
   }
-  py_assert_ptr(nc > 0);
-  py_assert_ptr(boxsize > 0.0);
 
   Grid* const grid=
     (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
-
   py_assert_ptr(grid);
 
-  grid->boxsize= boxsize;
+  const int nc= static_cast<int>(grid->nc);
+  const Float boxsize= grid->boxsize;
+  py_assert_ptr(nc > 0);
+  py_assert_ptr(boxsize > 0.0);
+
   grid->mode= GridMode::fourier_space;
 
   const int nckz= nc/2 + 1;
@@ -1007,9 +1006,34 @@ PyObject* py_grid_write_vector_binary_real(PyObject* self, PyObject* args)
   }  
 
   int ret= fclose(fp);
-py_assert_ptr(ret == 0);
+  py_assert_ptr(ret == 0);
 
   Py_DECREF(bytes);
+  Py_RETURN_NONE;
+}
+
+
+
+PyObject* py_grid_copy(PyObject* self, PyObject* args)
+{
+  // _grid_copy(_grid)
+  // Create a new grid object with same data
+  PyObject *py_grid_src, *py_grid_dest;
+
+  if(!PyArg_ParseTuple(args, "OO", &py_grid_src, &py_grid_dest)) {
+    return NULL;
+  }
+
+  Grid const * const grid_src=
+    (Grid const*) PyCapsule_GetPointer(py_grid_src, "_Grid");
+  Grid * const grid_dest=
+    (Grid*) PyCapsule_GetPointer(py_grid_dest, "_Grid");
+
+  py_assert_ptr(grid_src);
+  py_assert_ptr(grid_dest);
+
+  grid_src->copy(grid_dest);
+
   Py_RETURN_NONE;
 }
 

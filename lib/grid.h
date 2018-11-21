@@ -57,6 +57,7 @@ class Grid {
   void fft_inverse();
   void clear();
   void write(const char filename[]);
+  void copy(Grid* const grid) const;
   
   Float* fx;
   std::complex<Float>* fk;

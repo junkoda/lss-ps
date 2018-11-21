@@ -83,6 +83,8 @@ static PyMethodDef methods[] = {
   
   {"_grid_clear", py_grid_clear, METH_VARARGS,
    "_grid_clear(_grid); clear the array with 0"},
+  {"_grid_copy", py_grid_copy,  METH_VARARGS,
+   "_grid_copy(_grid_src, _grid_dest); copy src grid to dest grid"},   
   {"_grid_compute_fluctuation", py_grid_compute_fluctuation, METH_VARARGS,
    "_grid_compute_fluctuation(_grid_data, _grid_rand)"},
   {"_grid_compute_fluctuation_homogeneous",

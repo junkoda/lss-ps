@@ -74,6 +74,17 @@ class Grid:
 
         return self
 
+    def copy(self):
+        """
+        Create a copy of this grid.
+
+        Returns:
+          a new grid with the same content
+        """
+        grid = Grid(self.nc, self.boxsize)
+        c._grid_copy(self._grid, grid._grid)
+        return grid
+
     def compute_fluctuation(self, grid_rand=None):
         """Compute density fluctuation data -= rand
 
@@ -128,7 +139,7 @@ class Grid:
 
         Args:
           normalise (bool): 1/V sum e^ikx so that it is same as
-                            \int d3k/(2pi) f(k) e^ikx
+                            \int d3k/(2pi)^3 f(k) e^ikx
                             sum e^ikx if normalise = False
         """
         if self.mode != 'fourier-space':
@@ -136,7 +147,7 @@ class Grid:
         
         c._grid_fft_inverse(self._grid)
         if self.shifted is not None:
-            self.shifted.fft_inverse(normalise)
+            self.shifted.fft_inverse(normalise=normalise)
 
         if normalise:
             self[:] *= 1.0/self.boxsize**3
@@ -482,10 +493,10 @@ def k(kind, nc, boxsize):
     grid.mode = 'fourier-space'
     
     if kind == 'mag':
-        c._grid_create_kmag(grid._grid, nc, boxsize)
+        c._grid_create_kmag(grid._grid)
     else:
         if isinstance(kind, int) and 0 <= kind < 3:
-            c._grid_create_kmag(grid._grid, nc, boxsize, kind)
+            c._grid_create_k(grid._grid, kind)
         else:
             raise ValueError('kind is not 0, 1, 2, or mag')
 
@@ -529,7 +540,7 @@ def power_spectrum3D(nc, boxsize, k, P):
 
     return grid
 
-def write_vector_binary(filename, grid_x, grid_y, grid_z):
+def dump_vector_binary(filename, grid_x, grid_y, grid_z):
     c._grid_write_vector_binary_real(filename,
                                      grid_x._grid,
                                      grid_y._grid,
