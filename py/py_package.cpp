@@ -92,11 +92,10 @@ static PyMethodDef methods[] = {
    "_grid_create_k(_grid, nc, boxsize, axis)"},
   {"_grid_create_kmag", py_grid_create_kmag, METH_VARARGS,
    "_grid_create_kmag(_grid, nc, boxsize)"},
-
-  //{"_grid_set_k", py_grid_set_k, METH_VARARGS,
-  // "_grid_set_k(_grid); set |k|"},
   {"_grid_set_mu2", py_grid_set_mu2, METH_VARARGS,
    "_grid_set_mu2(_grid, axis); set mu2 = (k[axis]/|k|)^2"},
+  {"_grid_set_power3d", py_grid_set_power3d, METH_VARARGS,
+   "_grid_set_power3d(k, P, _grid)"},
 
   {"_mass_assignment_from_array", py_mass_assignment_from_array, METH_VARARGS,
    "assign mass to a grid from an array"},

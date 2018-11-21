@@ -36,7 +36,10 @@ void sequence_to_vector(PyObject* seq, std::vector<T>& v)
   }
 }
 
-	
-    
+void py_util_array_as_vector(const char name[],
+			     PyObject* py_array,
+			     std::vector<double>& v,
+			     const Py_ssize_t len_expect=0);
+
 
 #endif

@@ -1,13 +1,18 @@
 //
 // wrapping lib/grid.cpp
 //
-#include "msg.h"
-#include "grid.h"
-#include "error.h"
-#include "py_grid.h"
-#include "py_assert.h"
 #include <iostream>
 #include <cmath>
+
+#include "msg.h"
+#include "config.h"
+#include "grid.h"
+#include "error.h"
+#include "py_assert.h"
+#include "py_util.h"
+#include "py_interp.h"
+#include "py_grid.h"
+
 using namespace std;
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -804,6 +809,64 @@ PyObject* py_grid_set_mu2(PyObject* self, PyObject* args)
       }
     }
   }
+
+  Py_RETURN_NONE;
+}
+
+PyObject* py_grid_set_power3d(PyObject* self, PyObject* args)
+{
+  // _grid_set_power3d(k, P, _grid)
+  // Set P(k) to the grid
+  PyObject *py_k, *py_P, *py_grid;
+  
+  if(!PyArg_ParseTuple(args, "OOO", &py_k, &py_P, &py_grid)) {
+    return NULL;
+  }
+
+  vector<double> v_k, v_P;
+  py_util_array_as_vector("k", py_k, v_k);
+  py_util_array_as_vector("k", py_P, v_P, v_k.size());
+  
+  Grid* const grid=
+    (Grid*) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  const double boxsize= grid->boxsize;
+  const double fac= 2.0*M_PI/boxsize;
+
+  // interpolate P(k)
+  Interp interp(v_k, v_P);
+
+  // Loop over all grid points
+  const int nc= static_cast<int>(grid->nc);
+  const size_t nc_size= grid->nc;
+  const size_t nckz= nc_size/2 + 1;
+  
+  const int iknq= nc/2;
+  const int nkz= nc/2 + 1;
+
+  complex<Float>* fk= grid->fk;
+  fk[0]= 0.0;
+
+  int ik[3];
+  for(int ix=0; ix<nc; ++ix) {
+    ik[0]= ix <= iknq ? ix : ix - nc;
+    for(int iy=0; iy<nc; ++iy) {
+      ik[1]= iy <= iknq ? iy : iy - nc;
+
+      int iz0= ix == 0 && iy == 0; // skip k = (0,0,0)
+      for(int iz=iz0; iz<nkz; ++iz) {
+	ik[2]= iz;
+	Float k2= static_cast<Float>(ik[0]*ik[0] + ik[1]*ik[1] + ik[2]*ik[2]);
+	Float k= fac*sqrt(k2);
+	
+	size_t index= (ix*nc_size + iy)*nckz + iz;
+	fk[index]= interp(k);
+      }
+    }
+  }
+
+  grid->mode= GridMode::fourier_space;
 
   Py_RETURN_NONE;
 }
