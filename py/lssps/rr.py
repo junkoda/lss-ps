@@ -10,7 +10,8 @@ def compute_multipoles(xyz, nbar, r_max, *, weight=None, dr=1.0):
     d['r'] = (np.arange(n) + 0.5)*dr
     d['n'] = n
 
-    for i in [0, 1, 2, 3, 4]:
-        d['rr%d' % i] = np.copy(c._rr_asarray(_rr, i))
+    for n in [0, 1, 2, 3, 4]:
+        for l in [0, 1, 2, 3, 4]:
+            d['rr%d%d' % (n, l)] = np.copy(c._rr_asarray(_rr, n, l))
 
     return d

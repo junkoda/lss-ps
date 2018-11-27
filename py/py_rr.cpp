@@ -162,14 +162,14 @@ PyObject* py_rr_compute_multipoles(PyObject* self, PyObject* args)
 PyObject* py_rr_asarray(PyObject* self, PyObject* args)
 {
   //
-  // _rr_asarray(rr, l)
+  // _rr_asarray(rr, n, l)
   // rr: _RRMultipoles pointer
+  // n (int): distance index 0 -- 4 (Q_l^(n) ~ 1/x^n)
   // l (int): multipole index 0 -- 4
-  //
   PyObject *py_rr;
-  int l;
+  int l, n;
 
-  if(!PyArg_ParseTuple(args, "Oi", &py_rr, &l)) {
+  if(!PyArg_ParseTuple(args, "Oii", &py_rr, &n, &l)) {
     return NULL;
   }
 
@@ -180,20 +180,9 @@ PyObject* py_rr_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {rr->n};
 
-  switch(l) {
-  case 0:
-    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, rr->rr0.data());
-  case 1:
-    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, rr->rr1.data());
-  case 2:
-    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, rr->rr2.data());
-  case 3:
-    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, rr->rr3.data());
-  case 4:
-    return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, rr->rr4.data());
-
-  }
+  py_assert_ptr(0 <= n && n <= rr->nn);
+  py_assert_ptr(0 <= l && l <= rr->nl);
   
-  PyErr_SetString(PyExc_ValueError, "l is not 0,1,2,3,4");
-  return NULL;
+  return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE,
+				   rr->rr[n*rr->nl + l].data());
 }
