@@ -303,28 +303,32 @@ public:
 class MultipoleBianchi {
 public:
   explicit MultipoleBianchi(Grid const * const grid_,
+			    Grid const * const grid0_,
 			    Grid const * const grid2_,
 			    Grid const * const grid4_) :
-    grid(grid_), grid2(grid2_), grid4(grid4_) {
+    grid(grid_), grid0(grid0_), grid2(grid2_), grid4(grid4_) {
     assert(grid2->nc == grid->nc);
     assert(grid4->nc == grid->nc);
   }
   
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
-    Complex delta0_k = grid->fk[index];
-    Complex delta2_k = grid2->fk[index] - 0.5*delta0_k;
-    Complex delta4_k = grid4->fk[index] - 2.5*delta2_k - 7.0/8.0*delta0_k;
+    Complex delta_k = grid->fk[index];
+    Complex delta0_k = grid0->fk[index];
+    Complex delta2_k = grid2->fk[index] - 0.5*delta_k;
+    Complex delta4_k = grid4->fk[index] - 2.5*delta2_k - 7.0/8.0*delta_k;
 
 
-    P.p0[ik] += norm(delta0_k)*corr;
-    P.p2[ik] += 5.0*(delta2_k.real()*delta0_k.real() 
-	       + delta2_k.imag()*delta0_k.imag())*corr;
-    P.p4[ik] += 9.0*(delta4_k.real()*delta0_k.real()
-	       + delta4_k.imag()*delta0_k.imag())*corr;
+    P.p0[ik] +=     (  delta0_k.real()*delta_k.real()
+		     + delta0_k.imag()*delta_k.imag())*corr;
+    P.p2[ik] += 5.0*(  delta2_k.real()*delta_k.real() 
+	             + delta2_k.imag()*delta_k.imag())*corr;
+    P.p4[ik] += 9.0*(  delta4_k.real()*delta_k.real()
+	             + delta4_k.imag()*delta_k.imag())*corr;
   }
 
   Grid const * const grid;
+  Grid const * const grid0;
   Grid const * const grid2;
   Grid const * const grid4;
 };
@@ -334,18 +338,21 @@ public:
 class MultipoleScoccimarro {
  public:
   explicit MultipoleScoccimarro(Grid const * const grid_,
+				Grid const * const grid0_,
 				Grid const * const grid2_) :
-    grid(grid_), grid2(grid2_) {
+    grid(grid_), grid0(grid0_), grid2(grid2_) {
     assert(grid2->nc == grid->nc);
   }
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
-    Complex delta0_k = grid->fk[index];
-    Complex delta2_k = grid2->fk[index] - 0.5*delta0_k;
+    Complex delta_k = grid->fk[index];
+    Complex delta0_k = grid0->fk[index];
+    Complex delta2_k = grid2->fk[index] - 0.5*delta_k;
 
-    double P0_hat = norm(delta0_k)*corr;
-    double P2_hat = 5.0*(delta2_k.real()*delta0_k.real() 
-	            + delta2_k.imag()*delta0_k.imag())*corr;
+    double P0_hat = delta0_k.real()*delta_k.real()
+                    + delta0_k.imag()*delta_k.imag()*corr;
+    double P2_hat = 5.0*(delta2_k.real()*delta_k.real() 
+	            + delta2_k.imag()*delta_k.imag())*corr;
 
     double delta2_sq = norm(delta2_k)*corr;
 	
@@ -354,8 +361,10 @@ class MultipoleScoccimarro {
     P.p4[ik] += 17.5*delta2_sq - P2_hat - 3.5*P0_hat;
   }
   Grid const * const grid;
+  Grid const * const grid0;
   Grid const * const grid2;
 };
+
 
 //
 // Multipole1 (dipole) function object for compute_multipoles() algorithm
@@ -492,25 +501,27 @@ PowerSpectrum*
 multipole_compute_yamamoto_scoccimarro(const double k_min, const double k_max,
 				       const double dk,
 				       Grid const * const grid,
+				       Grid const * const grid0,
 				       Grid const * const grid2,
 				       const bool subtract_shotnoise,
 				       const bool correct_mas)
 {
   return compute_multipoles_template(k_min, k_max, dk,
-				     MultipoleScoccimarro(grid, grid2),
+				     MultipoleScoccimarro(grid, grid0, grid2),
 				     subtract_shotnoise, correct_mas);
 }
 
 PowerSpectrum*
 multipole_compute_yamamoto_bianchi(const double k_min, const double k_max, const double dk, 
 			   Grid const * const grid,
+			   Grid const * const grid0,
 			   Grid const * const grid2,
 			   Grid const * const grid4,
 			   const bool subtract_shotnoise,
 			   const bool correct_mas)
 {
   return compute_multipoles_template(k_min, k_max, dk,
-				     MultipoleBianchi(grid, grid2, grid4),
+				     MultipoleBianchi(grid, grid0,grid2, grid4),
 				     subtract_shotnoise, correct_mas);
 }
 

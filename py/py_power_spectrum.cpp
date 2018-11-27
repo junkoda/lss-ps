@@ -320,20 +320,28 @@ PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
   // _grid4:
   //   Yamamoto-Scoccimarro is used if _delta4 is None
   //   Yamamoto-Bianchi otherwise
+  //
+  // monopole: <grid0 grid>; usually grid0 = grid
+  // quadrupole: <grid2 grid>
+  // hexadecapole: <grid4 grid>
   
   double k_min, k_max, dk;
-  PyObject *py_grid, *py_grid2, *py_grid4;
+  PyObject *py_grid, *py_grid0, *py_grid2, *py_grid4;
   int subtract_shotnoise, correct_mas;
 
   
-  if(!PyArg_ParseTuple(args, "dddOOOii",
+  if(!PyArg_ParseTuple(args, "dddOOOOii",
 		       &k_min, &k_max, &dk,
-		       &py_grid, &py_grid2, &py_grid4,
+		       &py_grid, &py_grid0, &py_grid2, &py_grid4,
 		       &subtract_shotnoise, &correct_mas)) {
     return NULL;
   }
 
   Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  Grid const * const grid0=
     (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
   py_assert_ptr(grid);
 
@@ -346,7 +354,7 @@ PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
   if(py_grid4 == Py_None) {
     PowerSpectrum* pss= 
       multipole_compute_yamamoto_scoccimarro(k_min, k_max, dk, 
-					     grid, grid2,
+					     grid, grid0, grid2,
 					     subtract_shotnoise, correct_mas);
 
     return PyCapsule_New(pss, "_PowerSpectrum", py_power_spectrum_free);
@@ -359,7 +367,7 @@ PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
 
   PowerSpectrum* psb= 
   multipole_compute_yamamoto_bianchi(k_min, k_max, dk, 
-				     grid, grid2, grid4,
+				     grid, grid0, grid2, grid4,
 				     subtract_shotnoise, correct_mas);
   return PyCapsule_New(psb, "_PowerSpectrum", py_power_spectrum_free);
 }

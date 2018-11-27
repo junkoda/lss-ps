@@ -68,6 +68,23 @@ def _compute_delta_l(grid, indices, n=0, *,
     return grid_delta_l
 
 
+def compute_delta0(grid, n=0, *, grid_moment=None, grid1=None):
+    """
+    Compute delta_1 = [ (k_x/k) Q_x + cyc. ]
+
+    Args:
+      grid (Grid): input grid of delta_k
+      grid1 (Grid): output grid of delta2_k
+      grid_moment (Grid): temporaty grid for moment computation
+
+    grid1, grid_moment can be None
+
+    Returns:
+      grid0
+    """
+
+    return _compute_delta_l(grid, [], n,
+                            grid_moment=grid_moment, grid_delta_l=grid1)
 
 def compute_delta1(grid, n=0, *, grid_moment=None, grid1=None):
     """
@@ -86,7 +103,6 @@ def compute_delta1(grid, n=0, *, grid_moment=None, grid1=None):
 
     # Pairs of inddecies (xx, yy, zz, xy, yz, zx) and prefactors
     indices = [('0', 1.0), ('1', 1.0), ('2', 1.0)]
-    # OK setting this coef to zero makes delta1 = 0 # DEBUG!!!!
 
     return _compute_delta_l(grid, indices, n,
                             grid_moment=grid_moment, grid_delta_l=grid1)
@@ -233,6 +249,12 @@ def compute_yamamoto(grid_delta, kind, *,
 
     grid2 = compute_delta2(grid_delta_x, n)
 
+    if n == 0:
+        grid0 = grid_delta
+    else:
+        grid0 = compute_delta0(grid_delta_x, n)
+        
+
     if '1' in kind or '3' in kind:
         grid1 = compute_delta1(grid_delta_x, n)
 
@@ -253,6 +275,7 @@ def compute_yamamoto(grid_delta, kind, *,
         # quadrupole and Bianchi hexaxecapole
         _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
                                                  grid_delta._grid,
+                                                 grid0._grid,
                                                  grid2._grid, grid4._grid,
                                                  subtract_shotnoise,
                                                  correct_mas)        
@@ -260,6 +283,7 @@ def compute_yamamoto(grid_delta, kind, *,
         # quadrupole and Scoccimarro hexadecapole
         _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,
                                                  grid_delta._grid,
+                                                 grid0._grid,
                                                  grid2._grid, None,
                                                  subtract_shotnoise,
                                                  correct_mas)

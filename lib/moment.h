@@ -65,6 +65,18 @@ struct Moment4 {
 // Moment function objects for window function Qnl
 //
 
+// r^-n
+struct WindowMoment0 {
+  WindowMoment0(const int n_) : n(n_) {}
+
+  double operator()(const double x[]) const {
+    double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+
+    return r > 0.0 ? 1.0/pow(r, n + 1) : 0.0;
+  }
+  const int n;
+};
+
 // (x_i/r) r^-n
 struct WindowMoment1 {
   WindowMoment1(const int i_, const int n_) : i(i_), n(n_) {}

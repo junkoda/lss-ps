@@ -40,6 +40,7 @@ PowerSpectrum*
 multipole_compute_yamamoto_scoccimarro(const double k_min, const double k_max,
 			   const double dk,
 			   Grid const * const grid,
+			   Grid const * const grid0,
 			   Grid const * const grid2,
 			   const bool subtract_shotnoise,
 			   const bool correct_mas);
@@ -48,6 +49,7 @@ PowerSpectrum*
 multipole_compute_yamamoto_bianchi(const double k_min, const double k_max,
 			   const double dk,
 			   Grid const * const grid,
+			   Grid const * const grid0,
 			   Grid const * const grid2,
 			   Grid const * const grid4,
 			   const bool subtract_shotnoise,
@@ -61,5 +63,13 @@ multipole_compute_yamamoto_odd_multipoles(const double k_min,
 					  Grid const * const grid3,
 					  const bool subtract_shotnoise,
 					  const bool correct_mas);
+
+PowerSpectrum*
+multipole_compute_yamamoto_zero(const double k_min,
+				const double k_max, const double dk, 
+				Grid const * const grid,
+				Grid const * const grid0,
+				const bool subtract_shotnoise,
+				const bool correct_mas);
 
 #endif

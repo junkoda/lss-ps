@@ -37,7 +37,11 @@ PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
   vector<Float> x0;
   sequence_to_vector<Float>(py_x0, x0);
 
-  if(v.size() == 1) {
+  if(v.size() == 0) {
+    py_assert_ptr(n > 0); // n=0 would do nothing
+    moment_compute_x(delta, x0.data(), WindowMoment0(n), moment);    
+  }
+  else if(v.size() == 1) {
     if(n == 0)
       moment_compute_x(delta, x0.data(), Moment1(v[0]), moment);
     else
