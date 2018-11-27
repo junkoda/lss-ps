@@ -1,10 +1,9 @@
 import lssps._lssps as c
 import numpy as np
-import h5py # DEBUG!!!
 
 import lssps
 
-def _compute_delta_l(grid, indices, *, n=0,
+def _compute_delta_l(grid, indices, n=0, *,
                      grid_moment=None, grid_delta_l=None):
     """
     Compute delta_l (l = 2 or 4)
@@ -47,12 +46,11 @@ def _compute_delta_l(grid, indices, *, n=0,
         idx_array = [int(x) for x in idx[0]]
 
         # assign Q_index(x)
-        c._yamamoto_compute_moment_x(grid._grid, x0, idx_array,
-                                     grid_moment._grid, n)
+        c._yamamoto_compute_moment_x(grid._grid, x0, idx_array, n,
+                                     grid_moment._grid)
 
         if grid.shifted is not None:
-            c._yamamoto_compute_moment_x(grid.shifted._grid, x0,
-                                         idx_array,
+            c._yamamoto_compute_moment_x(grid.shifted._grid, x0, idx_array, n,
                                          grid_moment.shifted._grid)            
 
         # FFT to Q_index(k)
@@ -71,7 +69,7 @@ def _compute_delta_l(grid, indices, *, n=0,
 
 
 
-def compute_delta1(grid, *, grid_moment=None, grid1=None):
+def compute_delta1(grid, n=0, *, grid_moment=None, grid1=None):
     """
     Compute delta_1 = [ (k_x/k) Q_x + cyc. ]
 
@@ -90,11 +88,11 @@ def compute_delta1(grid, *, grid_moment=None, grid1=None):
     indices = [('0', 1.0), ('1', 1.0), ('2', 1.0)]
     # OK setting this coef to zero makes delta1 = 0 # DEBUG!!!!
 
-    return _compute_delta_l(grid, indices,
+    return _compute_delta_l(grid, indices, n,
                             grid_moment=grid_moment, grid_delta_l=grid1)
 
 
-def compute_delta2(grid, *, grid_moment=None, grid2=None):
+def compute_delta2(grid, n=0, *, grid_moment=None, grid2=None):
     """
     Compute delta_2 = (3/2) [ (k_x/k)^2 Q_xx + cyc.
                               + 2 (k_x/k)(k_y/k) Q_xy + cyc. ]
@@ -114,10 +112,10 @@ def compute_delta2(grid, *, grid_moment=None, grid2=None):
     indices = [('00', 1.5), ('11', 1.5), ('22', 1.5), # Q_xx + cyc.
                ('01', 3.0), ('12', 3.0), ('20', 3.0), # Q_xy + cyc.
               ]
-    return _compute_delta_l(grid, indices,
+    return _compute_delta_l(grid, indices, n,
                             grid_moment=grid_moment, grid_delta_l=grid2)
 
-def compute_delta3(grid, *, grid_moment=None, grid3=None):
+def compute_delta3(grid, n=0, *, grid_moment=None, grid3=None):
     """
     Compute delta_3 = 
                       
@@ -149,11 +147,11 @@ def compute_delta3(grid, *, grid_moment=None, grid3=None):
     fac = 2.5*6
     indices.extend([('123', fac),])
 
-    return _compute_delta_l(grid, indices,
+    return _compute_delta_l(grid, indices, n,
                             grid_moment=grid_moment, grid_delta_l=grid3)
 
 
-def compute_delta4(grid, *, grid_moment=None, grid4=None):
+def compute_delta4(grid, n=0, *, grid_moment=None, grid4=None):
     """
     Compute delta_4
 
@@ -188,12 +186,13 @@ def compute_delta4(grid, *, grid_moment=None, grid4=None):
 
     assert(len(indices) == 15)
 
-    return _compute_delta_l(grid, indices, grid_moment=grid_moment,
+    return _compute_delta_l(grid, indices, n, grid_moment=grid_moment,
                             grid_delta_l=grid4)
 
 
 def compute_yamamoto(grid_delta, kind, *,
                      k_min=0.0, k_max=1.0, dk=0.01,
+                     n=0, grid_delta_x=None,
                      subtract_shotnoise=True,
                      correct_mas=True):
     """
@@ -204,6 +203,9 @@ def compute_yamamoto(grid_delta, kind, *,
                   '1' for dipole, '3' for tripole
                   monopole and quadrupole are always calculated
 
+      n (int): 1/x^n weight for window function multipoles for wide-angle effect
+
+      grid_delta_x (Grid): grid in real-space when grid_delta is in fourier-space
       grid_moment (Grid): temporary grid for moment grid
       grid2 (Grid): temporary grid for grid2
       grid4 (Grid): temporary grid for grid4
@@ -216,37 +218,33 @@ def compute_yamamoto(grid_delta, kind, *,
       PowerSpectrum object with multipoles
     """
 
-    if grid_delta.mode != 'real-space':
-        raise ValueError('grid is not in real space')
+    if grid_delta.mode == 'real-space':
+        if grid_delta_x is None:
+            grid_delta_x = grid_delta
+    else:
+        if grid_delta_x is None:
+            raise ValueError('real-space grid_delta is not provided')
+
+    assert(grid_delta_x.mode == 'real-space')
 
     kind = kind.lower()
     if 's' in kind and 'b' in kind:
         raise ValueError('scoccimarro (s) and bianchi (b) cannot specified simultaneously in kind %s' % kind)
 
-    #grid1 = compute_delta1(grid_delta)
-
-    #with h5py.File('debug3.h5', 'w') as f:
-    #    f['delta1'] = grid1[:]
-    #raise RuntimeError('debug3.h5 written')
-
-    grid2 = compute_delta2(grid_delta)
+    grid2 = compute_delta2(grid_delta_x, n)
 
     if '1' in kind or '3' in kind:
-        grid1 = compute_delta1(grid_delta)
-
-    #with h5py.File('debug2.h5', 'w') as f:
-    #    f['delta1'] = grid1[:]
-    #raise RuntimeError('debug2.h5 written')
-
+        grid1 = compute_delta1(grid_delta_x, n)
 
     if '3' in kind:
-        grid3 = compute_delta3(grid_delta)
+        grid3 = compute_delta3(grid_delta_x, n)
     
     if 'b' in kind or '4' in kind:
-        grid4 = compute_delta4(grid_delta)
+        grid4 = compute_delta4(grid_delta_x, n)
 
     # Fourier transform delta
-    grid_delta.fft()
+    if grid_delta.mode == 'real-space':
+        grid_delta.fft()
 
     if grid_delta.shifted is not None:
         grid_delta.interlace()

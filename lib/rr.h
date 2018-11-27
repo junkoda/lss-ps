@@ -30,8 +30,7 @@ void rr_multipoles(float_type const * x,
 		   const size_t np,
 		   RRMultipoles* const rr)
 {
-  // DEBUG n(z)
-  // TODO: nbar not used necessary??
+  // nbar: number density of the *randoms*
   double w= 1.0;
   const int nbin= rr->n;
   const int nl= rr->nl;
@@ -187,11 +186,11 @@ void rr_multipoles(float_type const * x,
 
     int nl= rr->nl;
     for(int j=0; j<rr->nn; ++j) {
-      rr->rr[nl*j    ][i] /= fac;
-      rr->rr[nl*j + 1][i] /= 3.0*fac;
-      rr->rr[nl*j + 2][i] /= 5.0*fac;
-      rr->rr[nl*j + 3][i] /= 7.0*fac;
-      rr->rr[nl*j + 4][i] /= 9.0*fac;
+      rr->rr[nl*j    ][i] *= fac;
+      rr->rr[nl*j + 1][i] *= 3.0*fac;
+      rr->rr[nl*j + 2][i] *= 5.0*fac;
+      rr->rr[nl*j + 3][i] *= 7.0*fac;
+      rr->rr[nl*j + 4][i] *= 9.0*fac;
     }
   }
 }

@@ -10,7 +10,7 @@ using namespace std;
 
 PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
 {
-  // _yamamoto_compute_moment_x(_grid_delta, ij, _grid_moment)
+  // _yamamoto_compute_moment_x(_grid_delta, ij, n, _grid_moment)
   // grid_delta
   // ij (list): list of indeces len(ij) = 2 or 4
   //            e.g. Q_ij(x) for [i, j], Q_ijkl(x) for [i, j, k, l]
@@ -18,9 +18,9 @@ PyObject* py_yamamoto_compute_moment_x(PyObject* self, PyObject* args)
   PyObject *py_grid_delta, *py_list, *py_x0, *py_grid_moment;
   int n;
   
-  if(!PyArg_ParseTuple(args, "OOOOi",
-		       &py_grid_delta, &py_x0, &py_list, &py_grid_moment,
-		       &n))
+  if(!PyArg_ParseTuple(args, "OOOiO",
+		       &py_grid_delta, &py_x0, &py_list,
+		       &n, &py_grid_moment))
     return NULL;
 
   Grid const * const delta=
