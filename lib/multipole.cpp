@@ -521,8 +521,8 @@ multipole_compute_yamamoto_bianchi(const double k_min, const double k_max, const
 			   const bool correct_mas)
 {
   return compute_multipoles_template(k_min, k_max, dk,
-				     MultipoleBianchi(grid, grid0,grid2, grid4),
-				     subtract_shotnoise, correct_mas);
+				    MultipoleBianchi(grid, grid0, grid2, grid4),
+				    subtract_shotnoise, correct_mas);
 }
 
 PowerSpectrum*

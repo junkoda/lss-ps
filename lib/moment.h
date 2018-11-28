@@ -10,6 +10,12 @@
 // Moment function objects
 //
 
+struct Moment0 {
+  double operator()(const double x[]) const {
+    return 1.0;
+  }
+};
+
 // (x_i/r)
 struct Moment1 {
   Moment1(const int i_) : i(i_) {}

@@ -102,7 +102,10 @@ PyObject* py_yamamoto_compute_moment_k(PyObject* self, PyObject* args)
   vector<int> v;
   sequence_to_vector<int>(py_list, v);
 
-  if(v.size() == 1) {
+  if(v.size() == 0) {
+    moment_compute_k(delta, Moment0(), coef, moment);
+  }
+  else if(v.size() == 1) {
     moment_compute_k(delta, Moment1(v[0]), coef, moment);
   }
   else if(v.size() == 2) {

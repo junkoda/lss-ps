@@ -62,9 +62,8 @@ def _compute_delta_l(grid, indices, n=0, *,
             grid_moment.interlace()
 
         # delta_l += (k_i/k) (k_j/k) ... Q_ij..(k)
-        if len(idx_array) > 0:
-            c._yamamoto_compute_moment_k(grid_moment._grid, idx_array, idx[1],
-                                         grid_delta_l._grid)
+        c._yamamoto_compute_moment_k(grid_moment._grid, idx_array, idx[1],
+                                     grid_delta_l._grid)
 
     return grid_delta_l
 
