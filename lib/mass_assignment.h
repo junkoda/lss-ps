@@ -387,5 +387,4 @@ void mass_assignment_from_array(float_type const * const xyz,
   }
 }
 
-
 #endif
