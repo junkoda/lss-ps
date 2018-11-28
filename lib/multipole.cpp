@@ -315,8 +315,8 @@ public:
 		  const int ik, PowerSpectrum& P) const {
     Complex delta_k = grid->fk[index];
     Complex delta0_k = grid0->fk[index];
-    Complex delta2_k = grid2->fk[index] - 0.5*delta_k;
-    Complex delta4_k = grid4->fk[index] - 2.5*delta2_k - 7.0/8.0*delta_k;
+    Complex delta2_k = grid2->fk[index] - 0.5*delta0_k;
+    Complex delta4_k = grid4->fk[index] - 2.5*delta2_k - 7.0/8.0*delta0_k;
 
 
     P.p0[ik] +=     (  delta0_k.real()*delta_k.real()
@@ -347,7 +347,7 @@ class MultipoleScoccimarro {
 		  const int ik, PowerSpectrum& P) const {
     Complex delta_k = grid->fk[index];
     Complex delta0_k = grid0->fk[index];
-    Complex delta2_k = grid2->fk[index] - 0.5*delta_k;
+    Complex delta2_k = grid2->fk[index] - 0.5*delta0_k;
 
     double P0_hat = delta0_k.real()*delta_k.real()
                     + delta0_k.imag()*delta_k.imag()*corr;
