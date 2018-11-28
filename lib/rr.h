@@ -14,7 +14,7 @@ struct RRMultipoles {
   std::vector<double>* rr;
   
   // rrl_n -> Q_l^{(n)}
-  static const int nn=4, nl=4;
+  static const int nn=5, nl=5;
 };
 
 //
@@ -37,10 +37,10 @@ void rr_multipoles(float_type const * x,
   const Float dr= rr->dr;
   long double normalisation= 0;
 
-  assert(rr->nl >= 4);
-  assert(rr->nn >= 4);
-  for(int i=0; i<=rr->nn; ++i) {
-    for(int j=0; j<=rr->nl; ++j) {
+  assert(rr->nl >= 5);
+  assert(rr->nn >= 5);
+  for(int i=0; i<rr->nn; ++i) {
+    for(int j=0; j<rr->nl; ++j) {
       assert(rr->rr[nl*i + j].size() == static_cast<size_t>(nbin));
     }
   }

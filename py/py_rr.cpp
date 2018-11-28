@@ -180,8 +180,8 @@ PyObject* py_rr_asarray(PyObject* self, PyObject* args)
   const int nd=1;
   npy_intp dims[]= {rr->n};
 
-  py_assert_ptr(0 <= n && n <= rr->nn);
-  py_assert_ptr(0 <= l && l <= rr->nl);
+  py_assert_ptr(0 <= n && n < rr->nn);
+  py_assert_ptr(0 <= l && l < rr->nl);
   
   return PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE,
 				   rr->rr[n*rr->nl + l].data());

@@ -307,6 +307,7 @@ public:
 			    Grid const * const grid2_,
 			    Grid const * const grid4_) :
     grid(grid_), grid0(grid0_), grid2(grid2_), grid4(grid4_) {
+    assert(grid0->nc == grid->nc);
     assert(grid2->nc == grid->nc);
     assert(grid4->nc == grid->nc);
   }
@@ -355,6 +356,7 @@ class MultipoleScoccimarro {
 	            + delta2_k.imag()*delta_k.imag())*corr;
 
     double delta2_sq = norm(delta2_k)*corr;
+    //abort(); //DEBUG!!!!!
 	
     P.p0[ik] += P0_hat;
     P.p2[ik] += P2_hat;
