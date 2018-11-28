@@ -10,6 +10,7 @@ class Interp {
   Interp(const std::vector<double>& v_x, const std::vector<double>& v_y);
   ~Interp();
   double operator()(const double x);
+  double f(const double x);
  private:
   gsl_spline* spline;
   gsl_interp_accel* acc;

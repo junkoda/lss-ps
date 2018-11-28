@@ -21,6 +21,7 @@
 #include "py_model.h"
 #include "py_rr.h"
 #include "py_lognormal.h"
+#include "py_window.h"
 
 using namespace std;
 
@@ -227,6 +228,9 @@ static PyMethodDef methods[] = {
    py_lognormal_convert_P_to_delta_k, METH_VARARGS,
    "_logrnomal_convert_P_to_delta_k(_grid, seed, fix_amplitude"},
 
+  {"_window_cquag_bessel_transform", 
+   py_window_cquag_bessel_transform, METH_VARARGS,
+   "_window_cquag_bessel_transform()"},
 
   {NULL, NULL, 0, NULL}
 };

@@ -72,7 +72,7 @@ struct WindowMoment0 {
   double operator()(const double x[]) const {
     double r= sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
 
-    return r > 0.0 ? 1.0/pow(r, n + 1) : 0.0;
+    return r > 0.0 ? 1.0/pow(r, n) : 0.0;
   }
   const int n;
 };

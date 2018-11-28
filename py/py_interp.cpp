@@ -24,3 +24,8 @@ double Interp::operator()(const double x)
 {
   return gsl_spline_eval(spline, x, acc);
 }
+
+double Interp::f(const double x)
+{
+  return gsl_spline_eval(spline, x, acc);
+}

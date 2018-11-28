@@ -342,8 +342,8 @@ PyObject* py_power_spectrum_compute_yamamoto(PyObject* self,
   py_assert_ptr(grid);
 
   Grid const * const grid0=
-    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
-  py_assert_ptr(grid);
+    (Grid const *) PyCapsule_GetPointer(py_grid0, "_Grid");
+  py_assert_ptr(grid0);
 
   Grid const * const grid2=
     (Grid const *) PyCapsule_GetPointer(py_grid2, "_Grid");

@@ -61,9 +61,10 @@ def _compute_delta_l(grid, indices, n=0, *,
             grid_moment.interlaced = False
             grid_moment.interlace()
 
-        # delta_l += (k_i/k) (k_j/k) ... Q_ij..(k)            
-        c._yamamoto_compute_moment_k(grid_moment._grid, idx_array, idx[1],
-                                     grid_delta_l._grid)
+        # delta_l += (k_i/k) (k_j/k) ... Q_ij..(k)
+        if len(idx_array) > 0:
+            c._yamamoto_compute_moment_k(grid_moment._grid, idx_array, idx[1],
+                                         grid_delta_l._grid)
 
     return grid_delta_l
 
@@ -83,7 +84,7 @@ def compute_delta0(grid, n=0, *, grid_moment=None, grid1=None):
       grid0
     """
 
-    return _compute_delta_l(grid, [], n,
+    return _compute_delta_l(grid, [('', 1.0)], n,
                             grid_moment=grid_moment, grid_delta_l=grid1)
 
 def compute_delta1(grid, n=0, *, grid_moment=None, grid1=None):
