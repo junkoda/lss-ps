@@ -24,6 +24,7 @@ PyObject* py_grid_get_nmas(PyObject* self, PyObject* args);
 PyObject* py_grid_set_nmas(PyObject* self, PyObject* args);
 PyObject* py_grid_get_pk_normalisation(PyObject* self, PyObject* args);
 PyObject* py_grid_set_pk_normalisation(PyObject* self, PyObject* args);
+PyObject* py_grid_get_w2(PyObject* self, PyObject* args);
 
 PyObject* py_grid_fx_asarray(PyObject* self, PyObject* args);
 PyObject* py_grid_fk_asarray(PyObject* self, PyObject* args);

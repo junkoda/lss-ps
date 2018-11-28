@@ -30,6 +30,8 @@ Grid::Grid(const int nc_) :
   auto ts = std::chrono::high_resolution_clock::now();
 
   x0_box[0] = x0_box[1]= x0_box[2]= 0;
+  for(int i=0; i<5; ++i)
+    w2_sum_n[i]= 0.0;
   
   const size_t ngrid= nc*nc*ncz;
   fx= (Float*) FFTW(malloc)(sizeof(Float)*ngrid);
@@ -107,6 +109,8 @@ void Grid::clear()
   total_weight= w2_sum= nw2_sum= 0.0;
   np= 0;
 
+  for(int i=0; i<5; ++i)
+    w2_sum_n[i]= 0.0;
   
   const size_t ncz= 2*(nc/2 + 1);
   memset(fx, 0, sizeof(Float)*(nc*nc*ncz));
@@ -299,5 +303,8 @@ void Grid::copy(Grid* grid) const
   grid->nw2_sum= nw2_sum;
   grid->np= np;
   grid->n_mas= n_mas;
+
+  for(int k=0; k<5; ++k)
+    grid->w2_sum_n[k]= w2_sum_n[k];
 }
   

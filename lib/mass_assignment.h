@@ -271,6 +271,7 @@ void mass_assignment_template(float_type const * xyz,
     long double w_sum = 0.0;
     long double w2_sum = 0.0;
     long double nw2_sum = 0.0;
+    long double w2_sum_n[]= {0, 0, 0, 0, 0};
 
     for(size_t i=0; i<np; ++i) {
       Float rx[3];
@@ -281,6 +282,16 @@ void mass_assignment_template(float_type const * xyz,
       w_sum += w;
       w2_sum += w2;
       nw2_sum += nb*w2;
+      
+      double r2= xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2];
+      double r= sqrt(r2);
+      double r3= r*r2;
+      double r4= r2*r2;
+      w2_sum_n[0] += w2;
+      w2_sum_n[1] += w2/r;
+      w2_sum_n[2] += w2/r2;
+      w2_sum_n[3] += w2/r3;
+      w2_sum_n[4] += w2/r4;
     
       rx[0] = (xyz[0] - x0[0])*dx_inv;
 
@@ -306,6 +317,9 @@ void mass_assignment_template(float_type const * xyz,
       grid->nw2_sum += nw2_sum;
       grid->np += np;
       grid->n_mas = f.n_mas;
+
+      for(int k=0; k<5; ++k)
+	grid->w2_sum_n[k]= w2_sum_n[k];
     }
 
     //auto te = std::chrono::high_resolution_clock::now();

@@ -271,6 +271,10 @@ def compute_yamamoto(grid_delta, kind, *,
     if grid_delta.shifted is not None:
         grid_delta.interlace()
 
+    grid_delta.shot_noise = grid_delta.shot_noise_n(n)
+    #print('shot noise set to: ', n, shot_noise)
+
+
     if 'b' in kind or '4' in kind:
         # quadrupole and Bianchi hexaxecapole
         _ps = c._power_spectrum_compute_yamamoto(k_min, k_max, dk,

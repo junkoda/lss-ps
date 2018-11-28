@@ -397,6 +397,14 @@ class Grid:
     def shot_noise(self, value):
         c._grid_set_param_double(self._grid, 'shot_noise', value)
 
+    def shot_noise_n(self, n):
+        """
+        Shot noise for n>0 window multipoles
+        """
+        w2_sum = c._grid_get_w2(self._grid, n)
+        norm = self.nw2_sum
+        return w2_sum/norm
+        
 
 def empty(nc, boxsize, x0=None, offset=0.0, *, interlacing=True):
     """Return a new empty grid (uninitialised).

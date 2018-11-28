@@ -87,7 +87,7 @@ double compute_statistics_from_array(float_type const * const xyz,
 				     const int n)
 */
 
-
+/*
 PyObject* py_window_compute_shotnoise(PyObject* self, PyObject* args)
 {
   PyObject *py_xyz, *py_weight, *py_nbar;
@@ -204,3 +204,4 @@ PyObject* py_window_compute_shotnoise(PyObject* self, PyObject* args)
   return Py_BuildValue("d", shotnoise);
 }
 
+*/

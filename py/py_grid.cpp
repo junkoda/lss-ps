@@ -1039,3 +1039,20 @@ PyObject* py_grid_copy(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+PyObject* py_grid_get_w2(PyObject* self, PyObject* args)
+{
+  PyObject *py_grid;
+  int n;
+
+  if(!PyArg_ParseTuple(args, "Oi", &py_grid, &n)) {
+    return NULL;
+  }
+
+  py_assert_ptr(0 <= n && n <= 4);
+  
+  Grid const * const grid=
+    (Grid const *) PyCapsule_GetPointer(py_grid, "_Grid");
+  py_assert_ptr(grid);
+
+  return Py_BuildValue("d", grid->w2_sum_n[n]);
+}

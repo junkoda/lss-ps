@@ -5,4 +5,5 @@
 
 PyObject* py_window_cquag_bessel_transform(PyObject* self, PyObject* args);
 
+//PyObject* py_window_compute_shotnoise(PyObject* self, PyObject* args);
 #endif

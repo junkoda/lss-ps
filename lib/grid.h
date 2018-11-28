@@ -67,6 +67,7 @@ class Grid {
   Float boxsize;
   Float shot_noise;
   Float pk_normalisation;
+  Float w2_sum_n[5];
 
   long double total_weight, w2_sum, nw2_sum;
   size_t np;

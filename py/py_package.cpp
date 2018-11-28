@@ -64,6 +64,9 @@ static PyMethodDef methods[] = {
   {"_grid_set_sums", py_grid_set_sums, METH_VARARGS, "set sums"},
   {"_grid_get_nmas", py_grid_get_nmas, METH_VARARGS, "get n_mas"},
   {"_grid_set_nmas", py_grid_set_nmas, METH_VARARGS, "set n_mas"},
+  {"_grid_get_w2", py_grid_get_w2, METH_VARARGS,
+   "_grid_get_w2(_grid, n)"},
+   
   {"_grid_get_pk_normalisation", py_grid_get_pk_normalisation, METH_VARARGS,
    "set pk_normalisation"},
   {"_grid_set_pk_normalisation", py_grid_set_pk_normalisation, METH_VARARGS,
@@ -232,6 +235,10 @@ static PyMethodDef methods[] = {
    py_window_cquag_bessel_transform, METH_VARARGS,
    "_window_cquag_bessel_transform()"},
 
+  //{"_window_compute_shotnoise",
+  // py_window_compute_shotnoise, METH_VARARGS,
+  // "_window_compute_shotnoise()"},
+  
   {NULL, NULL, 0, NULL}
 };
 
