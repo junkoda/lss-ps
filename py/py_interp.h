@@ -11,6 +11,7 @@ class Interp {
   ~Interp();
   double operator()(const double x);
   double f(const double x);
+  double x_min, x_max;
  private:
   gsl_spline* spline;
   gsl_interp_accel* acc;
