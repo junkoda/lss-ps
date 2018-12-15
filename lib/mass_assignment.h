@@ -75,43 +75,7 @@ struct CIC {
   static const int n_mas = 2;
   size_t count;
 };
-/*
-struct TSC {
-  void operator()(const double x[], const double w, Grid* const d)  {
-    int ix0[3];
-    double ww[3][3];
 
-    count++;
-
-    for(int k=0; k<3; ++k) {
-      ix0[k] = (int) floor(x[k] + 0.5);
-      double dx1 = x[k] - ix0[k];
-      double dx2 = 0.5 - dx1;
-      
-      ww[k][0] = 0.5*dx2*dx2;
-      ww[k][1] = 0.75 - dx1*dx1;
-      ww[k][2] = 1.0 - ww[k][0] - ww[k][1];
-    }
-
-    for(int dix=0; dix<3; ++dix) {
-      int ix= (ix0[0] + dix - 1 + d->nc) % d->nc;
-      //if(ix_left <= ix && ix < ix_right) {
-	for(int diy=0; diy<3; ++diy) {
-	  int iy= (ix0[1] + diy - 1 + d->nc) % d->nc;
-	  for(int diz=0; diz<3; ++diz) {
-	    int iz= (ix0[2] + diz - 1 + d->nc) % d->nc;
-	    d->add(ix, iy, iz, w*ww[0][dix]*ww[1][diy]*ww[2][diz]);
-	  }
-	}
-	//}
-    }
-  }
-
-  static const int n_mas = 3;
-  int ix_left, ix_right;
-  size_t count;
-};
-*/
 
 struct TSC {
   void operator()(const double x[], const double w, Grid* const d)  {
@@ -253,21 +217,6 @@ void mass_assignment_template(float_type const * xyz,
     f_local.count= 0;
 
 
-    /*
-    #pragma omp critical
-    {
-      std::cerr << ithread << " / " << nthread << " "
-	        << ix_left << " - " << ix_right << " , "
-		<< x_left << " - " << x_right << std::endl;
-	
-
-      //std::cerr << ithread << " / " << nthread << " "
-      //<< ix_left << " - " << ix_right << std::endl;
-
-		}
-    */
-
-
     long double w_sum = 0.0;
     long double w2_sum = 0.0;
     long double nw2_sum = 0.0;
@@ -321,29 +270,10 @@ void mass_assignment_template(float_type const * xyz,
       for(int k=0; k<5; ++k)
 	grid->w2_sum_n[k]= w2_sum_n[k];
     }
-
-    //auto te = std::chrono::high_resolution_clock::now();
-
-    /*
-    #pragma omp critical
-    {
-      std::cerr << "count " << ithread << " / " << nthread <<
-	           " = " << f_local.count << " time "
-	        << std::chrono::duration<double>(te - ts).count()
-		<< std::endl;
-    }
-    */
   }
 }
 
 
-/*
-void mass_assignment(const std::vector<Particle>& cat,
-		     const Float x0[], const Float boxsize,
-		     const int mas,
-		     const bool parallel,
-		     Grid* const grid);
-*/
 //
 // Wrapper of mass_assignment_template for vector<Particle>
 //
