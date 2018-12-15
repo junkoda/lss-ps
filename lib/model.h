@@ -12,7 +12,7 @@
 class Model
 {
  public:
-  virtual ~Model() = default;
+  virtual ~Model(); // = default;
   virtual double operator()(const double k, const double mu) const = 0;
 };
 

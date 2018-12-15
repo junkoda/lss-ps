@@ -55,8 +55,12 @@ static void read_power_spectrum(const char filename[],
 }
 
 //
-// ModelLinear
+// Model
 //
+Model::~Model()
+{
+
+}
 
 //
 // ModelLinear class
