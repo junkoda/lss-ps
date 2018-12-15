@@ -107,3 +107,21 @@ def H_factor(omega_m, *, a=None, z=None):
     omega_l = 1.0 - omega_m
     
     return math.sqrt(omega_m*a**-3 + omega_l)
+
+def H(omega_m, *, a=None, z=None):
+    """
+    Compute redshift-dependent factor in Hubble parameter,
+      H(a) = 100 sqrt(omega_m*a**-3 + (1.0 - omega_m)) [km/s/(1/h Mpc)],
+
+    Args:
+       omega_m (float): Omega_m0
+       a (float): scale factor
+       z (float): redshift
+
+    Provide either a or z.
+    """
+
+    a = _get_a(a, z)
+    omega_l = 1.0 - omega_m
+    
+    return 100.0*math.sqrt(omega_m*a**-3 + omega_l)
