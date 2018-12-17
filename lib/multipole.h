@@ -7,9 +7,7 @@
 
 #include "power_spectrum.h"
 #include "grid.h"
-
-void multipole_mas_correction_vector(const int nc, const int n_mas,
-				     std::vector<Float>& v);
+#include "mas_correction.h"
 
 PowerSpectrum*
 multipole_compute_monopole(const double k_min, const double k_max,
@@ -101,8 +99,8 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   const double boxsize= grid->boxsize;
   const int n_mas= correct_mas ? grid->n_mas : 0;
 
-  std::vector<Float> mas_correction_array;
-  multipole_mas_correction_vector(nc, n_mas, mas_correction_array);
+  std::vector<Float>& mas_correction_array=
+    mas_correction_get_array(nc, n_mas);
 
   assert(nc > 0);
   assert(boxsize > 0.0);

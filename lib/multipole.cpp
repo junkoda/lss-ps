@@ -17,31 +17,6 @@
 
 using namespace std;
 
-void multipole_mas_correction_vector(const int nc, const int n_mas,
-				     vector<Float>& mas_correction_array)
-{
-  mas_correction_array.clear();
-  mas_correction_array.assign(nc, (Float) 1);
-
-  if(n_mas == 0) // mas_correction = false
-    return;
-  
-  const int knq = nc/2;
-  const Float fac= M_PI/nc;
-
-#ifdef _OPENMP
-  #pragma omp parallel for
-#endif
-  for(int i=1; i<nc; ++i) {
-    int k= i <= knq ? i : i - nc;
-    Float sinc = sin(fac*k)/(fac*k);
-    mas_correction_array[i] = 1.0/pow(sinc, 2*n_mas);
-  }
-
-  msg_printf(msg_info, "MAS correction array initialised\n");
-  
-  return;
-}
 
 
 
@@ -68,7 +43,7 @@ public:
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
-    // Legendre polynomial
+    // Legendre polynomials
     // (2l + 1) P_l = (2 l + 1)/2*int_0^1 P(k) P_l(mu) dmu
     // (2l + 1) P_2 = 5*(3 mu^2 - 1)/2
     // (2l + 1) P_4 = 9*(35 mu^4 - 30 mu^2 + 3)/8
@@ -90,7 +65,7 @@ public:
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
-    // Discrete Legendre polynomial
+    // Discrete Legendre polynomials
     // computed in discrete_multipole.cpp
     double l2= coef[5*ik] + coef[5*ik + 1]*mu2;
     double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
@@ -114,7 +89,7 @@ public:
 		  const int ik, PowerSpectrum& P) const {
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-    double pk= real(grid->fk[index])*corr;
+    double pk= grid->fk[index].real()*corr;
     P.p0[ik] += pk;
     P.p2[ik] += l2*pk;
     P.p4[ik] += l4*pk;
@@ -137,7 +112,7 @@ public:
     
     double l2= coef[5*ik] + coef[5*ik + 1]*mu2;
     double l4= coef[5*ik + 2] + coef[5*ik + 3]*mu2 + coef[5*ik + 4]*mu2*mu2;
-    double pk= real(grid->fk[index])*corr; // grid of P(k)
+    double pk= grid->fk[index].real()*corr; // grid of P(k)
 
     P.p0[ik] += pk;
     P.p2[ik] += l2*pk;
@@ -146,6 +121,51 @@ public:
   Grid const * const grid;
   const vector<Float>& coef;
 };
+
+class CrossMultipoleRe {
+public:
+  explicit CrossMultipoleRe(Grid const * const grid1_,
+			    Grid const * const grid2_) :
+    grid1(grid1_), grid2(grid2_) { }
+
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
+    // Re(delta1 delta2^*)
+    double l2= 7.5*mu2 - 2.5;
+    double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
+    double delta2= (  grid1->fk[index].real()*grid2->fk[index].real()
+		    + grid1->fk[index].imag()*grid2->fk[index].imag())*corr;
+
+    P.p0[ik] += delta2;
+    P.p2[ik] += l2*delta2;
+    P.p4[ik] += l4*delta2;
+  }
+  Grid const * const grid1;
+  Grid const * const grid2;
+};
+
+class CrossMultipoleIm {
+public:
+  explicit CrossMultipoleIm(Grid const * const grid1_,
+			    Grid const * const grid2_) :
+    grid1(grid1_), grid2(grid2_) { }
+
+  void operator()(const size_t index, const double mu2, const double corr,
+		  const int ik, PowerSpectrum& P) const {
+    // Im(delta1 delta2^*)
+    double l2= 7.5*mu2 - 2.5;
+    double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
+    double delta2= (  grid1->fk[index].imag()*grid2->fk[index].real()
+		    - grid1->fk[index].real()*grid2->fk[index].imag())*corr;
+
+    P.p0[ik] += delta2;
+    P.p2[ik] += l2*delta2;
+    P.p4[ik] += l4*delta2;
+  }
+  Grid const * const grid1;
+  Grid const * const grid2;
+};
+
 
 
 class MultipoleBianchi {
