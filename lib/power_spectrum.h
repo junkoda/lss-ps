@@ -16,9 +16,8 @@ class PowerSpectrum {
   int n;
   double shot_noise;
   
-  std::valarray<double> nmodes, nmodes2d;
+  std::valarray<double> nmodes;
   std::valarray<double> k, p0, p1, p2, p3, p4;
-  //std::valarray<double> p2d;
  private:
   PowerSpectrum(const PowerSpectrum&);
 };
