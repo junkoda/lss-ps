@@ -22,6 +22,7 @@
 #include "py_rr.h"
 #include "py_lognormal.h"
 #include "py_window.h"
+#include "py_power2d.h"
 
 using namespace std;
 
@@ -234,6 +235,9 @@ static PyMethodDef methods[] = {
   {"_window_cquag_bessel_transform", 
    py_window_cquag_bessel_transform, METH_VARARGS,
    "_window_cquag_bessel_transform()"},
+
+  {"_power2d_compute", py_power2d_compute, METH_VARARGS,
+   "_power2d_compute"},
 
   //{"_window_compute_shotnoise",
   // py_window_compute_shotnoise, METH_VARARGS,

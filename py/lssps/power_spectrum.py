@@ -251,3 +251,107 @@ def compute_2d_average(grid, *, k_min=0.0, k_max=1.0, dk=0.01, nmu=10):
 
     return d
     
+def compute_power_2d(grid, *, k_min=0.0, k_max=1.0, dk=0.01, nmu=10,
+                     line_of_sight=2,
+                     subtract_shotnoise=True, correct_mas=True):
+    """
+    Compute 2D power spectrum from the grid
+
+    Args:
+      grid (Grid): Grid objects in Fourier space (TODO)
+      kind (str): 're' or 'im', Real or Imaginary part of grid1 grid2^*
+      k_min (float): minimum edge of k binning
+      k_max (float): number of bin will be round((k_max - k_min)/dk)
+      dk (float): k bin width
+      nmu (int): number of mu bins
+      line_of_sight (int): i = 0,1, or, 2 for mu = k[i]/|k|
+      shot_noise (bool or float): subtract the given shot_noise if it is float
+                                  subtract grid.shot_noise if True
+      correct_mas (bool): correct for the mass assignment window function
+
+    Returns:
+      d (dict):
+        d['nmodes']: nmodes[ik, imu] number of independent modes
+        d['k']:      mean k in the 2D bin
+        d['mu']:     mean mu in the 2D  bin
+        d['P']:      power spectrum in the 2D bin
+    """
+    
+    if isinstance(subtract_shotnoise, bool):
+        if subtract_shotnoise == True:
+            shot_noise = grid1.shotnoise
+        else:
+            shot_noise = 0.0
+    elif isinstance(subtract_shotnoise, float):
+        shot_noise = subtract_shotnoise
+    else:
+        raise TypeError('Unrecognised type for subtract_shotnoise; '
+                        'it must be a boolean or the shot noise value in float')
+
+    compute_cross_power_2d(grid, grid, 're',
+                           k_min=k_min, k_max=k_max, dk=dk, nmu=nmu,
+                           shotnoise=shot_noise, correct_mas=correct_mas)
+
+
+def compute_cross_power_2d(grid1, grid2, kind='re', *,
+                           k_min=0.0, k_max=1.0, dk=0.01, nmu=10,
+                           line_of_sight=2,
+                           shot_noise=0.0, correct_mas=True):
+    """
+    Compute 2D cross-power spectrum from grid1 and grid2
+    Re(delta1 delta2^*) or Im(delta1 delta2^*)
+
+    Args:
+      grid1, grid2 (Grid): Grid objects in Fourier space (TODO)
+      kind (str): 're' or 'im', Real or Imaginary part of grid1 grid2^*
+      k_min (float): minimum edge of k binning
+      k_max (float): number of bin will be round((k_max - k_min)/dk)
+      dk (float): k bin width
+      nmu (int): number of mu bins
+      line_of_sight (int): i = 0,1, or, 2 for mu = k[i]/|k|
+      shot_noise (float): subtract this as a shot noise
+      correct_mas (bool): correct for the mass assignment window function
+
+    Returns:
+      d (dict):
+        d['nmodes']: nmodes[ik, imu] number of independent modes
+        d['k']:      mean k in the 2D bin
+        d['mu']:     mean mu in the 2D  bin
+        d['P']:      power spectrum in the 2D bin
+    
+      k, mu, P are 0 if no modes are in the bin
+    """
+
+    assert(nmu > 0)
+    
+    if kind == 're':
+        real_imag = 0
+    elif kind == 'im':
+        real_imag = 1
+    else:
+        raise ValueError("kind must be 're' or 'im': %s" % kind)
+    
+    nk = round((k_max - k_min)/dk)
+    if nk <= 0:
+        raise ValueError('No k bins for the given k_min, k_max, dk')
+
+    n = nk*nmu
+
+        
+    nmodes = np.zeros(n)
+    k = np.zeros(n)
+    mu = np.zeros(n)
+    ps2d = np.zeros(n)
+
+    c._power2d_compute(grid1._grid, grid2._grid, real_imag,
+                       k_min, dk, nk, nmu,
+		       shot_noise, correct_mas, line_of_sight,
+		       nmodes, k, mu, ps2d)
+    
+    d = {}
+    d['nmodes'] = nmodes.reshape((nk, nmu))
+    d['k'] = k.reshape((nk, nmu))
+    d['mu'] = mu.reshape((nk, nmu))
+    d['P'] = ps2d.reshape((nk, nmu))
+
+    return d

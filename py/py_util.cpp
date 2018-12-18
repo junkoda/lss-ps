@@ -3,10 +3,10 @@
 
 using namespace std;
 
-static void decode_array(const char name[],
-			 PyObject* py_obj, Py_buffer* buf,
-			 const Py_ssize_t len=0, const Py_ssize_t ncol=1,
-			 const bool read_only=true)
+void py_util_decode_array(const char name[],
+			  PyObject* py_obj, Py_buffer* buf,
+			  const Py_ssize_t len, const Py_ssize_t ncol,
+			  const bool read_only)
 {
   // Common procedure for using Python array
   //
@@ -73,7 +73,7 @@ void py_util_array_as_vector(const char name[],
   // 1-dimensional array of double as a vector
   Py_buffer buf;
 
-  decode_array(name, py_array, &buf, len_expect, 0, true);
+  py_util_decode_array(name, py_array, &buf, len_expect, 0, true);
 
   double const * x= (double const *) buf.buf;
   const size_t n= buf.shape[0];
@@ -97,7 +97,7 @@ void py_util_vector_as_array(const char name[], const vector<double>& v,
   // The length of the array must be the same as that of the vector
   Py_buffer buf;
 
-  decode_array(name, py_array, &buf, 0, 0, false);
+  py_util_decode_array(name, py_array, &buf, 0, 0, false);
 
   double * x= (double *) buf.buf;
   const size_t n= buf.shape[0];

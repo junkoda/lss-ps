@@ -5,7 +5,6 @@
 
 #include "config.h"
 #include "msg.h"
-#include "grid.h"
 #include "mas_correction.h"
 #include "power2d.h"
 
@@ -32,13 +31,13 @@ class CrossPower2dIm {
 public:
   explicit CrossPower2dIm(Grid const * const grid1_,
 			  Grid const * const grid2_) :
-    grid1(grid1_), grid2(grid2_) { }
+    grid(grid1_), grid2(grid2_) { }
 
   double operator()(const size_t index) const {
-    return grid1->fk[index].imag()*grid2->fk[index].real()
-         - grid1->fk[index].real()*grid2->fk[index].imag();
+    return grid->fk[index].imag()*grid2->fk[index].real()
+         - grid->fk[index].real()*grid2->fk[index].imag();
   }
-  Grid const * const grid1;
+  Grid const * const grid;
   Grid const * const grid2;
 };
 
@@ -118,7 +117,7 @@ void compute_power2d_template(const double k_min,
 
   // binning
   const double k_fundamental= 2.0*M_PI/boxsize;
-  const double k_nq= M_PI/boxsize*nc;
+  //const double k_nq= M_PI/boxsize*nc;
   const double ik_min= k_min/k_fundamental;
   const double ik_max= (k_min + nk*dk)/k_fundamental;
   const double idk= dk/k_fundamental;
@@ -136,7 +135,7 @@ void compute_power2d_template(const double k_min,
   #pragma omp parallel num_threads(omp_get_max_threads())
 #endif
   {
-    PowerSpectrum2D ps_local(nk, nmu);
+    PowerSpectrum2D ps_local(nk*nmu);
 
 #ifdef _OPENMP
     #pragma omp for
@@ -184,7 +183,7 @@ void compute_power2d_template(const double k_min,
 	    ps_local.nmodes[ibin] += 1.0;
 	    ps_local.k[ibin] += kmag;
 	    ps_local.mu[ibin] += mu;
-	    ps_local.p2d[ibin] += f(index);
+	    ps_local.p2d[ibin] += f(index)*corr_xyz;
 	  }	
 	}
       }
@@ -225,3 +224,33 @@ void compute_power2d_template(const double k_min,
 }
 
 
+void power2d_compute(Grid const * const grid1,
+		     Grid const * const grid2,
+		     const int real_imag,
+		     const double k_min,
+		     const double dk,
+		     const int nk, const int nmu,
+		     const double shot_noise,
+		     const bool correct_mas,
+		     const int los,
+		     double * const nmodes_out,
+		     double * const k_out,
+		     double * const mu_out,
+		     double * const P_out)
+{
+  if(real_imag == 0) {
+    compute_power2d_template(k_min, dk, nk, nmu,
+			     CrossPower2dRe(grid1, grid2),
+			     shot_noise, correct_mas, los,
+			     nmodes_out, k_out, mu_out, P_out);
+  }
+  else if(real_imag == 1) {
+    compute_power2d_template(k_min, dk, nk, nmu,
+			     CrossPower2dIm(grid1, grid2),
+			     shot_noise, correct_mas, los,
+			     nmodes_out, k_out, mu_out, P_out);
+  }
+  else {
+    msg_abort("Unknown real_imag value %d; must be 0 or 1", real_imag);
+  }
+}
