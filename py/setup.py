@@ -39,8 +39,9 @@ setup(name='lssps',
       py_modules=['lssps.msg', 'lssps.cosmology',
                   'lssps.grid',
                   'lssps.power_spectrum',
-                  'lssps.interlacing',
+                  'lssps.gadget_file.py',
                   'lssps.compute', 'lssps.model', 'lssps.lognormal',
+                  'lssps.rr', 'lssps.window', 'lssps.yamamoto'
       ],
       ext_modules=[
           Extension('lssps._lssps',
