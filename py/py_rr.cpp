@@ -37,11 +37,16 @@ PyObject* py_rr_compute_multipoles(PyObject* self, PyObject* args)
 {
   PyObject *py_xyz, *py_weight, *py_nbar;
   double r_max, dr;
+  int kind;
+  // kind= -1: End-point Yamamoto FFT
+  // kind= 0,1,2: Plane-parallel with line_of_sight = kind
 
-  if(!PyArg_ParseTuple(args, "OOOdd",
-		       &py_xyz, &py_weight, &py_nbar, &r_max, &dr))
+  if(!PyArg_ParseTuple(args, "OOOddi",
+		       &py_xyz, &py_weight, &py_nbar, &r_max, &dr, &kind))
     return NULL;
 
+  py_assert_ptr(-1 <= kind && kind < 3);
+  
   RRMultipoles* const rr= new RRMultipoles(r_max, dr);
 
   //
@@ -123,37 +128,38 @@ PyObject* py_rr_compute_multipoles(PyObject* self, PyObject* args)
     return NULL;
   }
 
-  if(strcmp(xyz.format, "d") == 0) {
-    if(xyz.strides[1] != sizeof(double)) {
-      PyErr_SetString(PyExc_TypeError,
+  if(strcmp(xyz.format, "d") != 0) {
+    PyErr_SetString(PyExc_TypeError, "Expected an array of double");
+  }
+  
+  if(xyz.strides[1] != sizeof(double)) {
+    PyErr_SetString(PyExc_TypeError,
 		    "xyz array is expected to be contigeous in 2nd direction");
-      return NULL;
-    }
+    return NULL;
+  }
 
+  if(kind == -1) {
+    // Yamamoto End-point
     rr_multipoles<double>((double*) xyz.buf,
 			  xyz.strides[0],
 			  (double*) weight.buf,
 			  weight.strides[0],
 			  (double*) nbar.buf,
 			  nbar.strides[0],
-			  xyz.shape[0],
+			xyz.shape[0],
 			  rr);
   }
-  else if(strcmp(xyz.format, "f") == 0) {
-    if(xyz.strides[1] != sizeof(float)) {
-      PyErr_SetString(PyExc_TypeError,
-		    "xyz array is expected to be contigeous in 2nd direction");
-      return NULL;
-    }
-
-    rr_multipoles<float>((float*) xyz.buf,
-			  xyz.strides[0],
-			  (float*) weight.buf,
-			  weight.strides[0],
-			  (float*) nbar.buf,
-			  nbar.strides[0],
-			  xyz.shape[0],
-			  rr);
+  else {
+    // Plane-parallel with line-of-sight = kind
+    rr_multipoles_plane_parallel<double>((double*) xyz.buf,
+					 xyz.strides[0],
+					 (double*) weight.buf,
+					 weight.strides[0],
+					 (double*) nbar.buf,
+					 nbar.strides[0],
+					 xyz.shape[0],
+					 kind,
+					 rr);
   }
 
   return PyCapsule_New(rr, "_RRMultipoles", py_rr_free);
