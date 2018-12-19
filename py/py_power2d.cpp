@@ -15,7 +15,7 @@ PyObject* py_power2d_compute(PyObject* self, PyObject* args)
   double k_min, dk;
   int nk, nmu;
   double shot_noise;
-  int correct_mas;
+  int correct_mas, los;
   Py_ssize_t zero[]= {(Py_ssize_t) 0};
   PyObject *py_nmodes, *py_k, *py_mu, *py_ps2d;
   

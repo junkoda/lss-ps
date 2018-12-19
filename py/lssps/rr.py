@@ -5,7 +5,7 @@ def compute_multipoles(xyz, nbar, r_max, *, weight=None, dr=1.0,
                        kind='end-point'):
     if kind == 'end-point':
         kind = -1
-    elif isinstance(kind, int) and (0 <= kind < 3):
+    elif isinstance(kind, int) and (-1 <= kind < 3):
         pass
     else:
         raise ValueError('Unknown kind of rr multipoles: {}'.format(kind))
