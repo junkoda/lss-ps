@@ -335,9 +335,16 @@ def compute_cross_power_2d(grid1, grid2, kind='re', *,
     if nk <= 0:
         raise ValueError('No k bins for the given k_min, k_max, dk')
 
-    n = nk*nmu
+    # FFT if necessary
+    if grid1.mode != 'fourier-space':
+        grid1.fft()
+    if grid2.mode != 'fourier-space':
+        grid2.fft()
 
-        
+    
+    
+    n = nk*nmu
+    
     nmodes = np.zeros(n)
     k = np.zeros(n)
     mu = np.zeros(n)
