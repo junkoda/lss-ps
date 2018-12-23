@@ -19,7 +19,7 @@ PyObject* py_power2d_compute(PyObject* self, PyObject* args)
   Py_ssize_t zero[]= {(Py_ssize_t) 0};
   PyObject *py_nmodes, *py_k, *py_mu, *py_ps2d;
   
-  if(!PyArg_ParseTuple(args, "OOiddiidi",
+  if(!PyArg_ParseTuple(args, "OOiddiidiiOOOO",
 		       &py_grid1, &py_grid2, &real_imag,
 		       &k_min, &dk, &nk, &nmu,
 		       &shot_noise, &correct_mas, &los,

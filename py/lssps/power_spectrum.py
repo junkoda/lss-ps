@@ -255,11 +255,10 @@ def compute_power_2d(grid, *, k_min=0.0, k_max=1.0, dk=0.01, nmu=10,
                      line_of_sight=2,
                      subtract_shotnoise=True, correct_mas=True):
     """
-    Compute 2D power spectrum from the grid
+    Compute 2D (auto) power spectrum from the grid
 
     Args:
       grid (Grid): Grid objects in Fourier space (TODO)
-      kind (str): 're' or 'im', Real or Imaginary part of grid1 grid2^*
       k_min (float): minimum edge of k binning
       k_max (float): number of bin will be round((k_max - k_min)/dk)
       dk (float): k bin width
@@ -279,7 +278,7 @@ def compute_power_2d(grid, *, k_min=0.0, k_max=1.0, dk=0.01, nmu=10,
     
     if isinstance(subtract_shotnoise, bool):
         if subtract_shotnoise == True:
-            shot_noise = grid1.shotnoise
+            shot_noise = grid.shot_noise
         else:
             shot_noise = 0.0
     elif isinstance(subtract_shotnoise, float):
@@ -288,9 +287,10 @@ def compute_power_2d(grid, *, k_min=0.0, k_max=1.0, dk=0.01, nmu=10,
         raise TypeError('Unrecognised type for subtract_shotnoise; '
                         'it must be a boolean or the shot noise value in float')
 
-    compute_cross_power_2d(grid, grid, 're',
-                           k_min=k_min, k_max=k_max, dk=dk, nmu=nmu,
-                           shotnoise=shot_noise, correct_mas=correct_mas)
+    return compute_cross_power_2d(grid, grid, 're',
+                                  k_min=k_min, k_max=k_max, dk=dk, nmu=nmu,
+                                  shot_noise=shot_noise,
+                                  correct_mas=correct_mas)
 
 
 def compute_cross_power_2d(grid1, grid2, kind='re', *,
