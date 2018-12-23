@@ -99,7 +99,7 @@ PowerSpectrum* compute_multipoles_template(const double k_min,
   const double boxsize= grid->boxsize;
   const int n_mas= correct_mas ? grid->n_mas : 0;
 
-  std::vector<Float>& mas_correction_array=
+  const std::vector<Float>& mas_correction_array=
     mas_correction_get_array(nc, n_mas);
 
   assert(nc > 0);
