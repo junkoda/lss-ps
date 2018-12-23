@@ -4,6 +4,6 @@
 #include <vector>
 #include "config.h"
 
-std::vector<Float>& mas_correction_get_array(const int nc, const int n_mas);
+const std::vector<Float>& mas_correction_get_array(const int nc, const int n_mas);
 
 #endif

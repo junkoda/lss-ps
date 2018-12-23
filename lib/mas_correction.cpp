@@ -6,7 +6,7 @@ using namespace std;
 static vector<Float> mas_correction_array;
 static int mas_correction_n;
 
-vector<Float>&
+const vector<Float>&
 mas_correction_get_array(const int nc, const int n_mas)
 {
   if(mas_correction_array.size() == static_cast<size_t>(nc)
