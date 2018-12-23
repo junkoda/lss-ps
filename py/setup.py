@@ -39,7 +39,7 @@ setup(name='lssps',
       py_modules=['lssps.msg', 'lssps.cosmology',
                   'lssps.grid',
                   'lssps.power_spectrum',
-                  'lssps.gadget_file.py',
+                  'lssps.gadget_file',
                   'lssps.compute', 'lssps.model', 'lssps.lognormal',
                   'lssps.rr', 'lssps.window', 'lssps.yamamoto'
       ],
