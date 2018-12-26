@@ -21,6 +21,9 @@ PyObject* py_power_spectrum_Pl_asarray(PyObject* self, PyObject* args);
 //PyObject* py_power_spectrum_compute_multipoles(PyObject* self, PyObject* args);
 PyObject* py_power_spectrum_compute_plane_parallel(PyObject* self,
 						   PyObject* args);
+PyObject* py_power_spectrum_compute_cross_plane_parallel(PyObject* self,
+							 PyObject* args);
+
 PyObject* py_power_spectrum_compute_yamamoto(PyObject* self, PyObject* args);
 
 PyObject* py_power_spectrum_compute_yamamoto_odd(PyObject* self,

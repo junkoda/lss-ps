@@ -100,13 +100,59 @@ def compute_plane_parallel(grid_delta, *,
         grid_delta.fft()
 
     if grid_delta.shifted is not None:
-        if grid_delta.interlaced == False:
-            grid_delta.interlace()
+        grid_delta.interlace()
 
     correct_mas = correct_mas and (not grid_delta.mas_corrected)
 
     _ps = c._power_spectrum_compute_plane_parallel(k_min, k_max, dk,
                               grid_delta._grid,
+                              subtract_shotnoise, correct_mas,
+                              line_of_sight)
+
+    return PowerSpectrum(_ps)
+
+
+def compute_cross_plane_parallel(grid1, grid2, kind='re', *,
+                                 k_min=0.0, k_max=1.0, dk=0.01,
+                                 subtract_shotnoise=True,
+                                 correct_mas= True, line_of_sight=2):
+    """
+    Args:
+        delta_grid (Grid): Grid object for delta(k)
+        k_min (float): lower bound of k binning [h/Mpc]
+        k_max (float): upper bound of k binning [h/Mpc]
+        dk (float):    bin width [h/Mpc]
+        subtract_shotnoise (bool)
+        correct_mas (bool)
+        line_of_sight (int): line of sight direction for multipoles
+                             0,1,2 for x,y,z, respectively
+    Returns:
+        PowerSpectrum object
+    """
+
+    if kind == 're':
+        real_imag = 0
+    elif kind == 'im':
+        real_imag = 1
+    else:
+        raise ValueError("kind must be 're' or 'im': %s" % kind)
+
+    
+    if grid1.mode != 'fourier-space':
+        grid1.fft()
+    if grid2.mode != 'fourier-space':
+        grid2.fft()
+
+    if grid1.shifted is not None:
+        grid1.interlace()
+    if grid2.shifted is not None:
+        grid2.interlace()
+
+    correct_mas = correct_mas and (not grid1.mas_corrected)
+
+    _ps = c._power_spectrum_compute_cross_plane_parallel(real_imag,
+                                                         k_min, k_max, dk,
+                              grid1._grid, grid2._grid,
                               subtract_shotnoise, correct_mas,
                               line_of_sight)
 
@@ -171,8 +217,7 @@ def compute_discrete_multipoles(grid, *,
         grid.fft()
 
     if grid.shifted is not None:
-        if grid.interlaced == False:
-            grid.interlace()
+        grid.interlace()
 
     _ps = c._power_spectrum_compute_discrete_multipoles(1,
                               k_min, k_max, dk,
@@ -303,7 +348,8 @@ def compute_cross_power_2d(grid1, grid2, kind='re', *,
 
     Args:
       grid1, grid2 (Grid): Grid objects in Fourier space (TODO)
-      kind (str): 're' or 'im', Real or Imaginary part of grid1 grid2^*
+      kind (str): 're' or 'im
+', Real or Imaginary part of grid1 grid2^*
       k_min (float): minimum edge of k binning
       k_max (float): number of bin will be round((k_max - k_min)/dk)
       dk (float): k bin width
@@ -341,8 +387,12 @@ def compute_cross_power_2d(grid1, grid2, kind='re', *,
     if grid2.mode != 'fourier-space':
         grid2.fft()
 
-    
-    
+    if grid1.shifted is not None:
+        grid1.interlace()
+    if grid2.shifted is not None:
+        grid2.interlace()
+
+
     n = nk*nmu
     
     nmodes = np.zeros(n)

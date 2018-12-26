@@ -25,6 +25,16 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
 				 const int line_of_sight);
 
 PowerSpectrum*
+multipole_compute_cross_plane_parallel(const int real_imag,
+				       const double k_min, const double k_max,
+				       const double dk,
+				       Grid const * const grid1,
+				       Grid const * const grid2,
+				       const bool subtract_shotnoise,
+				       const bool correct_mas,
+				       const int line_of_sight);
+
+PowerSpectrum*
 multipole_compute_discrete_multipoles(const bool is_delta,
 				      const double k_min, const double k_max,
 				      const double dk, 

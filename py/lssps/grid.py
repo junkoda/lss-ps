@@ -113,12 +113,9 @@ class Grid:
         if self.mode != 'fourier-space':
             raise RuntimeError('grid must be in Fourier space for interlacing')
 
-        if self.interlaced == True:
-            warnings.warn('Interlacing has already been performed.'
-                          'Neglect interlace()', RuntimeWarning)
-
-        c._interlacing(self._grid, self.shifted._grid)
-        self.interlaced = True
+        if self.interlaced == False:
+            c._interlacing(self._grid, self.shifted._grid)
+            self.interlaced = True
 
         return self
 

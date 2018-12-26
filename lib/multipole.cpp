@@ -126,21 +126,21 @@ class CrossMultipoleRe {
 public:
   explicit CrossMultipoleRe(Grid const * const grid1_,
 			    Grid const * const grid2_) :
-    grid1(grid1_), grid2(grid2_) { }
+    grid(grid1_), grid2(grid2_) { }
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
     // Re(delta1 delta2^*)
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-    double delta2= (  grid1->fk[index].real()*grid2->fk[index].real()
-		    + grid1->fk[index].imag()*grid2->fk[index].imag())*corr;
+    double delta2= (  grid->fk[index].real()*grid2->fk[index].real()
+		    + grid->fk[index].imag()*grid2->fk[index].imag())*corr;
 
     P.p0[ik] += delta2;
     P.p2[ik] += l2*delta2;
     P.p4[ik] += l4*delta2;
   }
-  Grid const * const grid1;
+  Grid const * const grid;
   Grid const * const grid2;
 };
 
@@ -148,21 +148,21 @@ class CrossMultipoleIm {
 public:
   explicit CrossMultipoleIm(Grid const * const grid1_,
 			    Grid const * const grid2_) :
-    grid1(grid1_), grid2(grid2_) { }
+    grid(grid1_), grid2(grid2_) { }
 
   void operator()(const size_t index, const double mu2, const double corr,
 		  const int ik, PowerSpectrum& P) const {
     // Im(delta1 delta2^*)
     double l2= 7.5*mu2 - 2.5;
     double l4= (1.125*35.0)*mu2*mu2 - (1.125*30.0)*mu2 + (1.125*3.0);
-    double delta2= (  grid1->fk[index].imag()*grid2->fk[index].real()
-		    - grid1->fk[index].real()*grid2->fk[index].imag())*corr;
+    double delta2= (  grid->fk[index].imag()*grid2->fk[index].real()
+		    - grid->fk[index].real()*grid2->fk[index].imag())*corr;
 
     P.p0[ik] += delta2;
     P.p2[ik] += l2*delta2;
     P.p4[ik] += l4*delta2;
   }
-  Grid const * const grid1;
+  Grid const * const grid;
   Grid const * const grid2;
 };
 
@@ -323,6 +323,30 @@ multipole_compute_plane_parallel(const double k_min, const double k_max,
   				     Multipole(grid),
 				     subtract_shotnoise, correct_mas,
 				     line_of_sight);
+}
+
+PowerSpectrum*
+multipole_compute_cross_plane_parallel(const int real_imag,
+				       const double k_min, const double k_max,
+				       const double dk,
+				       Grid const * const grid1,
+				       Grid const * const grid2,
+				       const bool subtract_shotnoise,
+				       const bool correct_mas,
+				       const int line_of_sight)
+{
+  if(real_imag == 1) {
+    return compute_multipoles_template(k_min, k_max, dk,
+				       CrossMultipoleIm(grid1, grid2),
+				       subtract_shotnoise, correct_mas,
+				       line_of_sight);
+  }
+
+  return compute_multipoles_template(k_min, k_max, dk,
+				     CrossMultipoleRe(grid1, grid2),
+				     subtract_shotnoise, correct_mas,
+				     line_of_sight);
+
 }
 
 PowerSpectrum*
