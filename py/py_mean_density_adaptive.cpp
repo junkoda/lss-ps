@@ -184,6 +184,10 @@ PyObject* py_kdpoints_from_array(PyObject* self, PyObject* args)
     return NULL;
   }
 
+  PyBuffer_Release(&xyz);
+  if(weight.buf)
+    PyBuffer_Release(&weight);
+
   Py_RETURN_NONE;
 }
 
@@ -258,6 +262,8 @@ PyObject* py_kdpoints_density_as_array(PyObject* self, PyObject* args)
     assert(0 <= idx && idx < static_cast<index_t>(n));
     out[idx]= v[i].n_local;
   }
+
+  PyBuffer_Release(&nbar);
 
   cerr << "py 2852 " << v[2852].n_local << " " << v[2852].idx << endl;
 
@@ -443,6 +449,10 @@ PyObject* py_mean_density_adaptive_estimate(PyObject* self, PyObject* args)
     navg= (double*) ((char*) navg + navg_stride);
   }
 
+  PyBuffer_Release(&xyz);
+  PyBuffer_Release(&nbar);
+
+
   Py_RETURN_NONE;
 }
 
@@ -533,6 +543,9 @@ PyObject* py_mean_density_average_estimate(PyObject* self, PyObject* args)
     x= (double*) ((char*) x + x_stride);
     navg= (double*) ((char*) navg + navg_stride);
   }
+
+  PyBuffer_Release(&xyz);
+  PyBuffer_Release(&nbar);
 
   Py_RETURN_NONE;
 }

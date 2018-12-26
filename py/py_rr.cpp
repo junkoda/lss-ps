@@ -162,6 +162,13 @@ PyObject* py_rr_compute_multipoles(PyObject* self, PyObject* args)
 					 rr);
   }
 
+  PyBuffer_Release(&xyz);
+  if(weight.buf)
+    PyBuffer_Release(&weight);
+  if(nbar.buf)
+    PyBuffer_Release(&nbar);
+
+
   return PyCapsule_New(rr, "_RRMultipoles", py_rr_free);
 }
 
