@@ -227,5 +227,7 @@ PyObject* py_gadget_file_read(PyObject* self, PyObject* args)
 
   gf->read(component[0], ibegin, iend, a.strides[0], (float*) a.buf);
 
+  PyBuffer_Release(&a);
+  
   Py_RETURN_NONE;
 }
