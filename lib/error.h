@@ -13,7 +13,7 @@ class FileNotFoundError: IOError {};
 
 class MemoryError: RuntimeError {};
 
-class ValError: RuntimeError {}; // check Python error name
+class ValueError: RuntimeError {};
 
 class TypeError: RuntimeError {};
 

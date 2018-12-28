@@ -56,7 +56,7 @@ void GadgetFile::read(const char component,
   }
   else {
     msg_printf(msg_error, "Error: unknown component to read: %c", component);
-    throw ValError();
+    throw ValueError();
   }
 
   int sep_begin, sep_end;

@@ -394,12 +394,15 @@ def compute_cross_power_2d(grid1, grid2, kind='re', *,
 
 
     n = nk*nmu
+    assert(n > 0)
     
     nmodes = np.zeros(n)
     k = np.zeros(n)
     mu = np.zeros(n)
     ps2d = np.zeros(n)
 
+    print(nmodes.shape, k.shape, mu.shape, ps2d.shape)# DEBUG!!!
+    
     c._power2d_compute(grid1._grid, grid2._grid, real_imag,
                        k_min, dk, nk, nmu,
 		       shot_noise, correct_mas, line_of_sight,

@@ -1,10 +1,13 @@
 #ifndef _PY_BUFFER_H
 #define _PY_BUFFER_H 1
 
+#include <string>
 #include <vector>
+#include <typeinfo>
 #include "Python.h"
 #include "error.h"
 
+	       
 class Buffer {
  public:
   Buffer(char const * const name_, PyObject* const py_array);
@@ -25,8 +28,36 @@ class Buffer {
     return pybuf.strides;
   }
 
-  template <typename T>
-  T* buf() const {
+  Py_ssize_t shape(const int i) const;
+
+  
+
+  template <typename T> T* buf() const {
+    char msg[64];
+    
+    if(str_format == "d") {
+      if(typeid(T) != typeid(double)) {
+	sprintf(msg, "Expected an array of double for %.16s but it is %.4s",
+		name, pybuf.format);
+	PyErr_SetString(PyExc_TypeError, msg);
+	throw TypeError();
+      }
+    }
+    else if(str_format == "f") {
+      if(typeid(T) != typeid(float)) {
+	sprintf(msg, "Expected an array of float for %.16s but it is %.4s",
+		name, pybuf.format);
+	PyErr_SetString(PyExc_TypeError, msg);
+	throw TypeError();
+      }
+    }  
+    else {
+      sprintf(msg, "Array %.16s has an unknown dtype %.4s",
+	      name, str_format.c_str());
+      PyErr_SetString(PyExc_TypeError, msg);
+      throw TypeError();
+    }
+    
     return reinterpret_cast<T*>(pybuf.buf);
   }
 
@@ -55,6 +86,10 @@ class Buffer {
  private:
   Py_buffer pybuf;
   char const * const name;
-};
+  std::string str_format;
+  // format string
+  // d for double, f for float, ... 
+  // https://docs.python.org/3/library/struct.html#module-struct
+ };
 
 #endif
