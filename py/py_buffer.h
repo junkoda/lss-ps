@@ -29,6 +29,7 @@ class Buffer {
   }
 
   Py_ssize_t shape(const int i) const;
+  Py_ssize_t stride(const int i) const;
 
   
 

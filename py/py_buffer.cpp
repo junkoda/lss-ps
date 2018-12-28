@@ -49,9 +49,6 @@ Buffer::~Buffer()
 Py_ssize_t Buffer::shape(const int i) const
 {
   // may throw ValueError
-  //cerr << "shape() " << str_format << endl;//DEBUG
-  //cerr << "ndim " << pybuf.ndim << endl;
-  //cerr << "shape " << pybuf.shape[0] << endl;
 
   char msg[96];
   if(i < 0 || i >= pybuf.ndim) {
@@ -63,6 +60,23 @@ Py_ssize_t Buffer::shape(const int i) const
 
   return pybuf.shape[i];
 }
+
+
+Py_ssize_t Buffer::stride(const int i) const
+{
+  // may throw ValueError
+
+  char msg[96];
+  if(i < 0 || i >= pybuf.ndim) {
+    sprintf(msg, "shape(%d) undefined for a %d-dimensional array for %.16s",
+	    i, pybuf.ndim, name);
+    PyErr_SetString(PyExc_IndexError, msg);
+    throw ValueError();
+  }
+
+  return pybuf.strides[i];
+}
+
 
 void Buffer::assert_shape(const int n_dim,
 		     const Py_ssize_t len, const Py_ssize_t ncol)

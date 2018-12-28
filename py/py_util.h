@@ -44,9 +44,4 @@ void py_util_array_as_vector(const char name[],
 void py_util_vector_as_array(const char name[], const std::vector<double>& v,
 			     PyObject* py_array);
 
-void py_util_decode_array(const char name[],
-			  PyObject* py_obj, Py_buffer* buf,
-			  const Py_ssize_t len=0, const Py_ssize_t ncol=1,
-			  const bool read_only=true);
-
 #endif
