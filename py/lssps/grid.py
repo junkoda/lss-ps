@@ -15,6 +15,7 @@ import warnings
 
 class Grid:
     """Grid is a 3-dimensional cubic grid with nc points per dimension
+    Grid(nc, boxsize, *, x0, offset)
 
     Methods:
         grid[:]: return grid data as an array
