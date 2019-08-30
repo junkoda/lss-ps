@@ -21,7 +21,7 @@ class LogLevel:
     @property
     def loglevel(self):
         n = c._msg_get_loglevel()
-        return self._str(n)
+        return self._str[n]
 
     @loglevel.setter
     def loglevel(self, value):
@@ -36,6 +36,8 @@ class LogLevel:
             raise TypeError('loglevel must be a string or integer')
 
         c._msg_set_loglevel(nlevel)
-    
+
+        if self.loglevel == 'debug':
+            print('loglevel set to', self.loglevel)
     
 

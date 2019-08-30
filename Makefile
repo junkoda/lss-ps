@@ -11,7 +11,7 @@ default: py
 
 OPENMP  := #-fopenmp
 
-CXXOPENMP ?= c++
+CXXOPENMP = g++
 CXX     := $(CXXOPENMP) $(OPENMP) -std=c++11
 CC      := $(CXX)
 
