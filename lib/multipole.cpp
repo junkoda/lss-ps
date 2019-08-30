@@ -218,10 +218,10 @@ class MultipoleScoccimarro {
     Complex delta0_k = grid0->fk[index];
     Complex delta2_k = grid2->fk[index] - 0.5*delta0_k;
 
-    double P0_hat = delta0_k.real()*delta_k.real()
-                    + delta0_k.imag()*delta_k.imag()*corr;
+    double P0_hat = (  delta0_k.real()*delta_k.real()
+		     + delta0_k.imag()*delta_k.imag())*corr;
     double P2_hat = 5.0*(delta2_k.real()*delta_k.real() 
-	            + delta2_k.imag()*delta_k.imag())*corr;
+			 + delta2_k.imag()*delta_k.imag())*corr;
 
     double delta2_sq = norm(delta2_k)*corr;
     //abort(); //DEBUG!!!!!
